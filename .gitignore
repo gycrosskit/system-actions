@@ -1,0 +1,8 @@
+.gradle/
+.kotlin/
+**/build/
+local.properties
+**/oh_modules/
+**/.hvigor/
+.DS_Store
+**/BuildProfile.ets

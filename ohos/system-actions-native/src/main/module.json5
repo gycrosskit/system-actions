@@ -1,0 +1,7 @@
+{
+  "module": {
+    "name": "SystemActionsNative",
+    "type": "har",
+    "deviceTypes": ["default", "tablet"]
+  }
+}
