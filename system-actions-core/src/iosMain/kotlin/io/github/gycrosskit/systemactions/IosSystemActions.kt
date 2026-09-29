@@ -13,9 +13,9 @@ import kotlin.coroutines.resume
 @OptIn(ExperimentalForeignApi::class)
 internal actual fun hasValidWebAuthority(value: String): Boolean {
     val parts = NSURLComponents.componentsWithString(value) ?: return false
-    val port = parts.port?.intValue
+    val port = parts.port
     return !parts.host.isNullOrEmpty() && parts.user == null && parts.password == null &&
-        (port == null || port in 1..65535) && parts.URL != null
+        (port == null || port.stringValue.toIntOrNull()?.let { it in 1..65535 } == true) && parts.URL != null
 }
 
 @OptIn(ExperimentalForeignApi::class)
