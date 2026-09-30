@@ -47,6 +47,9 @@ export class SystemActions {
     } catch (_) { return 'unavailable'; }
   }
 
+  /** 没有独立的公开定位服务设置入口，不使用应用设置页伪装成功。 */
+  async openLocationSettings(): Promise<ActionResult> { return 'unavailable'; }
+
   async openAppStore(listingUrl: string): Promise<ActionResult> {
     return this.openExternalUrl(listingUrl);
   }

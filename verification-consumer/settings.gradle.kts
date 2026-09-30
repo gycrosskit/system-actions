@@ -11,6 +11,7 @@ dependencyResolutionManagement {
         }
         maven("https://maven.eazytec-cloud.com/nexus/repository/maven-public/")
         google(); mavenCentral()
+        maven("https://mirrors.tencent.com/nexus/repository/maven-tencent/")
     }
 }
 rootProject.name = "system-actions-consumer"

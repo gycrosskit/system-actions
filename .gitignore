@@ -6,3 +6,4 @@ local.properties
 **/.hvigor/
 .DS_Store
 **/BuildProfile.ets
+**/oh-package-lock.json5
