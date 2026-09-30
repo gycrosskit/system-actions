@@ -16,7 +16,7 @@
 ```kotlin
 repositories { maven("https://jitpack.io") }
 commonMain.dependencies {
-    implementation("com.github.gycrosskit.system-actions:system-actions-core:0.1.1")
+    implementation("com.github.gycrosskit.system-actions:system-actions-core:0.1.2")
 }
 ```
 
@@ -62,7 +62,7 @@ await actions.openAppStore(storeListingUrl);
 在 `ohosArm64Main.dependencies` 添加：
 
 ```kotlin
-implementation("com.github.gycrosskit.system-actions:system-actions-kuikly:0.1.1")
+implementation("com.github.gycrosskit.system-actions:system-actions-kuikly:0.1.2")
 ```
 
 Kotlin `SystemActionsModule` 实现 `SystemActions`，覆盖拨号、HTTP(S) 外链、应用设置、定位设置与 HTTP(S) 商店地址。页面在 `createExternalModules()` 注册同一实例：
