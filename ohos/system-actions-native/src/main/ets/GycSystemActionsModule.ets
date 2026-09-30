@@ -4,6 +4,7 @@ import { ActionResult, SystemActions } from './SystemActions';
 interface ActionParams { requestId?: string; value?: string; }
 class PendingAction {
   callback: KuiklyRenderCallback | null;
+  cancel: (() => void) | null = null;
   constructor(callback: KuiklyRenderCallback) { this.callback = callback; }
 }
 
@@ -29,19 +30,30 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
     const id = args.requestId;
     if (method === 'cancel') {
       const pending = this.pending.get(id);
-      if (pending) { pending.callback = null; }
+      if (pending) { pending.callback = null; pending.cancel?.(); pending.cancel = null; }
       this.pending.delete(id); return null;
     }
     const actions = this.actions;
     if (!actions) { callback?.({ status: 'unavailable' }); return null; }
     if (!callback) { return null; }
     if (this.pending.has(id)) { callback({ status: 'invalid_input' }); return null; }
+    if (args.value !== undefined && typeof args.value !== 'string') {
+      callback({ status: 'invalid_input' }); return null;
+    }
     const pending = new PendingAction(callback);
     this.pending.set(id, pending);
-    this.perform(actions, method, typeof args.value === 'string' ? args.value : '').then((status: ActionResult) => {
+    const result = method === 'openNativeAppStore' ? this.openNativeStore(actions, args.value, pending) :
+      this.perform(actions, method, args.value ?? '');
+    result.then((status: ActionResult) => {
       this.deliver(id, pending, status);
     }).catch(() => { this.deliver(id, pending, 'unavailable'); });
     return null;
+  }
+
+  private async openNativeStore(actions: SystemActions, value: string | undefined, pending: PendingAction): Promise<ActionResult> {
+    const request = actions.requestNativeAppStore(value);
+    pending.cancel = request.cancel;
+    return request.result;
   }
 
   private async perform(actions: SystemActions, method: string, value: string): Promise<ActionResult> {
@@ -60,12 +72,17 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
     this.pending.delete(id);
     const callback = pending.callback;
     pending.callback = null;
+    pending.cancel = null;
     callback?.({ status });
   }
 
   onDestroy(): void {
     this.destroyed = true;
-    this.pending.forEach((pending: PendingAction) => { pending.callback = null; });
+    this.pending.forEach((pending: PendingAction) => {
+      pending.callback = null;
+      pending.cancel?.();
+      pending.cancel = null;
+    });
     this.pending.clear();
     this.actions = null;
     super.onDestroy();

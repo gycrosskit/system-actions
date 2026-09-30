@@ -1,8 +1,14 @@
 import { call } from '@kit.TelephonyKit';
 import { common } from '@kit.AbilityKit';
 import { url } from '@kit.ArkTS';
+import { productViewManager } from '@kit.AppGalleryKit';
 
 export type ActionResult = 'requested' | 'invalid_input' | 'unavailable';
+export interface NativeStoreRequest {
+  result: Promise<ActionResult>;
+  /** 结束等待；SDK 没有撤销已经打开的商店页面的 API。 */
+  cancel: () => void;
+}
 
 /** 在宿主 UIAbility 的主线程调用。requested 不表示用户已完成操作。 */
 export class SystemActions {
@@ -52,5 +58,38 @@ export class SystemActions {
 
   async openAppStore(listingUrl: string): Promise<ActionResult> {
     return this.openExternalUrl(listingUrl);
+  }
+
+  async openNativeAppStore(applicationId?: string): Promise<ActionResult> {
+    return this.requestNativeAppStore(applicationId).result;
+  }
+
+  /** 原生调用可保留请求取消函数；Renderer 只取消自身请求，不销毁共享实例。 */
+  requestNativeAppStore(applicationId?: string): NativeStoreRequest {
+    const bundleName = applicationId === undefined ? this.context.abilityInfo.bundleName : applicationId.trim();
+    if (bundleName.length > 255 || !/^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/.test(bundleName)) {
+      return { result: Promise.resolve('invalid_input'), cancel: () => {} };
+    }
+    let complete: ((status: ActionResult) => void) | null = null;
+    let timer: number | null = null;
+    const result = new Promise<ActionResult>((resolve) => { complete = resolve; });
+    const finish = (status: ActionResult): void => {
+      if (!complete) { return; }
+      const resolve = complete;
+      complete = null;
+      if (timer !== null) { clearTimeout(timer); timer = null; }
+      resolve(status);
+    };
+    timer = setTimeout(() => finish('unavailable'), 20_000);
+    try {
+      // loadProduct 返回 void；只有 onAppear 证明详情页已显示。
+      // SDK 可能保留 callback，结算后它不再持有 Promise resolver 或页面 context。
+      productViewManager.loadProduct(this.context, { parameters: { bundleName } }, {
+        onAppear: () => finish('requested'),
+        onError: () => finish('unavailable'),
+        onDisappear: () => finish('unavailable')
+      });
+    } catch (_) { finish('unavailable'); }
+    return { result, cancel: () => finish('unavailable') };
   }
 }

@@ -29,6 +29,7 @@ class IosSystemActions : SystemActions {
         return open(normalized)
     }
     override suspend fun openAppSettings(): ActionResult = open(UIApplicationOpenSettingsURLString)
+    override suspend fun openNativeAppStore(applicationId: String?): ActionResult = ActionResult.Unavailable
     private suspend fun open(value: String): ActionResult = withContext(Dispatchers.Main.immediate) {
         val url = NSURL.URLWithString(value) ?: return@withContext ActionResult.InvalidInput
         suspendCancellableCoroutine { pending ->

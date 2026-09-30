@@ -11,4 +11,6 @@ interface SystemActions {
     suspend fun openLocationSettings(): ActionResult = ActionResult.Unavailable
     /** 商店详情的 HTTP(S) URL 由宿主按品牌与平台提供。 */
     suspend fun openAppStore(listingUrl: String): ActionResult = openExternalUrl(listingUrl)
+    /** Android 厂商商店 / OHOS AppGallery；null 使用当前应用标识，iOS 不支持。 */
+    suspend fun openNativeAppStore(applicationId: String? = null): ActionResult = ActionResult.Unavailable
 }
