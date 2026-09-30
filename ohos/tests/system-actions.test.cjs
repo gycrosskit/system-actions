@@ -18,6 +18,7 @@ vm.runInNewContext(ts.transpileModule(source, {compilerOptions: {module: ts.Modu
   for (const value of ['javascript:alert(1)', 'https://', 'http:///x', 'https://@host.com', 'https://a.com/%ZZ', 'https://a.com:99999', 'https://a.com/ x']) {
     assert.equal(await actions.openExternalUrl(value), 'invalid_input', value);
   }
+  assert.equal(await actions.openLocationSettings(), 'unavailable');
   assert.equal(calls.length, 0);
   let settled = false;
   const request = actions.dial('+86 138-1234-5678').then(value => {settled = true; return value;});

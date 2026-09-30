@@ -1,6 +1,6 @@
 {
   "name": "@gycrosskit/system-actions-native",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "HarmonyOS 拨号、外链、应用设置与商店详情",
   "main": "Index.ets",
   "author": {
@@ -9,5 +9,5 @@
   },
   "repository": "https://github.com/gycrosskit/system-actions",
   "license": "Apache-2.0",
-  "dependencies": {}
+  "dependencies": { "@kuikly-open/render": "2.28.0" }
 }

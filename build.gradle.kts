@@ -4,5 +4,5 @@ plugins {
 }
 allprojects {
     group = "com.github.gycrosskit.system-actions"
-    version = providers.environmentVariable("VERSION").orElse("0.1.0").get()
+    version = providers.environmentVariable("VERSION").orElse("0.1.1").get()
 }

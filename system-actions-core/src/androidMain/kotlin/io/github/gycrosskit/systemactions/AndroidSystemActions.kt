@@ -20,6 +20,8 @@ class AndroidSystemActions(private val context: Context) : SystemActions {
     override suspend fun openAppSettings(): ActionResult = launch(
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
     )
+    override suspend fun openLocationSettings(): ActionResult = launch(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+
     private suspend fun launch(intent: Intent): ActionResult = withContext(Dispatchers.Main.immediate) {
         try {
             if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

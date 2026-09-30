@@ -1,3 +1,6 @@
 package consumer
 import io.github.gycrosskit.systemactions.*
-suspend fun probe(actions: SystemActions): ActionResult = actions.openExternalUrl("https://example.com")
+suspend fun probe(actions: SystemActions): List<ActionResult> = listOf(
+    actions.dial("123"), actions.openExternalUrl("https://example.com"), actions.openAppSettings(),
+    actions.openLocationSettings(), actions.openAppStore("https://store.example.com"),
+)

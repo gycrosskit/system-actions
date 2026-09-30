@@ -26,4 +26,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "system-actions"
-include(":system-actions-core")
+include(":system-actions-core", ":system-actions-kuikly")
