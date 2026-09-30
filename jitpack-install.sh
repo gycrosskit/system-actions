@@ -3,7 +3,7 @@ set -euo pipefail
 
 archive=system-actions-maven.tar.gz
 curl -fL --retry 3 -o "$archive" "https://github.com/gycrosskit/system-actions/releases/download/${VERSION}/${archive}"
-echo "848c4fd3dfd1d31c35d9393551db51cd22532c41bc6f42d11631b38915018267  $archive" | sha256sum -c -
+echo "474b8f091ef310c9be66665e5e0d9b7c544c1333cdbf714abc3faff3b3d4861e  $archive" | sha256sum -c -
 mkdir -p "$HOME/.m2/repository" build/release-maven
 tar -xzf "$archive" -C "$HOME/.m2/repository"
 tar -xzf "$archive" -C build/release-maven

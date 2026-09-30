@@ -9,6 +9,7 @@ class InputTest {
             override suspend fun openAppSettings() = ActionResult.Requested
         }
         assertEquals(ActionResult.Unavailable, actions.openLocationSettings())
+        assertEquals(ActionResult.Unavailable, actions.openNativeAppStore())
     }
 
     @Test fun validatesInputsBeforeAnySystemAction() {

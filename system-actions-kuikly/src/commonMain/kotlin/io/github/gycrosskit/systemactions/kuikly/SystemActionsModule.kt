@@ -26,8 +26,9 @@ class SystemActionsModule : Module(), SystemActions {
     override suspend fun openAppSettings(): ActionResult = perform("openAppSettings")
     override suspend fun openLocationSettings(): ActionResult = perform("openLocationSettings")
     override suspend fun openAppStore(listingUrl: String): ActionResult = perform("openAppStore", listingUrl)
+    override suspend fun openNativeAppStore(applicationId: String?): ActionResult = perform("openNativeAppStore", applicationId)
 
-    private suspend fun perform(method: String, value: String = ""): ActionResult {
+    private suspend fun perform(method: String, value: String? = null): ActionResult {
         if (disposed) return ActionResult.Unavailable
         val id = (++nextId).toString()
         var request: Pending? = null
@@ -44,7 +45,7 @@ class SystemActionsModule : Module(), SystemActions {
                     pending[id] = entry
                     entry.callback = toNative(false, method, JSONObject().apply {
                         put("requestId", id)
-                        put("value", value)
+                        if (value != null) put("value", value)
                     }.toString(), { response ->
                         if (!disposed && result.isActive) {
                             completed = true
