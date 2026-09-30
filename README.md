@@ -2,7 +2,7 @@
 
 封装 Android、iOS、HarmonyOS 的拨号、HTTP(S) 外链、当前应用设置和商店详情跳转。商店详情 URL、业务域名白名单与提示文案由宿主提供；库不绑定品牌包名或厂商商店优先级。
 
-Maven `0.1.2` 已发布：[GitHub Release](https://github.com/gycrosskit/system-actions/releases/tag/0.1.2)，JitPack 状态 `ok`，独立消费的Android、iOS arm64/x64 编译、iOS Simulator Framework 链接、OHOS 编译通过。 HAR `0.1.1` 已提交 OHPM 审核，尚未上架；GitHub Release HAR 已远程下载、SHA-256 校验、安装到独立工程并 assembleHar 成功。OHPM 不支持此 HAR URL 直接依赖，验收使用下载缓存的 file 依赖，不计为 Registry 安装验收。
+Maven `0.1.2` 已发布：[GitHub Release](https://github.com/gycrosskit/system-actions/releases/tag/0.1.2)，JitPack 状态 `ok`，独立消费的Android、iOS arm64/x64 编译、iOS Simulator Framework 链接、OHOS 编译通过。 HAR `0.1.1` 已通过 OHPM 审核并上架，正式 Registry 精确版本安装和独立 assembleHar 已通过；GitHub Release HAR 已远程下载、SHA-256 校验、安装到独立工程并 assembleHar 成功。OHPM 不支持此 HAR URL 直接依赖，验收使用下载缓存的 file 依赖，另已使用正式 Registry 版本重新验收安装与编译。
 
 ## 平台与模块
 
