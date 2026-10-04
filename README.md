@@ -1,6 +1,6 @@
 # GY CrossKit System Actions
 
-为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名或厂商商店优先级。
+为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.1` 本地候选新增原生 Window 策略。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名或厂商商店优先级。
 
 ## 平台与模块
 
@@ -11,6 +11,37 @@
 | `@gycrosskit/system-actions-native` | HarmonyOS API 22 兼容 HAR；原生 ArkTS 和 Kuikly Renderer Module，render `2.28.0` |
 
 KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.1 / AGP 8.10.1。iOS 编译链接需 macOS / Xcode，OHOS 需匹配 Native SDK。Core 的 OHOS 和 JVM 变体仅包含公共 API；JVM 不提供桌面系统动作。
+
+## Window 策略候选
+
+`0.2.0-rc.1` 尚未发布，不可把以下候选 API 当作已上架能力。Android Core 提供常亮和 `FLAG_SECURE` lease；iOS 原生 `GYCWindowPolicy` Swift Package / Git Pod 提供常亮和录屏/镜像黑遮罩；OHOS HAR 提供窗口 privacy lease。iOS 使用公开 UIKit，无法阻止静态截图；OHOS 本轮只抽离 privacy，不提供常亮、全屏、方向或系统栏控制。业务录屏授权由宿主输入，UI、导航和 Shared 协议留在宿主。
+
+Android 候选坐标为 `com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.1`，Android API 24+，不依赖 Compose。Swift Package 位于仓库根目录，product `GYCWindowPolicy`，iOS 14+、Swift 5.9，无 KMP/Shared 依赖；同源码 `GYCWindowPolicy.podspec` 支持宿主已有 CocoaPods 工作流。HAR 候选坐标为 `@gycrosskit/system-actions-native@0.2.0-rc.1`，HarmonyOS API 22。发布前仅使用本地 staging / 本地 Git Package / 本地 Pod / 打包 HAR 验证。
+
+```kotlin
+val lease = AndroidWindowPolicy.acquire(activity.window) // 主线程，默认常亮且禁录
+lease.update(screenRecordingAllowed = true)
+lease.close() // 最后一个 owner 释放后恢复进入前的 flags
+```
+
+```swift
+import GYCWindowPolicy
+// 在 MainActor；宿主提供当前 Window resolver。
+let policy = WindowPolicyController { hostWindow }
+let lease = policy.acquire()
+lease.update(screenRecordingAllowed: true)
+lease.end()
+```
+
+```typescript
+import { WindowPolicyController, window } from '@gycrosskit/system-actions-native';
+const lease = WindowPolicyController.shared.createLease(() => window.getLastWindow(context));
+await lease.update(false); // 必须成功后才展示视频
+await lease.update(true);
+await lease.release();
+```
+
+多 owner 与异步释放、Swift/CocoaPods 接线和限制见[接入指南](docs/接入指南.md#window-策略候选)。本地验证方法见[开发与验证](docs/开发与验证.md#window-策略候选验证)。
 
 ## 安装
 
