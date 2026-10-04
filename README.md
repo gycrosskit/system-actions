@@ -15,7 +15,7 @@ KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.
 ## Window 与原生系统边界（0.2.0-rc.2 候选）
 
 本轮候选为 `0.2.0-rc.2`，新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、
-OHOS 键盘/环境观察及全屏 Window lease。候选完成本地构建和契约验证；发布与远程消费结果见
+OHOS 键盘/环境观察及全屏 Window lease。Maven、Git Pod与Swift Package精确版本的真实独立消费者编译/链接通过；发布与各渠道结果见
 [系统边界闭合验收](verification/系统边界闭合候选验收.md)，尚未完成的渠道不视为可安装。
 `0.2.0-rc.1` 为此前已发布的 Window 基线，2026-10-04 OHPM 精确查询仍返回 `NOTFOUND`。
 
@@ -53,7 +53,7 @@ await lease.release();
 ## 本轮系统边界闭合
 
 当前分支增加剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、OHOS 键盘/环境观察及全屏窗口 lease。
-这些 API 尚未发布，不能从上面的历史远程版本取得；接线示例见[系统边界迁移](docs/接入指南.md#系统边界迁移待发布)。
+这些 API 从 0.2.0-rc.2 开始提供；HAR尚在审核，不能以旧Registry包代替；接线示例见[系统边界迁移](docs/接入指南.md#系统边界迁移020-rc2)。
 Android 增加 AndroidX Core 1.16.0 以复用 FileProvider，但 provider 和私有目录仍由宿主唯一声明。
 iOS KMP 分享分别返回面板受理和实际 completion 终态；Swift 工具仍属于现有 `GYCWindowPolicy` product。
 OHOS fullscreen 与 privacy 共用 `WindowPolicyController.shared` 和串行队列，宿主输入方向/系统栏目标，
