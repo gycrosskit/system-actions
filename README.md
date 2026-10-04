@@ -1,6 +1,6 @@
 # GY CrossKit System Actions
 
-为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.1` 本地候选新增原生 Window 策略。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名或厂商商店优先级。
+为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.1` 预发布新增原生 Window 策略。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名或厂商商店优先级。
 
 ## 平台与模块
 
@@ -12,11 +12,11 @@
 
 KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.1 / AGP 8.10.1。iOS 编译链接需 macOS / Xcode，OHOS 需匹配 Native SDK。Core 的 OHOS 和 JVM 变体仅包含公共 API；JVM 不提供桌面系统动作。
 
-## Window 策略候选
+## Window 策略（0.2.0-rc.1 预发布）
 
-`0.2.0-rc.1` 尚未发布，不可把以下候选 API 当作已上架能力。Android Core 提供常亮和 `FLAG_SECURE` lease；iOS 原生 `GYCWindowPolicy` Swift Package / Git Pod 提供常亮和录屏/镜像黑遮罩；OHOS HAR 提供窗口 privacy lease。iOS 使用公开 UIKit，无法阻止静态截图；OHOS 本轮只抽离 privacy，不提供常亮、全屏、方向或系统栏控制。业务录屏授权由宿主输入，UI、导航和 Shared 协议留在宿主。
+[0.2.0-rc.1 预发布](https://github.com/gycrosskit/system-actions/releases/tag/0.2.0-rc.1)已发布，JitPack 最终构建成功并完成三平台远程消费。OHPM `next` 提交已接受但仍审核中，精确版本安装返回 `NOTFOUND`，不能视为 Registry 上架。Android Core 提供常亮和 `FLAG_SECURE` lease；iOS 原生 `GYCWindowPolicy` Swift Package / Git Pod 提供常亮和录屏/镜像黑遮罩；OHOS HAR 提供窗口 privacy lease。iOS 使用公开 UIKit，无法阻止静态截图；OHOS 本轮只抽离 privacy，不提供常亮、全屏、方向或系统栏控制。业务录屏授权由宿主输入，UI、导航和 Shared 协议留在宿主。
 
-Android 候选坐标为 `com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.1`，Android API 24+，不依赖 Compose。Swift Package 位于仓库根目录，product `GYCWindowPolicy`，iOS 14+、Swift 5.9，无 KMP/Shared 依赖；同源码 `GYCWindowPolicy.podspec` 支持宿主已有 CocoaPods 工作流。HAR 候选坐标为 `@gycrosskit/system-actions-native@0.2.0-rc.1`，HarmonyOS API 22。发布前仅使用本地 staging / 本地 Git Package / 本地 Pod / 打包 HAR 验证。
+Android Maven 坐标为 `com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.1`，Android API 24+，不依赖 Compose。Swift Package 位于仓库根目录，product `GYCWindowPolicy`，iOS 14+、Swift 5.9，无 KMP/Shared 依赖；同源码 `GYCWindowPolicy.podspec` 支持宿主已有 CocoaPods 工作流；SPM/Git Pod 均固定标签 `0.2.0-rc.1`。HAR 版本为 `@gycrosskit/system-actions-native@0.2.0-rc.1`，HarmonyOS API 22。Maven、SPM/Git Pod、Release HAR 均已完成独立远程消费；OHPM 审核期间使用固定 Release HAR 下载地址并校验 SHA-256，安装方法见接入指南。
 
 ```kotlin
 val lease = AndroidWindowPolicy.acquire(activity.window) // 主线程，默认常亮且禁录
@@ -41,7 +41,7 @@ await lease.update(true);
 await lease.release();
 ```
 
-多 owner 与异步释放、Swift/CocoaPods 接线和限制见[接入指南](docs/接入指南.md#window-策略候选)。本地验证方法见[开发与验证](docs/开发与验证.md#window-策略候选验证)。
+多 owner 与异步释放、Swift/CocoaPods 接线和限制见[接入指南](docs/接入指南.md#window-策略)。本地验证方法见[开发与验证](docs/开发与验证.md#window-策略验证)。
 
 ## 安装
 
@@ -65,7 +65,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.1.3")
+            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.1")
         }
     }
 }
@@ -77,9 +77,9 @@ HarmonyOS 原生宿主：
 ohpm install @gycrosskit/system-actions-native@0.1.1
 ```
 
-Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。Maven `0.1.3` 和 HAR 分别发布；上述 OHPM 命令对应当前公开上架的 `0.1.1`。
+Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。Maven `0.1.3` 和 HAR 分别发布；上述 OHPM 命令对应已验收的 `0.1.1`，不含 Window 策略；Window 预发布 HAR 见上方说明。
 
-原生商店增强已发布 [Maven `0.1.3`](https://github.com/gycrosskit/system-actions/releases/tag/0.1.3)，JitPack 构建成功。[HAR `0.1.2` 归档](https://github.com/gycrosskit/system-actions/releases/tag/har-0.1.2)独立发布，OHPM 已接受提交、审核中；Registry 精确 `0.1.2` 安装仍返回 `NOTFOUND`。审核通过前可下载归档、校验 Release `SHA256SUMS` 后临时安装验证；不能视为 Registry 上架验收。API 与回执边界见接入指南。
+原生商店增强的历史稳定版本为 [Maven `0.1.3`](https://github.com/gycrosskit/system-actions/releases/tag/0.1.3)，JitPack 构建成功。[HAR `0.1.2` 归档](https://github.com/gycrosskit/system-actions/releases/tag/har-0.1.2)独立发布，OHPM 已接受提交、审核中；Registry 精确 `0.1.2` 安装仍返回 `NOTFOUND`。审核通过前可下载归档、校验 Release `SHA256SUMS` 后临时安装验证；不能视为 Registry 上架验收。API 与回执边界见接入指南。
 
 ## 快速使用
 
@@ -112,7 +112,8 @@ Android 拨号使用 `ACTION_DIAL`，不申请直接呼叫权限。定位服务�
 
 - [接入指南](docs/接入指南.md)：三端 API、输入规则、主线程和 Kuikly 生命周期。
 - [开发与验证](docs/开发与验证.md)、[历史验收记录](verification/验收记录.md)：源码验证与独立消费。
-- [远程发布验收](verification/远程发布验收.md)：Maven `0.1.3` 远程消费与 HAR `0.1.2` 审核边界。
+- [Window 预发布验收](verification/Window策略候选验收.md)：`0.2.0-rc.1` PR、标签、归档校验、三平台远程消费与 OHPM 审核边界。
+- [历史远程发布验收](verification/远程发布验收.md)：Maven `0.1.3` / HAR `0.1.2` 历史记录。
 - [GitHub Releases](https://github.com/gycrosskit/system-actions/releases)：Maven / HAR 版本和归档。
 - [GitHub Issues](https://github.com/gycrosskit/system-actions/issues)：提供平台、版本、输入和最小复现。
 

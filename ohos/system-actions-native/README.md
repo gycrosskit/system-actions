@@ -24,9 +24,9 @@ modules.set(GycSystemActionsModule.MODULE_NAME, () => new GycSystemActionsModule
 
 用途、坐标和许可证见 [根 README](https://github.com/gycrosskit/system-actions/blob/main/README.md)；平台输入与生命周期见 [接入指南](https://github.com/gycrosskit/system-actions/blob/main/docs/接入指南.md)。业务 listingURL、升级决策及文案由宿主提供。
 
-## Window 策略候选
+## Window 策略（0.2.0-rc.1 预发布）
 
-本源码的 `0.2.0-rc.1` 尚未发布，发布后坐标为 `ohpm install @gycrosskit/system-actions-native@0.2.0-rc.1`。候选通过本地打包 HAR 验证。
+`0.2.0-rc.1` 的 GitHub Release HAR 已发布并完成下载校验和独立消费；OHPM `next` 提交已接受但仍审核中，精确版本安装返回 `NOTFOUND`。上架后坐标为 `ohpm install @gycrosskit/system-actions-native@0.2.0-rc.1`；当前按[接入指南](https://github.com/gycrosskit/system-actions/blob/main/docs/接入指南.md)从固定 Release 下载、校验并以 `--no-save` 安装。
 
 ```typescript
 import { WindowPolicyController, window } from '@gycrosskit/system-actions-native';
