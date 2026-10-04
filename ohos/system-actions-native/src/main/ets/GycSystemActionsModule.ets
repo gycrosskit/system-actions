@@ -1,5 +1,6 @@
 import { KRAny, KuiklyRenderBaseModule, KuiklyRenderCallback } from '@kuikly-open/render';
 import { ActionResult, SystemActions } from './SystemActions';
+import { SystemObservations } from './SystemObservations';
 
 interface ActionParams { requestId?: string; value?: string; }
 class PendingAction {
@@ -14,6 +15,7 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
   private actions: SystemActions | null;
   private readonly pending: Map<string, PendingAction> = new Map();
   private destroyed: boolean = false;
+  private readonly observations: SystemObservations = new SystemObservations(() => this.controller?.getUIAbilityContext());
 
   constructor(actions: SystemActions) { super(); this.actions = actions; }
   syncMode(): boolean { return false; }
@@ -28,6 +30,16 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
       }
     } catch (_) { callback?.({ status: 'invalid_input' }); return null; }
     const id = args.requestId;
+    if (method === 'observeKeyboardHeight') {
+      if (callback) this.observations.observeKeyboardHeight(id, height => callback({ height }));
+      return null;
+    }
+    if (method === 'stopKeyboardHeight') { this.observations.stopKeyboardHeight(id); return null; }
+    if (method === 'observeDarkMode') {
+      if (callback) this.observations.observeDarkMode(id, darkMode => callback({ darkMode }));
+      return null;
+    }
+    if (method === 'stopDarkMode') { this.observations.stopDarkMode(id); return null; }
     if (method === 'cancel') {
       const pending = this.pending.get(id);
       if (pending) { pending.callback = null; pending.cancel?.(); pending.cancel = null; }
@@ -78,6 +90,7 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
 
   onDestroy(): void {
     this.destroyed = true;
+    this.observations.dispose();
     this.pending.forEach((pending: PendingAction) => {
       pending.callback = null;
       pending.cancel?.();

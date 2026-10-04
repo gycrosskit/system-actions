@@ -1,6 +1,6 @@
 # GY CrossKit System Actions
 
-为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.1` 预发布新增原生 Window 策略。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名或厂商商店优先级。
+为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.2` 候选补齐原生系统边界。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名或厂商商店优先级。
 
 ## 平台与模块
 
@@ -12,11 +12,18 @@
 
 KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.1 / AGP 8.10.1。iOS 编译链接需 macOS / Xcode，OHOS 需匹配 Native SDK。Core 的 OHOS 和 JVM 变体仅包含公共 API；JVM 不提供桌面系统动作。
 
-## Window 策略（0.2.0-rc.1 预发布）
+## Window 与原生系统边界（0.2.0-rc.2 候选）
 
-[0.2.0-rc.1 预发布](https://github.com/gycrosskit/system-actions/releases/tag/0.2.0-rc.1)已发布，JitPack 最终构建成功并完成三平台远程消费。OHPM `next` 提交已接受但仍审核中，精确版本安装返回 `NOTFOUND`，不能视为 Registry 上架。Android Core 提供常亮和 `FLAG_SECURE` lease；iOS 原生 `GYCWindowPolicy` Swift Package / Git Pod 提供常亮和录屏/镜像黑遮罩；OHOS HAR 提供窗口 privacy lease。iOS 使用公开 UIKit，无法阻止静态截图；OHOS 本轮只抽离 privacy，不提供常亮、全屏、方向或系统栏控制。业务录屏授权由宿主输入，UI、导航和 Shared 协议留在宿主。
+本轮候选为 `0.2.0-rc.2`，新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、
+OHOS 键盘/环境观察及全屏 Window lease。候选完成本地构建和契约验证；发布与远程消费结果见
+[系统边界闭合验收](verification/系统边界闭合候选验收.md)，尚未完成的渠道不视为可安装。
+`0.2.0-rc.1` 为此前已发布的 Window 基线，2026-10-04 OHPM 精确查询仍返回 `NOTFOUND`。
 
-Android Maven 坐标为 `com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.1`，Android API 24+，不依赖 Compose。Swift Package 位于仓库根目录，product `GYCWindowPolicy`，iOS 14+、Swift 5.9，无 KMP/Shared 依赖；同源码 `GYCWindowPolicy.podspec` 支持宿主已有 CocoaPods 工作流；SPM/Git Pod 均固定标签 `0.2.0-rc.1`。HAR 版本为 `@gycrosskit/system-actions-native@0.2.0-rc.1`，HarmonyOS API 22。Maven、SPM/Git Pod、Release HAR 均已完成独立远程消费；OHPM 审核期间使用固定 Release HAR 下载地址并校验 SHA-256，安装方法见接入指南。
+Android Core 提供常亮和 `FLAG_SECURE` lease、`AndroidFileActions`；iOS 原生 `GYCWindowPolicy`
+Swift Package / Git Pod 提供常亮、录屏/镜像黑遮罩与 UIKit 工具，同版 KMP Core 提供文件分享与剪贴板。
+OHOS HAR 的 fullscreen/privacy 共用 `WindowPolicyController.shared` 与队列，窗口 layout/fullscreen
+分别保存；跨 View 接管累计恢复已修改的窗口状态。宿主输入方向、系统栏目标和业务录屏准入。
+iOS 使用公开 UIKit，无法阻止静态截图。Android API 24+、iOS 14+、HarmonyOS API 22。
 
 ```kotlin
 val lease = AndroidWindowPolicy.acquire(activity.window) // 主线程，默认常亮且禁录
@@ -43,6 +50,15 @@ await lease.release();
 
 多 owner 与异步释放、Swift/CocoaPods 接线和限制见[接入指南](docs/接入指南.md#window-策略)。本地验证方法见[开发与验证](docs/开发与验证.md#window-策略验证)。
 
+## 本轮系统边界闭合
+
+当前分支增加剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、OHOS 键盘/环境观察及全屏窗口 lease。
+这些 API 尚未发布，不能从上面的历史远程版本取得；接线示例见[系统边界迁移](docs/接入指南.md#系统边界迁移待发布)。
+Android 增加 AndroidX Core 1.16.0 以复用 FileProvider，但 provider 和私有目录仍由宿主唯一声明。
+iOS KMP 分享分别返回面板受理和实际 completion 终态；Swift 工具仍属于现有 `GYCWindowPolicy` product。
+OHOS fullscreen 与 privacy 共用 `WindowPolicyController.shared` 和串行队列，宿主输入方向/系统栏目标，
+页面、主题、退出任务和 WebView 的 `FullScreenExitHandler` 保留在宿主或 WebView 事件层。
+
 ## 安装
 
 项目 `settings.gradle.kts` 的依赖仓库：
@@ -65,7 +81,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.1")
+            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.2")
         }
     }
 }

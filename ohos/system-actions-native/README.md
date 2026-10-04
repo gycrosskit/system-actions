@@ -37,3 +37,9 @@ await lease.release();
 ```
 
 宿主 `module.json5` 声明 `ohos.permission.PRIVACY_WINDOW`。同一 Ability 共用 controller；必须等保护设置成功才展示视频。多 owner 任意禁录即保持 privacy，最后一个释放才恢复进入前状态；获取窗口期间释放会抑制迟到结果，异步释放失败应由宿主处理，可重试 release。此接口不提供常亮、全屏、方向或系统栏能力。业务授权、播放器错误 UI、导航和生命周期均由宿主决定。
+
+
+当前源码待发布：`GycSystemActionsModule` 提供键盘高度(vp)/环境观察和 stop/dispose；
+`WindowPolicyController.shared.createFullscreenLease` 与 privacy lease 共用串行队列。
+方向、系统栏目标及生命周期由宿主输入，完整 API/示例见仓库 `docs/接入指南.md`。
+现有版本号仍代表历史发布物，不表示新 API 已进入 Registry。

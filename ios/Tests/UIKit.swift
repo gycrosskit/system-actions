@@ -3,6 +3,7 @@
 @MainActor public final class UIApplication {
     public static let shared = UIApplication()
     public var isIdleTimerDisabled = false
+    public var connectedScenes: Set<UIScene> = []
 }
 @MainActor public final class UIScreen {
     public nonisolated static let capturedDidChangeNotification = Notification.Name("captured")
@@ -30,5 +31,29 @@ public final class UIColor { public static let black = UIColor() }
 }
 @MainActor public final class UIWindow: UIView {
     public var screen: UIScreen = .main
+    public var isKeyWindow = false
+    public var isHidden = false
+    public var rootViewController: UIViewController?
     public override init(frame: CGRect) { super.init(frame: frame) }
+}
+
+@MainActor public class UIViewController {
+    public var presentedViewController: UIViewController?
+    public init() {}
+}
+@MainActor public class UINavigationController: UIViewController {
+    public var visibleViewController: UIViewController?
+}
+@MainActor public class UITabBarController: UIViewController {
+    public var selectedViewController: UIViewController?
+}
+@MainActor public class UISplitViewController: UIViewController {
+    public var viewControllers: [UIViewController] = []
+}
+@MainActor public class UIScene: NSObject {
+    public enum ActivationState { case foregroundActive, background }
+    public var activationState: ActivationState = .foregroundActive
+}
+@MainActor public class UIWindowScene: UIScene {
+    public var windows: [UIWindow] = []
 }

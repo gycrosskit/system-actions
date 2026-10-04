@@ -12,7 +12,9 @@ kotlin {
         androidMain.get().dependsOn(platformMain)
         iosMain.get().dependsOn(platformMain)
         jvmMain.get().dependsOn(platformMain)
-        androidMain.dependencies { implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2") }
+        androidMain.dependencies {
+            implementation("androidx.core:core:1.16.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2") }
         commonTest.dependencies { implementation(kotlin("test")) }
         androidUnitTest.dependencies {
             implementation("org.robolectric:robolectric:4.16")

@@ -4,6 +4,35 @@ import GYCWindowPolicy
 @main
 struct WindowPolicyChecks {
     @MainActor static func main() {
+    var ran = false
+    UIKitExecutionContext.run { ran = true }
+    precondition(ran, "main thread run preserves immediate semantics")
+    let actorValue = UIKitExecutionContext.syncOnMainActor { 42 }
+    precondition(actorValue == 42)
+    UIKitExecutionContext.runOnMainActor { ran = false }
+    precondition(!ran)
+    let foreground = UIWindowScene(), background = UIWindowScene()
+    background.activationState = .background
+    let frontWindow = UIWindow(frame: CGRect()), backWindow = UIWindow(frame: CGRect())
+    frontWindow.isKeyWindow = true; backWindow.isKeyWindow = true
+    foreground.windows = [frontWindow]; background.windows = [backWindow]
+    UIApplication.shared.connectedScenes = [background, foreground]
+    precondition(UIKitPresentationContext.activeWindow === frontWindow)
+    let root = UINavigationController(), tab = UITabBarController(), split = UISplitViewController()
+    let custom = UIViewController(), child = UIViewController(), modal = UIViewController()
+    root.visibleViewController = tab; tab.selectedViewController = split
+    split.viewControllers = [UIViewController(), custom]; child.presentedViewController = modal
+    frontWindow.rootViewController = root
+    let top = UIKitPresentationContext.topViewController(activeChild: { $0 === custom ? child : nil })
+    precondition(top === modal)
+    let replacementRoot = UIViewController(); frontWindow.rootViewController = replacementRoot
+    precondition(UIKitPresentationContext.topViewController() === replacementRoot, "root is never cached")
+    replacementRoot.presentedViewController = replacementRoot
+    precondition(UIKitPresentationContext.topViewController() === replacementRoot, "cycle guard")
+    foreground.windows = []
+    precondition(UIKitPresentationContext.activeWindow === backWindow)
+    backWindow.isKeyWindow = false; foreground.windows = [frontWindow]; frontWindow.isKeyWindow = false
+    precondition(UIKitPresentationContext.activeWindow === frontWindow, "visible foreground fallback")
     let window = UIWindow(frame: CGRect())
     var currentWindow: UIWindow? = window
     let firstController = WindowPolicyController { currentWindow }

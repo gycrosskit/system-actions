@@ -20,3 +20,15 @@ export async function windowPolicy(resolveWindow: () => Promise<window.Window>):
   await lease.update(true);
   await lease.release();
 }
+
+export async function fullscreenPolicy(resolveWindow: () => Promise<window.Window>): Promise<void> {
+  const lease = WindowPolicyController.shared.createFullscreenLease(resolveWindow, {
+    enterOrientation: window.Orientation.AUTO_ROTATION_LANDSCAPE,
+    unspecifiedExitOrientation: window.Orientation.PORTRAIT,
+    enterSystemBars: [], exitSystemBarsWhenFullscreen: [],
+    exitSystemBarsWhenNotFullscreen: ['status', 'navigation']
+  });
+  await lease.enter();
+  await lease.exit();
+  await lease.release();
+}

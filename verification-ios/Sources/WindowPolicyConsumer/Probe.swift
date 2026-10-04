@@ -9,3 +9,12 @@ public func probe(window: UIWindow) {
     controller.refresh()
     lease.end()
 }
+
+@MainActor
+public func presentationProbe(root: UIViewController, activeChild: (UIViewController) -> UIViewController?) -> UIViewController? {
+    UIKitPresentationContext.topViewController(from: root, activeChild: activeChild)
+}
+
+public func executionProbe() -> Bool {
+    UIKitExecutionContext.syncOnMainActor { Thread.isMainThread }
+}
