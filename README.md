@@ -14,9 +14,9 @@ KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.
 
 ## Window 与原生系统边界（0.2.0-rc.3 候选）
 
-本轮候选为 `0.2.0-rc.3`，修正 layout-only 全屏退出时不应回写方向的问题。Maven/HAR 发布与真实远程消费尚待完成；无变化的 Swift Package/Git Pod 继续使用已验证 rc.2。既有 rc.2 已新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、
-OHOS 键盘/环境观察及全屏 Window lease。Maven、Git Pod与Swift Package精确版本的真实独立消费者编译/链接通过；发布与各渠道结果见
-[系统边界闭合验收](verification/系统边界闭合候选验收.md)，尚未完成的渠道不视为可安装。
+本轮候选为 `0.2.0-rc.3`，修正 layout-only 全屏退出时不应回写方向的问题。Maven/HAR 已发布为 prerelease，JitPack 最终 ok 且全变体字节核验通过；真实远程 Android/iOS/OHOS 编译、Simulator 最终链接与 Release HAR 消费已通过，OHPM next 已接受但精确版本仍 NOTFOUND/审核中；无变化的 Swift Package/Git Pod 继续使用已验证 rc.2。既有 rc.2 已新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、
+OHOS 键盘/环境观察及全屏 Window lease。历史 rc.2 的 Maven、Git Pod 与 Swift Package 独立消费者编译/链接已通过；发布与各渠道结果见
+[rc.3 远程验收](verification/rc3远程发布验收.md)，尚未完成的渠道不视为可安装。
 `0.2.0-rc.1` 为此前已发布的 Window 基线，2026-10-04 OHPM 精确查询仍返回 `NOTFOUND`。
 
 Android Core 提供常亮和 `FLAG_SECURE` lease、`AndroidFileActions`；iOS 原生 `GYCWindowPolicy`
@@ -90,12 +90,13 @@ kotlin {
 HarmonyOS 原生宿主：
 
 ```sh
-ohpm install @gycrosskit/system-actions-native@0.1.1
+# 审核上架后使用；当前精确版本安装仍 NOTFOUND
+ohpm install @gycrosskit/system-actions-native@0.2.0-rc.3
 ```
 
-Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。Maven `0.1.3` 和 HAR 分别发布；上述 OHPM 命令对应已验收的 `0.1.1`，不含 Window 策略；Window 预发布 HAR 见上方说明。
+Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。本轮 Maven/HAR 精确使用 `0.2.0-rc.3`；OHPM 审核期间按固定 Release HAR SHA 安装，步骤见接入指南。历史 Registry `0.1.1` 不含 Window 策略，不能替代本轮 HAR。
 
-原生商店增强的历史稳定版本为 [Maven `0.1.3`](https://github.com/gycrosskit/system-actions/releases/tag/0.1.3)，JitPack 构建成功。[HAR `0.1.2` 归档](https://github.com/gycrosskit/system-actions/releases/tag/har-0.1.2)独立发布，OHPM 已接受提交、审核中；Registry 精确 `0.1.2` 安装仍返回 `NOTFOUND`。审核通过前可下载归档、校验 Release `SHA256SUMS` 后临时安装验证；不能视为 Registry 上架验收。API 与回执边界见接入指南。
+原生商店增强的历史稳定版本为 [Maven `0.1.3`](https://github.com/gycrosskit/system-actions/releases/tag/0.1.3)，JitPack 构建成功。[HAR `0.1.2` 归档](https://github.com/gycrosskit/system-actions/releases/tag/har-0.1.2)独立发布，当前 OHPM 公开元数据已列出 `0.1.2` 且 `latest=0.1.2`。它不含本轮 Window 与系统边界 API；旧审核期间的 NOTFOUND 留在历史验收记录。API 与回执边界见接入指南。
 
 ## 快速使用
 
