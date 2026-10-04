@@ -1,6 +1,6 @@
 # 变更记录
 
-## 0.2.0-rc.1（本地候选，未发布）
+## 0.2.0-rc.1（GitHub Release 预发布，OHPM 审核中）
 
 - 新增 WindowPolicyController / WindowPolicyLease，多 owner privacy 合并与进入前状态恢复。
 - 串行处理窗口获取、privacy 设置和释放；销毁期间迟到窗口不会被接管，恢复失败可重试。
