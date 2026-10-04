@@ -14,9 +14,9 @@ KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.
 
 ## Window 与原生系统边界（0.2.0-rc.3 候选）
 
-本轮候选为 `0.2.0-rc.3`，修正 layout-only 全屏退出时不应回写方向的问题。Maven/HAR 发布与真实远程消费尚待完成；无变化的 Swift Package/Git Pod 继续使用已验证 rc.2。既有 rc.2 已新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、
+本轮候选为 `0.2.0-rc.3`，修正 layout-only 全屏退出时不应回写方向的问题。Maven/HAR 已发布为 prerelease，JitPack 最终 ok 且全变体字节核验通过；远程消费编译尚待完成，OHPM next 已接受但精确版本仍 NOTFOUND/审核中；无变化的 Swift Package/Git Pod 继续使用已验证 rc.2。既有 rc.2 已新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、
 OHOS 键盘/环境观察及全屏 Window lease。Maven、Git Pod与Swift Package精确版本的真实独立消费者编译/链接通过；发布与各渠道结果见
-[系统边界闭合验收](verification/系统边界闭合候选验收.md)，尚未完成的渠道不视为可安装。
+[rc.3 远程验收](verification/rc3远程发布验收.md)，尚未完成的渠道不视为可安装。
 `0.2.0-rc.1` 为此前已发布的 Window 基线，2026-10-04 OHPM 精确查询仍返回 `NOTFOUND`。
 
 Android Core 提供常亮和 `FLAG_SECURE` lease、`AndroidFileActions`；iOS 原生 `GYCWindowPolicy`
