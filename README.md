@@ -34,7 +34,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.1.2")
+            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.1.3")
         }
     }
 }
@@ -46,9 +46,9 @@ HarmonyOS 原生宿主：
 ohpm install @gycrosskit/system-actions-native@0.1.1
 ```
 
-Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。Maven `0.1.2` 和 HAR `0.1.1` 分别发布。
+Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。Maven `0.1.3` 和 HAR 分别发布；上述 OHPM 命令对应当前公开上架的 `0.1.1`。
 
-本次原生商店增强的候选为 Maven `0.1.3` / HAR `0.1.2`，仅在本地 staging 打包验证；上述远程安装命令仍对应已发布版本。候选 API 与回执边界见接入指南，正式发布前需使用外部临时仓库注入消费。
+原生商店增强已发布 [Maven `0.1.3`](https://github.com/gycrosskit/system-actions/releases/tag/0.1.3)，JitPack 构建成功。[HAR `0.1.2` 归档](https://github.com/gycrosskit/system-actions/releases/tag/har-0.1.2)独立发布，OHPM 已接受提交、审核中；Registry 精确 `0.1.2` 安装仍返回 `NOTFOUND`。审核通过前可下载归档、校验 Release `SHA256SUMS` 后临时安装验证；不能视为 Registry 上架验收。API 与回执边界见接入指南。
 
 ## 快速使用
 
@@ -69,7 +69,7 @@ suspend fun openHelp(actions: SystemActions): ActionResult =
     actions.openExternalUrl("https://example.com/help")
 ```
 
-还支持 `dial(phone)`、`openAppSettings()`、`openLocationSettings()`、`openAppStore(listingUrl)`；候选新增 `openNativeAppStore(applicationId = null)`。`Requested` 仅表示系统受理，`InvalidInput` 表示输入拒绝，`Unavailable` 表示无法打开。ArkTS 的对应状态为 `requested` / `invalid_input` / `unavailable`。
+还支持 `dial(phone)`、`openAppSettings()`、`openLocationSettings()`、`openAppStore(listingUrl)`；新增 `openNativeAppStore(applicationId = null)`。`Requested` 仅表示系统受理，`InvalidInput` 表示输入拒绝，`Unavailable` 表示无法打开。ArkTS 的对应状态为 `requested` / `invalid_input` / `unavailable`。
 
 原生商店使用当前应用标识或宿主显式传入的 applicationId/bundleName：Android 优先匹配设备厂商商店，再尝试固定第三方商店；OHOS 使用 AppGallery `loadProduct` 并等待 `onAppear`，iOS 返回 `Unavailable`。业务商店 URL 和升级决策继续由宿主提供。取消和超时结束等待，不能关闭 SDK 已显示的商店页面。
 
@@ -81,6 +81,7 @@ Android 拨号使用 `ACTION_DIAL`，不申请直接呼叫权限。定位服务�
 
 - [接入指南](docs/接入指南.md)：三端 API、输入规则、主线程和 Kuikly 生命周期。
 - [开发与验证](docs/开发与验证.md)、[历史验收记录](verification/验收记录.md)：源码验证与独立消费。
+- [远程发布验收](verification/远程发布验收.md)：Maven `0.1.3` 远程消费与 HAR `0.1.2` 审核边界。
 - [GitHub Releases](https://github.com/gycrosskit/system-actions/releases)：Maven / HAR 版本和归档。
 - [GitHub Issues](https://github.com/gycrosskit/system-actions/issues)：提供平台、版本、输入和最小复现。
 
