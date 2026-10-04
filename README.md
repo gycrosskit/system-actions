@@ -2,6 +2,84 @@
 
 为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.3` 候选修正全屏退出方向并保留原生系统边界。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名，原生商店选择遵循下文的平台策略。
 
+## 架构与调用流程
+
+系统动作与 Window 策略是两条独立入口：前者返回系统受理结果，后者由宿主持有 lease。KMP OHOS 通过 Kuikly 调用 HAR；Swift Window 工具是独立原生产物。
+
+```mermaid
+flowchart TB
+    H["宿主<br/>输入 / 白名单 / 生命周期"] --> K["SystemActions 公共契约"]
+    K --> A["AndroidSystemActions<br/>Intent"]
+    K --> I["IosSystemActions<br/>UIKit"]
+    K --> M["SystemActionsModule<br/>Kuikly Kotlin"]
+    M --> R["OHOS Renderer<br/>ArkTS SystemActions"]
+    R --> O["系统 API<br/>AppGallery"]
+    H --> W["WindowPolicy<br/>宿主持有 lease"]
+    W --> V["常亮 / 隐私 / 全屏"]
+```
+
+下面以 OHOS 原生商店为例：`loadProduct` 本身不返回成功，只有 `onAppear` 才结算 `requested`。其他系统动作的返回时点取决于平台；Android `startActivity` 受理后返回，iOS 等待 `openURL` completion。
+
+```mermaid
+sequenceDiagram
+    participant H as 宿主
+    participant K as Kotlin Module
+    participant R as Renderer
+    participant A as ArkTS Actions
+    participant S as AppGallery
+    H->>K: openNativeAppStore(id)
+    K->>R: 异步调用(requestId)
+    R->>A: requestNativeAppStore()
+    A->>S: loadProduct()
+    alt onAppear 在期限内到达
+        S-->>A: onAppear
+        A-->>R: Promise requested
+        R-->>K: JSON status
+        K-->>H: ActionResult.Requested
+    else 错误、消失或 20 秒超时
+        A-->>R: Promise unavailable
+        R-->>K: JSON status
+        K-->>H: ActionResult.Unavailable
+    end
+    opt 协程取消或页面 dispose
+        K->>R: cancel(id)<br/>移除 callback
+        R->>A: 结束本地等待
+        Note over H,S: 系统页面无法撤回<br/>迟回执不再交付
+    end
+```
+
+核心类型关系如下（只列 Kotlin 类型）。Android lease 在主线程同步更新；最后一个 owner 关闭后恢复进入前 flags。OHOS Window 操作使用共享串行队列，必须等待 `update` 成功再展示内容，`release` 等待窗口恢复；宿主负责释放自己的 lease。
+
+```mermaid
+classDiagram
+    direction LR
+    class SystemActions {
+        <<interface>>
+        +dial(phone) ActionResult
+        +openExternalUrl(url) ActionResult
+        +openNativeAppStore(id) ActionResult
+    }
+    class AndroidSystemActions
+    class IosSystemActions
+    class SystemActionsModule {
+        +dispose()
+    }
+    class AndroidWindowPolicy {
+        +acquire(window) AndroidWindowPolicyLease
+    }
+    class AndroidWindowPolicyLease {
+        +update(screenRecordingAllowed)
+        +close()
+    }
+    SystemActions <|.. AndroidSystemActions
+    SystemActions <|.. IosSystemActions
+    SystemActions <|.. SystemActionsModule
+    AndroidWindowPolicy --> AndroidWindowPolicyLease : 创建并登记 owner
+    AndroidWindowPolicyLease --> AndroidWindowPolicy : 更新与释放
+```
+
+源码入口：[公共动作契约](system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt)、[Android 动作](system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidSystemActions.kt)、[iOS 动作](system-actions-core/src/iosMain/kotlin/io/github/gycrosskit/systemactions/IosSystemActions.kt)、[Kuikly 请求生命周期](system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/SystemActionsModule.kt)、[OHOS Renderer](ohos/system-actions-native/src/main/ets/GycSystemActionsModule.ets)、[OHOS 商店回执](ohos/system-actions-native/src/main/ets/SystemActions.ets)、[Android Window owner](system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidWindowPolicy.kt)、[OHOS Window 队列](ohos/system-actions-native/src/main/ets/WindowPolicy.ets)。iOS/OHOS 定位设置、iOS 原生商店返回不可用，图中的平台入口不表示每个动作均受支持。
+
 ## 平台与模块
 
 | 模块 | 平台与要求 |
