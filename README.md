@@ -1,6 +1,6 @@
 # GY CrossKit System Actions
 
-为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.2` 候选补齐原生系统边界。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名或厂商商店优先级。
+为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.3` 候选修正全屏退出方向并保留原生系统边界。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名，原生商店选择遵循下文的平台策略。
 
 ## 平台与模块
 
@@ -12,9 +12,9 @@
 
 KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.1 / AGP 8.10.1。iOS 编译链接需 macOS / Xcode，OHOS 需匹配 Native SDK。Core 的 OHOS 和 JVM 变体仅包含公共 API；JVM 不提供桌面系统动作。
 
-## Window 与原生系统边界（0.2.0-rc.2 候选）
+## Window 与原生系统边界（0.2.0-rc.3 候选）
 
-本轮候选为 `0.2.0-rc.2`，新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、
+本轮候选为 `0.2.0-rc.3`，修正 layout-only 全屏退出时不应回写方向的问题。Maven/HAR 发布与真实远程消费尚待完成；无变化的 Swift Package/Git Pod 继续使用已验证 rc.2。既有 rc.2 已新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、
 OHOS 键盘/环境观察及全屏 Window lease。Maven、Git Pod与Swift Package精确版本的真实独立消费者编译/链接通过；发布与各渠道结果见
 [系统边界闭合验收](verification/系统边界闭合候选验收.md)，尚未完成的渠道不视为可安装。
 `0.2.0-rc.1` 为此前已发布的 Window 基线，2026-10-04 OHPM 精确查询仍返回 `NOTFOUND`。
@@ -81,7 +81,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.2")
+            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.3")
         }
     }
 }

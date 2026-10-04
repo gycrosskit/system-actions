@@ -27,6 +27,7 @@ export class WindowPolicyController {
   private previousLayoutFullscreen: boolean = false;
   private layoutTouched: boolean = false;
   private systemBarsTouched: boolean = false;
+  private orientationTouched: boolean = false;
   private restorePolicy: FullscreenWindowPolicy | null = null;
 
   createLease(resolveWindow: () => Promise<window.Window>): WindowPolicyLease {
@@ -87,6 +88,7 @@ export class WindowPolicyController {
       const policy = lease.policy;
       this.restorePolicy = policy;
       if (policy.enterOrientation !== undefined) {
+        this.orientationTouched = true;
         await target.setPreferredOrientation(policy.enterOrientation);
         if (!this.ownsFullscreen(lease, revision)) return;
       }
@@ -145,7 +147,10 @@ export class WindowPolicyController {
       const previous = policy?.unspecifiedExitOrientation !== undefined &&
         this.previousOrientation === window.Orientation.UNSPECIFIED ? policy.unspecifiedExitOrientation : this.previousOrientation;
       const orientation = policy?.exitOrientation ?? previous;
-      if (orientation !== null && orientation !== undefined) await target.setPreferredOrientation(orientation);
+      const fallbackRequested = policy?.unspecifiedExitOrientation !== undefined &&
+        this.previousOrientation === window.Orientation.UNSPECIFIED;
+      if ((this.orientationTouched || policy?.exitOrientation !== undefined || fallbackRequested) &&
+        orientation !== null && orientation !== undefined) await target.setPreferredOrientation(orientation);
     } catch (error) { if (!failure) failure = error as Error; }
     if (failure) throw failure;
     this.fullscreenTarget = null;
@@ -153,6 +158,7 @@ export class WindowPolicyController {
     this.restorePolicy = null;
     this.layoutTouched = false;
     this.systemBarsTouched = false;
+    this.orientationTouched = false;
   }
 
   private privacyRequired(): boolean {
