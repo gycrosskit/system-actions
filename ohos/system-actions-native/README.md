@@ -1,5 +1,14 @@
 # GY CrossKit System Actions Native
 
+当前 HAR 候选为 **0.2.0-rc.3**，修正 layout-only 全屏退出方向，保留跨 owner 累计恢复与原有 privacy lease。发布和远程消费尚待完成；OHPM 接受提交、审核与 Registry 安装分别核验。审核通过并可查询后安装：
+
+```sh
+ohpm install @gycrosskit/system-actions-native@0.2.0-rc.3
+```
+
+以下为已有渠道历史记录，不替代新候选验收。
+
+
 HarmonyOS API 22 的拨号、HTTP(S) 外链、应用设置和商店能力，含可注入共享 `SystemActions` 的 Kuikly Renderer Module。
 
 `0.1.1` 已在 OHPM Registry 发布；`0.1.2` 的[独立 GitHub Release 归档](https://github.com/gycrosskit/system-actions/releases/tag/har-0.1.2)已发布并完成远程下载、校验、安装和编译。OHPM 已接受 `0.1.2` 提交，当前审核中，Registry 精确安装尚不可用。
@@ -39,7 +48,8 @@ await lease.release();
 宿主 `module.json5` 声明 `ohos.permission.PRIVACY_WINDOW`。同一 Ability 共用 controller；必须等保护设置成功才展示视频。多 owner 任意禁录即保持 privacy，最后一个释放才恢复进入前状态；获取窗口期间释放会抑制迟到结果，异步释放失败应由宿主处理，可重试 release。此接口不提供常亮、全屏、方向或系统栏能力。业务授权、播放器错误 UI、导航和生命周期均由宿主决定。
 
 
-当前源码待发布：`GycSystemActionsModule` 提供键盘高度(vp)/环境观察和 stop/dispose；
+`0.2.0-rc.2` 的固定 GitHub Release HAR 已发布并通过真实独立消费；OHPM `next` 提交已接受，审核状态与 Registry 安装另计。
+该版 `GycSystemActionsModule` 提供键盘高度(vp)/环境观察和 stop/dispose；
 `WindowPolicyController.shared.createFullscreenLease` 与 privacy lease 共用串行队列。
 方向、系统栏目标及生命周期由宿主输入，完整 API/示例见仓库 `docs/接入指南.md`。
-现有版本号仍代表历史发布物，不表示新 API 已进入 Registry。
+0.2.0-rc.3 候选另修正 layout-only 全屏退出时的方向恢复门禁；此修复尚未发布，不能由 rc.2 的远程消费结果代替。

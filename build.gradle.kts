@@ -4,5 +4,21 @@ plugins {
 }
 allprojects {
     group = "com.github.gycrosskit.system-actions"
-    version = providers.environmentVariable("VERSION").orElse("0.2.0-rc.2").get()
+    version = providers.environmentVariable("VERSION").orElse("0.2.0-rc.3").get()
+}
+
+subprojects {
+    plugins.withId("maven-publish") {
+        extensions.configure<org.gradle.api.publish.PublishingExtension> {
+            publications.withType<org.gradle.api.publish.maven.MavenPublication>().configureEach {
+                pom.licenses {
+                    license {
+                        name.set("Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        distribution.set("repo")
+                    }
+                }
+            }
+        }
+    }
 }
