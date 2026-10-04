@@ -1,5 +1,11 @@
 # 变更记录
 
+## 0.2.0-rc.1（本地候选，未发布）
+
+- 新增 WindowPolicyController / WindowPolicyLease，多 owner privacy 合并与进入前状态恢复。
+- 串行处理窗口获取、privacy 设置和释放；销毁期间迟到窗口不会被接管，恢复失败可重试。
+- 只提取 privacy，常亮、全屏、方向和系统栏留给宿主。
+
 ## 0.1.2
 
 - 新增原生 AppGallery 商店详情，等待 onAppear；错误、提前关闭、取消和 20 秒超时结束等待。
