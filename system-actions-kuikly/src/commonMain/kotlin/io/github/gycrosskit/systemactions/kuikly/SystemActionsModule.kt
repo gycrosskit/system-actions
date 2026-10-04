@@ -16,6 +16,9 @@ class SystemActionsModule : Module(), SystemActions {
     private class Pending(val continuation: CancellableContinuation<ActionResult>) {
         var callback: CallbackRef? = null
     }
+    private class Observation(val id: String) { var callback: CallbackRef? = null }
+    private var keyboard: Observation? = null
+    private var darkMode: Observation? = null
     private val pending = mutableMapOf<String, Pending>()
     private var nextId = 0L
     private var disposed = false
@@ -27,6 +30,53 @@ class SystemActionsModule : Module(), SystemActions {
     override suspend fun openLocationSettings(): ActionResult = perform("openLocationSettings")
     override suspend fun openAppStore(listingUrl: String): ActionResult = perform("openAppStore", listingUrl)
     override suspend fun openNativeAppStore(applicationId: String?): ActionResult = perform("openNativeAppStore", applicationId)
+
+    /** 高度已经由当前 Window 的 px2vp 转成 vp；宿主只负责 inset 消费。 */
+    fun observeKeyboardHeight(onChange: (Float) -> Unit): () -> Unit {
+        stopKeyboardHeight()
+        if (disposed) return {}
+        val observer = Observation((++nextId).toString())
+        keyboard = observer
+        observer.callback = toNative(true, "observeKeyboardHeight", observationParams(observer), { response ->
+            if (!disposed && keyboard === observer) {
+                onChange(response?.optDouble("height", 0.0)?.toFloat()?.coerceAtLeast(0f) ?: 0f)
+            }
+        }).callbackRef
+        if (disposed || keyboard !== observer) observer.callback?.let(::removeCallback)
+        return { if (keyboard === observer) stopKeyboardHeight() }
+    }
+
+    fun observeDarkMode(onChange: (Boolean) -> Unit): () -> Unit {
+        stopDarkMode()
+        if (disposed) return {}
+        val observer = Observation((++nextId).toString())
+        darkMode = observer
+        observer.callback = toNative(true, "observeDarkMode", observationParams(observer), { response ->
+            if (!disposed && darkMode === observer) onChange(response?.optBoolean("darkMode") == true)
+        }).callbackRef
+        if (disposed || darkMode !== observer) observer.callback?.let(::removeCallback)
+        return { if (darkMode === observer) stopDarkMode() }
+    }
+
+    fun stopKeyboardHeight() {
+        val observer = keyboard ?: return
+        keyboard = null
+        stopObservation("stopKeyboardHeight", observer)
+    }
+
+    fun stopDarkMode() {
+        val observer = darkMode ?: return
+        darkMode = null
+        stopObservation("stopDarkMode", observer)
+    }
+
+    private fun observationParams(observer: Observation) = JSONObject().apply { put("requestId", observer.id) }.toString()
+
+    private fun stopObservation(method: String, observer: Observation) {
+        toNative(false, method, observationParams(observer), null, false)
+        observer.callback?.let(::removeCallback)
+        observer.callback = null
+    }
 
     private suspend fun perform(method: String, value: String? = null): ActionResult {
         if (disposed) return ActionResult.Unavailable
@@ -74,6 +124,8 @@ class SystemActionsModule : Module(), SystemActions {
 
     fun dispose() {
         if (disposed) return
+        stopKeyboardHeight()
+        stopDarkMode()
         disposed = true
         pending.toMap().forEach { (id, request) ->
             request.callback?.let(::removeCallback)

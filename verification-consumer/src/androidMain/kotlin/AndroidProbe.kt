@@ -9,3 +9,5 @@ fun windowPolicy(window: Window) {
     lease.update(screenRecordingAllowed = true)
     lease.close()
 }
+
+fun fileActions(context: Context) = io.github.gycrosskit.systemactions.AndroidFileActions(context)
