@@ -4,6 +4,12 @@ HarmonyOS API 22 的拨号、HTTP(S) 外链、应用设置和商店能力，含�
 
 `0.1.1` 已在 OHPM Registry 发布；本目录 `0.1.2` 是原生 AppGallery 商店候选，仅本地打包验证。候选未上传 Registry。
 
+`0.1.2` 上架后可按以下命令安装；Registry 接受提交不代表已经上架，当前仍需确认版本可用：
+
+```sh
+ohpm install @gycrosskit/system-actions-native@0.1.2
+```
+
 ```typescript
 import { SystemActions, GycSystemActionsModule } from '@gycrosskit/system-actions-native';
 const actions = new SystemActions(uiAbilityContext);
