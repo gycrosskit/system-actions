@@ -24,7 +24,7 @@ File.write(File.join(output, 'Podfile'), <<~PODFILE)
   use_frameworks!
   project 'WindowPolicyConsumer.xcodeproj'
   target 'WindowPolicyConsumer' do
-    pod 'GYCWindowPolicy', :path => '#{root}'
+    pod 'GYCWindowPolicy', :git => 'https://github.com/gycrosskit/system-actions.git', :tag => '0.2.0-rc.2'
   end
 PODFILE
 puts output

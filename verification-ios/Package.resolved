@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "system-actions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gycrosskit/system-actions.git",
+      "state" : {
+        "revision" : "8772e33a1f3c4e2d93011e88afbdb36010e76536",
+        "version" : "0.2.0-rc.2"
+      }
+    }
+  ],
+  "version" : 2
+}
