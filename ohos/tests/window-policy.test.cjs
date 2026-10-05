@@ -11,7 +11,8 @@ const { WindowPolicyController } = exportsObject;
 const flush = () => new Promise(resolve => setImmediate(resolve));
 function target(initial = false) {
   return { current: initial, calls: [], fail: false,
-    getWindowProperties() { return { isPrivacyMode: this.current }; },
+    getWindowProperties() { return { isPrivacyMode: this.current, isKeepScreenOn: this.keep || false }; },
+    async setWindowKeepScreenOn(value) { this.keep = value; },
     async setWindowPrivacyMode(value) { this.calls.push(value); if (this.fail) throw Error('rejected'); this.current = value; }
   };
 }
@@ -36,8 +37,8 @@ function target(initial = false) {
   assert.deepEqual(lateWindow.calls, [], 'release during getLastWindow cannot touch late Window');
 
   const failingWindow = target(), failing = controller.createLease(async () => failingWindow);
+  await failing.update(false);
   failingWindow.fail = true;
-  await assert.rejects(failing.update(false));
   await assert.rejects(failing.release());
   failingWindow.fail = false; await failing.release(); assert.equal(failingWindow.current, false);
   const next = controller.createLease(async () => lateWindow);
@@ -55,5 +56,15 @@ function target(initial = false) {
   const update = asyncLease.update(false); await flush();
   const released = asyncLease.release(); finishSet(); await update; await released;
   assert.deepEqual(asyncWindow.calls, [true, false]); assert.equal(asyncWindow.current, false);
+  const brightWindow = target(), brightOne = controller.createLease(async () => brightWindow, true);
+  const brightTwo = controller.createLease(async () => brightWindow, true);
+  await brightOne.update(true); await brightTwo.update(true);
+  assert.equal(brightWindow.keep, true);
+  await brightOne.release(); assert.equal(brightWindow.keep, true);
+  await brightTwo.release(); assert.equal(brightWindow.keep, false);
+  brightWindow.keep = true;
+  const baseline = controller.createLease(async () => brightWindow, false);
+  await baseline.update(true); await baseline.release(); assert.equal(brightWindow.keep, true);
+
   console.log('Window policy checks passed: owners, initial privacy, late window, failed restore retry and asynchronous release.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -1,8 +1,10 @@
 import { KRAny, KuiklyRenderBaseModule, KuiklyRenderCallback } from '@kuikly-open/render';
 import { ActionResult, SystemActions } from './SystemActions';
+import { WindowPolicyController, WindowPolicyLease } from './WindowPolicy';
+import { window } from '@kit.ArkUI';
 import { SystemObservations } from './SystemObservations';
 
-interface ActionParams { requestId?: string; value?: string; }
+interface ActionParams { requestId?: string; value?: string; title?: string; }
 class PendingAction {
   callback: KuiklyRenderCallback | null;
   cancel: (() => void) | null = null;
@@ -16,6 +18,7 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
   private actions: SystemActions | null;
   private readonly pending: Map<string, PendingAction> = new Map();
   private destroyed: boolean = false;
+  private keepScreenLease: WindowPolicyLease | null = null;
   private readonly observations: SystemObservations = new SystemObservations(() => this.controller?.getUIAbilityContext());
 
   /** @param actions 页面注入的系统能力；销毁只取消自身请求，不销毁该实例。 */
@@ -57,7 +60,7 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
     const pending = new PendingAction(callback);
     this.pending.set(id, pending);
     const result = method === 'openNativeAppStore' ? this.openNativeStore(actions, args.value, pending) :
-      this.perform(actions, method, args.value ?? '');
+      method === 'setKeepScreenOn' ? this.setKeepScreenOn(args.value, pending) : this.perform(actions, method, args, pending);
     result.then((status: ActionResult) => {
       this.deliver(id, pending, status);
     }).catch(() => { this.deliver(id, pending, 'unavailable'); });
@@ -70,8 +73,38 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
     return request.result;
   }
 
-  private async perform(actions: SystemActions, method: string, value: string): Promise<ActionResult> {
+  private async setKeepScreenOn(value: string | undefined, pending: PendingAction): Promise<ActionResult> {
+    if (value !== 'true' && value !== 'false') return 'invalid_input';
+    if (value === 'false') {
+      const lease = this.keepScreenLease;
+      // 恢复失败保留句柄，下一次 false 可沿既有 release 重试；不清掉期间的新 owner。
+      if (lease) await lease.release();
+      if (this.keepScreenLease === lease) this.keepScreenLease = null;
+      return 'requested';
+    }
+    const previous = this.keepScreenLease;
+    const lease = WindowPolicyController.shared.createLease(async () => {
+      const context = this.controller?.getUIAbilityContext();
+      if (!context) throw new Error('UIAbility unavailable');
+      return window.getLastWindow(context);
+    }, true);
+    this.keepScreenLease = lease;
+    pending.cancel = () => {
+      if (this.keepScreenLease === lease) this.keepScreenLease = null;
+      lease.release().catch(() => {});
+    };
+    if (previous) await previous.release();
+    await lease.update(true);
+    return lease.isReleased ? 'unavailable' : 'requested';
+  }
+
+  private async perform(actions: SystemActions, method: string, args: ActionParams, pending: PendingAction): Promise<ActionResult> {
+    const value = args.value ?? '';
     switch (method) {
+      case 'copyText': return actions.copyText(value);
+      case 'shareFile':
+        if (typeof args.title !== 'string') return 'invalid_input';
+        return actions.shareFile(value, args.title, () => !this.destroyed && pending.callback !== null);
       case 'dial': return actions.dial(value);
       case 'openExternalUrl': return actions.openExternalUrl(value);
       case 'openAppSettings': return actions.openAppSettings();
@@ -93,6 +126,8 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
   onDestroy(): void {
     this.destroyed = true;
     this.observations.dispose();
+    this.keepScreenLease?.release().catch(() => {});
+    this.keepScreenLease = null;
     this.pending.forEach((pending: PendingAction) => {
       pending.callback = null;
       pending.cancel?.();

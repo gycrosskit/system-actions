@@ -15,7 +15,7 @@ export async function cancelledStore(actions: SystemActions): Promise<ActionResu
 }
 
 export async function windowPolicy(resolveWindow: () => Promise<window.Window>): Promise<void> {
-  const lease = WindowPolicyController.shared.createLease(resolveWindow);
+  const lease = WindowPolicyController.shared.createLease(resolveWindow, true);
   await lease.update(false);
   await lease.update(true);
   await lease.release();
@@ -31,4 +31,8 @@ export async function fullscreenPolicy(resolveWindow: () => Promise<window.Windo
   await lease.enter();
   await lease.exit();
   await lease.release();
+}
+
+export async function files(actions: SystemActions, path: string): Promise<ActionResult[]> {
+  return [await actions.copyText('consumer'), await actions.shareFile(path, 'Share')];
 }

@@ -3,7 +3,7 @@ plugins {
     id("com.android.library") version "8.10.1"
 }
 kotlin {
-    val systemActionsVersion = providers.gradleProperty("systemActionsVersion").orElse("0.2.0-rc.3").get()
+    val systemActionsVersion = providers.gradleProperty("systemActionsVersion").orElse("0.2.0-rc.4").get()
     androidTarget()
     iosArm64()
     iosX64()

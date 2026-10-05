@@ -29,6 +29,7 @@ export class WindowPolicyController {
   private owners: Map<WindowPolicyLease, boolean> = new Map();
   private target: window.Window | null = null;
   private previousPrivacy: boolean = false;
+  private previousKeepScreenOn: boolean = false;
   private task: Promise<void> = Promise.resolve();
   private fullscreenOwner: FullscreenWindowLease | null = null;
   private fullscreenTarget: window.Window | null = null;
@@ -40,9 +41,9 @@ export class WindowPolicyController {
   private orientationTouched: boolean = false;
   private restorePolicy: FullscreenWindowPolicy | null = null;
 
-  /** 主线程创建未应用的 privacy lease。@param resolveWindow 宿主解析当前 Window 的异步函数。 */
-  createLease(resolveWindow: () => Promise<window.Window>): WindowPolicyLease {
-    return new WindowPolicyLease(this, resolveWindow);
+  /** 主线程创建未应用的窗口 lease。@param resolveWindow 宿主当前 Window。@param keepScreenOn 默认 false，保留旧 privacy-only 行为。 */
+  createLease(resolveWindow: () => Promise<window.Window>, keepScreenOn: boolean = false): WindowPolicyLease {
+    return new WindowPolicyLease(this, resolveWindow, keepScreenOn);
   }
 
   /** 供 lease.update 使用的串行入口。@param lease 本 controller 创建的未释放 owner。@param resolveWindow 首次接管的 Window resolver。 */
@@ -54,11 +55,13 @@ export class WindowPolicyController {
         target = await resolveWindow();
         // 获取窗口期间页面可能已销毁，迟到回调不能建立 owner 或修改 Window。
         if (lease.isReleased) return;
-        this.previousPrivacy = target.getWindowProperties().isPrivacyMode;
+        const properties = target.getWindowProperties();
+        this.previousPrivacy = properties.isPrivacyMode;
+        this.previousKeepScreenOn = properties.isKeepScreenOn;
         this.target = target;
       }
       this.owners.set(lease, lease.screenRecordingAllowed);
-      await target.setWindowPrivacyMode(this.privacyRequired());
+      await this.applyWindowPolicy(target);
     });
   }
 
@@ -68,7 +71,7 @@ export class WindowPolicyController {
       this.owners.delete(lease);
       const target = this.target;
       if (!target) return;
-      await target.setWindowPrivacyMode(this.privacyRequired());
+      await this.applyWindowPolicy(target);
       // 恢复失败保留初值和目标，后续 release 可重试，不把受保护窗口当作新的初始状态。
       if (this.owners.size === 0) this.target = null;
     });
@@ -182,6 +185,22 @@ export class WindowPolicyController {
     this.orientationTouched = false;
   }
 
+  private async applyWindowPolicy(target: window.Window): Promise<void> {
+    // 两项独立恢复：privacy 失败也不能把常亮留在窗口上；失败保留基线供 release 重试。
+    let failure: Error | null = null;
+    const privacy = this.privacyRequired();
+    try {
+      // 常亮 owner 不改 privacy 时不调用需要 PRIVACY_WINDOW 的 API。
+      if (target.getWindowProperties().isPrivacyMode !== privacy) await target.setWindowPrivacyMode(privacy);
+    } catch (error) { failure = error as Error; }
+    let keepScreenOn = this.previousKeepScreenOn;
+    this.owners.forEach((_allowed, owner) => { if (owner.keepScreenOn) keepScreenOn = true; });
+    try {
+      if (target.getWindowProperties().isKeepScreenOn !== keepScreenOn) await target.setWindowKeepScreenOn(keepScreenOn);
+    } catch (error) { if (!failure) failure = error as Error; }
+    if (failure) throw failure;
+  }
+
   private privacyRequired(): boolean {
     let protect = this.previousPrivacy;
     this.owners.forEach(allowed => { if (!allowed) protect = true; });
@@ -199,17 +218,20 @@ export class WindowPolicyController {
 export class WindowPolicyLease {
   private released: boolean = false;
   private allowed: boolean = false;
+  /** 本 owner 是否请求常亮；初始窗口常亮和其他 owner 不受它的释放影响。 */
+  readonly keepScreenOn: boolean;
   private readonly controller: WindowPolicyController;
   private readonly resolveWindow: () => Promise<window.Window>;
 
   /**
-   * 创建未应用的 privacy owner。
+   * 创建未应用的窗口 owner，默认仅控制 privacy。
    * @param controller 同一 Ability 共用的策略 controller。
    * @param resolveWindow 首次应用时解析的窗口，释放前由 controller 持有。
    */
-  constructor(controller: WindowPolicyController, resolveWindow: () => Promise<window.Window>) {
+  constructor(controller: WindowPolicyController, resolveWindow: () => Promise<window.Window>, keepScreenOn: boolean = false) {
     this.controller = controller;
     this.resolveWindow = resolveWindow;
+    this.keepScreenOn = keepScreenOn;
   }
   /** 是否已撤销 owner；释放后 update 不再修改窗口。 */
   get isReleased(): boolean { return this.released; }

@@ -1,3 +1,7 @@
+import { uniformTypeDescriptor } from '@kit.ArkData';
+import { pasteboard } from '@kit.BasicServicesKit';
+import { fileIo, fileUri } from '@kit.CoreFileKit';
+import { systemShare } from '@kit.ShareKit';
 import { call } from '@kit.TelephonyKit';
 import { common } from '@kit.AbilityKit';
 import { url } from '@kit.ArkTS';
@@ -18,6 +22,54 @@ export class SystemActions {
   private readonly context: common.UIAbilityContext;
   /** @param context 当前 UIAbility；实例持有该引用，宿主限定其生命周期。 */
   constructor(context: common.UIAbilityContext) { this.context = context; }
+
+  /** 原样写入文本（允许空文本）；只返回系统写入受理，不读取剪贴板。 */
+  async copyText(value: string): Promise<ActionResult> {
+    try {
+      await pasteboard.getSystemPasteboard().setData(pasteboard.createPlainTextData(value));
+      return 'requested';
+    } catch (_) { return 'unavailable'; }
+  }
+
+  /**
+   * 分享宿主拥有的普通沙箱文件；不删除文件，不把面板受理当作用户完成分享。
+   * @param path 绝对本地路径，不能传 URI。
+   * @param title 分享标题，由宿主本地化。
+   * @param stillAllowed 桥接请求的生命周期许可；取消可阻止尚未展示的面板，不能关闭已展示面板。
+   */
+  async shareFile(path: string, title: string, stillAllowed: () => boolean = () => true): Promise<ActionResult> {
+    if (!stillAllowed()) return 'unavailable';
+    if (!path.startsWith('/') || path.includes('\0') || path.split('/').some(part => part === '..' || part === '.')) return 'invalid_input';
+    const roots = [this.context.filesDir, this.context.cacheDir, this.context.tempDir];
+    const root = roots.find(value => value && path.startsWith(`${value}/`));
+    if (!root) return 'invalid_input';
+    try {
+      // 路径限制在当前 Ability 私有目录；逐段拒绝符号链接，避免路径前缀绕过沙箱范围。
+      let current = root;
+      for (const part of path.substring(root.length + 1).split('/')) {
+        if (!part) return 'invalid_input';
+        current += `/${part}`;
+        const entry = await fileIo.lstat(current);
+        if (!stillAllowed()) return 'unavailable';
+        if (entry.isSymbolicLink()) return 'invalid_input';
+      }
+      const entry = await fileIo.stat(path);
+      if (!stillAllowed() || !entry.isFile()) return 'unavailable';
+      const name = path.substring(path.lastIndexOf('/') + 1);
+      const extension = name.includes('.') ? name.substring(name.lastIndexOf('.')) : '';
+      const data = new systemShare.SharedData({
+        utd: extension ? uniformTypeDescriptor.getUniformDataTypeByFilenameExtension(extension, uniformTypeDescriptor.UniformDataType.FILE)
+          : uniformTypeDescriptor.UniformDataType.FILE,
+        uri: fileUri.getUriFromPath(path), title
+      });
+      if (!stillAllowed()) return 'unavailable';
+      await new systemShare.ShareController(data).show(this.context, {
+        previewMode: systemShare.SharePreviewMode.DEFAULT,
+        selectionMode: systemShare.SelectionMode.SINGLE
+      });
+      return 'requested';
+    } catch (_) { return 'unavailable'; }
+  }
 
   /** @param phone 可选前导 +、数字和空格/括号/连字符；去除首尾空白后最多 31 个数字/分隔字符。不表示电话已接通。 */
   async dial(phone: string): Promise<ActionResult> {
