@@ -1,0 +1,106 @@
+name: Component regression
+on:
+  pull_request:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Immutable release tag to verify (empty runs source regression)
+        type: string
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: regression-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+defaults:
+  run:
+    shell: bash
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - run: npm install --prefix "$RUNNER_TEMP/ci-tools" --ignore-scripts --no-audit --no-fund typescript@4.9.5
+      - run: |
+          python3 scripts/test-check-maven.py
+          python3 scripts/test-jitpack-metadata.py
+          TYPESCRIPT_PATH="$RUNNER_TEMP/ci-tools/node_modules/typescript" node --test ohos/tests/*.test.cjs
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: test -f "$ANDROID_HOME/platforms/android-36/android.jar"
+      - run: bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" :system-actions-core:jvmTest :system-actions-core:testDebugUnitTest :system-actions-core:compileDebugKotlinAndroid --no-daemon --max-workers=1
+  native:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: |
+          case "$(uname -m)" in
+            arm64) native_target=IosSimulatorArm64; native_test=iosSimulatorArm64Test ;;
+            x86_64) native_target=IosX64; native_test=iosX64Test ;;
+            *) echo "Unsupported macOS architecture" >&2; exit 1 ;;
+          esac
+          bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" :system-actions-core:compileKotlinIosArm64 :system-actions-core:compileKotlin${native_target} :system-actions-core:compileKotlinOhosArm64 :system-actions-kuikly:compileKotlinOhosArm64 --no-daemon --max-workers=1
+      - run: bash ios/Tests/run.sh
+      - run: xcrun swiftc -typecheck -target "$(uname -m)-apple-ios15.0-simulator" -sdk "$(xcrun --sdk iphonesimulator --show-sdk-path)" ios/Sources/GYCWindowPolicy/*.swift
+  release-android:
+    if: github.event_name == 'pull_request' || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.version != '')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      VERSION: ${{ github.event.release.tag_name || inputs.version || '0.2.0-rc.4' }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: test -f "$ANDROID_HOME/platforms/android-36/android.jar"
+      - run: bash scripts/ci-release.sh
+      - run: bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" -p verification-consumer compileDebugKotlinAndroid -PsystemActionsVersion="$VERSION" --refresh-dependencies --no-daemon --max-workers=1
+  release-native:
+    if: github.event_name == 'pull_request' || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.version != '')
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      VERSION: ${{ github.event.release.tag_name || inputs.version || '0.2.0-rc.4' }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: bash scripts/ci-release.sh
+      - run: |
+          case "$(uname -m)" in
+            arm64) native_target=IosSimulatorArm64; native_test=iosSimulatorArm64Test ;;
+            x86_64) native_target=IosX64; native_test=iosX64Test ;;
+            *) echo "Unsupported macOS architecture" >&2; exit 1 ;;
+          esac
+          bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" -p verification-consumer linkDebugFramework${native_target} compileKotlinOhosArm64 -PsystemActionsVersion="$VERSION" --refresh-dependencies --no-daemon --max-workers=1
