@@ -11,12 +11,14 @@ class PendingAction {
 
 /** 由页面注入同一 SystemActions；取消只抑制回执，不能撤回系统已受理的动作。 */
 export class GycSystemActionsModule extends KuiklyRenderBaseModule {
+  /** 与 Kotlin SystemActionsModule.NAME 一致的注册名。 */
   static readonly MODULE_NAME: string = 'GycSystemActionsModule';
   private actions: SystemActions | null;
   private readonly pending: Map<string, PendingAction> = new Map();
   private destroyed: boolean = false;
   private readonly observations: SystemObservations = new SystemObservations(() => this.controller?.getUIAbilityContext());
 
+  /** @param actions 页面注入的系统能力；销毁只取消自身请求，不销毁该实例。 */
   constructor(actions: SystemActions) { super(); this.actions = actions; }
   syncMode(): boolean { return false; }
 

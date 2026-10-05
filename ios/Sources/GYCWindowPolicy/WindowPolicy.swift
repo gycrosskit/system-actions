@@ -6,10 +6,15 @@ public final class WindowPolicyController {
     private let windowResolver: () -> UIWindow?
     private static let state = WindowPolicyState()
 
+    /// - Parameter windowResolver: 主线程即时解析宿主当前 Window；无窗口时返回 nil。
     public init(windowResolver: @escaping () -> UIWindow?) {
         self.windowResolver = windowResolver
     }
 
+    /// 主线程获取 owner；任一 owner 常亮/禁录即生效，宿主在生命周期结束时显式 end。
+    /// - Parameters:
+    ///   - keepScreenOn: 默认 true；进程 idle timer 的既有禁用状态不会被放宽。
+    ///   - screenRecordingAllowed: 默认 false；捕获/镜像时遮罩，不阻止静态截图。
     public func acquire(keepScreenOn: Bool = true, screenRecordingAllowed: Bool = false) -> WindowPolicyLease {
         let lease = WindowPolicyLease(keepScreenOn: keepScreenOn, screenRecordingAllowed: screenRecordingAllowed,
                                       windowResolver: windowResolver)
@@ -24,6 +29,7 @@ public final class WindowPolicyController {
     fileprivate static func release(_ lease: WindowPolicyLease) { state.remove(lease) }
 }
 
+/// 主线程拥有的窗口策略句柄；只影响自身意图，结束后无法重新接管窗口。
 @MainActor
 public final class WindowPolicyLease {
     fileprivate let id = UUID()
@@ -38,6 +44,8 @@ public final class WindowPolicyLease {
         self.windowResolver = windowResolver
     }
 
+    /// 更新此 owner 的录制意图，已结束时忽略；其他 owner 和初始策略优先。
+    /// - Parameter screenRecordingAllowed: true 允许本 owner 的窗口被录制。
     public func update(screenRecordingAllowed: Bool) {
         guard !ended else { return }
         self.screenRecordingAllowed = screenRecordingAllowed

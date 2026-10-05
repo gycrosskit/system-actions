@@ -9,7 +9,12 @@ import android.view.WindowManager.LayoutParams.FLAG_SECURE
 object AndroidWindowPolicy {
     private val windows = mutableMapOf<Window, WindowOwners>()
 
-    /** 所有操作须在主线程；任一 owner 禁录时保留 FLAG_SECURE，原有保护不会被放宽。 */
+    /**
+     * 主线程获取独占 lease；任一 owner 禁录时保留 FLAG_SECURE，原有保护不会被放宽。
+     * @param window 本次生命周期的窗口，lease 关闭前保留引用。
+     * @param keepScreenOn 默认 true，请求常亮；任一 owner 请求即可生效。
+     * @param screenRecordingAllowed 默认 false，禁止截图/录屏；已有 FLAG_SECURE 不会被放宽。
+     */
     fun acquire(
         window: Window,
         keepScreenOn: Boolean = true,
@@ -60,6 +65,7 @@ class AndroidWindowPolicyLease internal constructor(
 ) : AutoCloseable {
     private var closed = false
 
+    /** 主线程更新本 owner 的录制策略。@param screenRecordingAllowed true 允许，但不覆盖其他 owner 或原有保护。 */
     fun update(screenRecordingAllowed: Boolean) {
         AndroidWindowPolicy.requireMainThread()
         if (closed) return

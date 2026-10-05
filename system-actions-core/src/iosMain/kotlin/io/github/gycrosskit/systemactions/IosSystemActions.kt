@@ -18,6 +18,7 @@ internal actual fun hasValidWebAuthority(value: String): Boolean {
         (port == null || port.stringValue.toIntOrNull()?.let { it in 1..65535 } == true) && parts.URL != null
 }
 
+/** iOS UIApplication 动作实现，自动切主线程；按系统 openURL completion 返回受理状态。 */
 @OptIn(ExperimentalForeignApi::class)
 class IosSystemActions : SystemActions {
     override suspend fun dial(phone: String): ActionResult {

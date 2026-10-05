@@ -20,6 +20,14 @@ function target() {
 const policy = { enterOrientation: 2, exitOrientation: 1, enterSystemBars: [], exitSystemBars: ['status', 'navigation'] };
 (async () => {
  const controller = new exportsObject.WindowPolicyController(), window = target();
+ const snapshotTarget = target();
+ const mutablePolicy = { enterSystemBars: [], exitSystemBars: ['status'] };
+ const snapshotLease = controller.createFullscreenLease(async () => snapshotTarget, mutablePolicy);
+ mutablePolicy.enterSystemBars.push('navigation');
+ mutablePolicy.exitSystemBars.push('navigation');
+ assert.equal(await snapshotLease.enter(), true);
+ await snapshotLease.release();
+ assert.deepEqual(snapshotTarget.calls, [['bars', []], ['bars', ['status']]], 'queued policy arrays are copied from host');
  const lease = controller.createFullscreenLease(async () => window, policy);
  assert.equal(await lease.enter(), true); await lease.exit();
  assert.deepEqual(window.calls, [['orientation', 2], ['bars', []], ['bars', ['status', 'navigation']], ['orientation', 1]]);

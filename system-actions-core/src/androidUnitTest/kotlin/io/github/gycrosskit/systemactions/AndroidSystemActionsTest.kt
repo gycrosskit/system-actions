@@ -22,6 +22,28 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class AndroidSystemActionsTest {
+    @Test fun phoneAndWebUrlValidationPrecedesSystemLaunchAndPreservesNormalizedIntent() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val launched = mutableListOf<Intent>()
+            val context = object : ContextWrapper(RuntimeEnvironment.getApplication()) {
+                override fun startActivity(intent: Intent) { launched += intent }
+            }
+            val actions = AndroidSystemActions(context)
+            assertEquals(ActionResult.InvalidInput, actions.dial("123;456"))
+            assertEquals(ActionResult.InvalidInput, actions.openExternalUrl("https://user@example.com"))
+            assertTrue(launched.isEmpty(), "invalid input never reaches system")
+            assertEquals(ActionResult.Requested, actions.dial(" +86 (138)-1234 "))
+            assertEquals(Intent.ACTION_DIAL, launched.single().action)
+            assertEquals("tel", launched.single().data?.scheme)
+            assertEquals("+861381234", launched.single().data?.schemeSpecificPart)
+            assertEquals(ActionResult.Requested, actions.openExternalUrl(" https://example.com/path%20name "))
+            assertEquals(Intent.ACTION_VIEW, launched.last().action)
+            assertEquals("https://example.com/path%20name", launched.last().dataString)
+            assertTrue(launched.all { it.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0 })
+        } finally { Dispatchers.resetMain() }
+    }
+
     @Test fun locationSettingsReportsActualAcceptanceWithApplicationContext() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
