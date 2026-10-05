@@ -6,7 +6,7 @@ kotlin {
     val systemActionsVersion = providers.gradleProperty("systemActionsVersion").orElse("0.2.0-rc.4").get()
     androidTarget()
     iosArm64()
-    iosX64()
+    iosX64 { binaries.framework { baseName = "SystemActionsConsumer" } }
     iosSimulatorArm64 { binaries.framework { baseName = "SystemActionsConsumer" } }
     ohosArm64()
     sourceSets {
