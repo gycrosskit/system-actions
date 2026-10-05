@@ -6,7 +6,7 @@
 
 ## 0.2.0-rc.4 发布状态
 
-Maven core/Kuikly `0.2.0-rc.4` 已提供 GitHub 预发行，JitPack 的精确标签/提交、完整 publication 和实际文件校验通过。Release HAR 已重下载校验；OHPM 以独立 `candidate-0.2.0-rc.4` 标签提交审核，精确 Registry 安装仍返回 NOTFOUND，旧 next 保持。详情见[0.2.0-rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。 Swift Package/Git Pod 保持已验 `0.2.0-rc.2`。
+Maven core/Kuikly `0.2.0-rc.4` 已提供 GitHub 预发行，JitPack 的精确标签/提交、完整 publication 和实际文件校验通过。Release HAR 已重下载校验；OHPM 以独立 `candidate-0.2.0-rc.4` 标签提交审核，精确 Registry 安装仍返回 NOTFOUND，旧 next 保持。全新远程 Maven 的 Android/iOS/OHOS 消费与 Simulator Framework 链接已通过。详情见[0.2.0-rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。 Swift Package/Git Pod 保持已验 `0.2.0-rc.2`。
 
 OHOS `SystemActions.copyText(value)` 与 `shareFile(path, title)` 提供剪贴板和普通私有文件分享。`WindowPolicyController.createLease(resolver, keepScreenOn = false)` 增加常亮意图；旧调用维持默认行为。Kuikly Module 同步提供 `copyText`、`shareFile` 和 `setKeepScreenOn`。这些能力随 rc.4 GitHub 预发行提供；OHPM 候选仍在审核，旧 rc.3 不含该能力。
 
@@ -180,7 +180,7 @@ HarmonyOS 原生宿主：
 ohpm install @gycrosskit/system-actions-native@0.2.0-rc.4
 ```
 
-Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。本轮 Maven/HAR 候选精确使用 `0.2.0-rc.4`，尚未发布；上一版 rc.3 的固定 Release HAR SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代本轮 HAR。
+Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。本轮 Maven/HAR 精确使用已提供 GitHub 预发行的 `0.2.0-rc.4`，OHPM 候选仍审核中；本轮固定 Release HAR 的校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)，上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代本轮 HAR。
 
 原生商店增强的历史稳定版本为 [Maven `0.1.3`](https://github.com/gycrosskit/system-actions/releases/tag/0.1.3)，JitPack 构建成功。[HAR `0.1.2` 归档](https://github.com/gycrosskit/system-actions/releases/tag/har-0.1.2)独立发布，当前 OHPM 公开元数据已列出 `0.1.2` 且 `latest=0.1.2`。它不含本轮 Window 与系统边界 API；旧审核期间的 NOTFOUND 留在历史验收记录。API 与回执边界见接入指南。
 
