@@ -2,13 +2,13 @@
 
 [本轮完整源码审查](docs/完整源码审查.md) 列出全部生产文件、公开调用链、实际验证与未测项。
 
-为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.4` 候选补齐 OHOS 剪贴板、文件分享与常亮，并保留原生系统边界。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名，原生商店选择遵循下文的平台策略。
+为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.4` 预发行补齐 OHOS 剪贴板、文件分享与常亮，并保留原生系统边界。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名，原生商店选择遵循下文的平台策略。
 
-## 0.2.0-rc.4 候选（未发布）
+## 0.2.0-rc.4 发布状态
 
-本轮 Maven core/Kuikly 与 HAR 同为 `0.2.0-rc.4`，尚未发布；下文安装坐标用于发布后的精确消费。 Swift Package/Git Pod 保持已验 `0.2.0-rc.2`。
+Maven core/Kuikly `0.2.0-rc.4` 已提供 GitHub 预发行，JitPack 的精确标签/提交、完整 publication 和实际文件校验通过。Release HAR 已重下载校验；OHPM 以独立 `candidate-0.2.0-rc.4` 标签提交审核，精确 Registry 安装仍返回 NOTFOUND，旧 next 保持。详情见[0.2.0-rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。 Swift Package/Git Pod 保持已验 `0.2.0-rc.2`。
 
-OHOS `SystemActions.copyText(value)` 与 `shareFile(path, title)` 提供剪贴板和普通私有文件分享。`WindowPolicyController.createLease(resolver, keepScreenOn = false)` 增加常亮意图；旧调用维持默认行为。Kuikly Module 同步提供 `copyText`、`shareFile` 和 `setKeepScreenOn`。这部分源码不属于下文已发布 rc.3；渠道需以新版本重新验证。
+OHOS `SystemActions.copyText(value)` 与 `shareFile(path, title)` 提供剪贴板和普通私有文件分享。`WindowPolicyController.createLease(resolver, keepScreenOn = false)` 增加常亮意图；旧调用维持默认行为。Kuikly Module 同步提供 `copyText`、`shareFile` 和 `setKeepScreenOn`。这些能力随 rc.4 GitHub 预发行提供；OHPM 候选仍在审核，旧 rc.3 不含该能力。
 
 ## 架构与调用流程
 
