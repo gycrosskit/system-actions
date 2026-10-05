@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
 
+/** Android Intent 动作实现，自动切主线程。@param context 宿主 Context；非 Activity 时追加 NEW_TASK。 */
 class AndroidSystemActions(private val context: Context) : SystemActions {
     override suspend fun dial(phone: String): ActionResult {
         val normalized = normalizedPhone(phone) ?: return ActionResult.InvalidInput

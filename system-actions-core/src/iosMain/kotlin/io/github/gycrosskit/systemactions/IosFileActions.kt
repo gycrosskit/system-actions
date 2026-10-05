@@ -13,19 +13,28 @@ import platform.UIKit.UIPasteboard
 import platform.UIKit.UIViewController
 import platform.UIKit.popoverPresentationController
 
-/** 在主线程调用；presenter 每次由宿主即时解析，不缓存旧 Scene 或业务根控制器。 */
+/**
+ * 在主线程调用；presenter 每次即时解析，不缓存旧 Scene 或业务根控制器。
+ * @param presenterResolver 宿主当前可展示控制器的解析函数，无法展示时返回 null。
+ */
 @OptIn(ExperimentalForeignApi::class)
 class IosFileActions(private val presenterResolver: () -> UIViewController?) {
     private var active: UIActivityViewController? = null
     private var completion: ((FileShareOutcome) -> Unit)? = null
 
+    /** 主线程原样复制文本，非主线程返回 Unavailable。@param value 文本，可为空。 */
     fun copyText(value: String): ActionResult {
         if (!NSThread.isMainThread) return ActionResult.Unavailable
         UIPasteboard.generalPasteboard.string = value
         return ActionResult.Requested
     }
 
-    /** 返回值只表示展示受理；成功、取消和错误仅由系统 completion 交付。 */
+    /**
+     * 返回值只表示展示受理；成功、取消和错误仅由系统 completion 交付，非主线程/忙时不可用。
+     * @param path 存在的普通文件本地路径，生命周期与所有权归宿主。
+     * @param title 分享面板标题，由宿主本地化。
+     * @param onComplete 主线程终态回调，每次受理至多一次；close 交付 Cancelled。
+     */
     fun shareFile(path: String, title: String, onComplete: (FileShareOutcome) -> Unit): ActionResult {
         if (!NSThread.isMainThread || active != null) return ActionResult.Unavailable
         if (path.isBlank()) return ActionResult.InvalidInput

@@ -15,8 +15,14 @@ export class SystemObservations {
   private environmentToken: string | null = null;
   private disposed: boolean = false;
 
+  /** @param context 每次读取当前 UIAbility，不缓存旧 Window 或业务页面。 */
   constructor(context: () => common.UIAbilityContext | null | undefined) { this.context = context; }
 
+  /**
+   * 主线程替换本实例旧观察；初值为 0，迟到旧 Window/旧事件忽略。
+   * @param token 本次所有权标识，停止时使用相同值。
+   * @param callback 主线程回调，高度由当前 Window px2vp 转为 vp。
+   */
   async observeKeyboardHeight(token: string, callback: (height: number) => void): Promise<void> {
     this.stopKeyboardHeight();
     if (this.disposed) return;
@@ -41,6 +47,7 @@ export class SystemObservations {
     }
   }
 
+  /** 幂等停止键盘观察。@param token 省略停止当前观察；旧 token 不影响后继观察。 */
   stopKeyboardHeight(token?: string): void {
     if (token !== undefined && token !== this.keyboardToken) return;
     this.keyboardGeneration++;
@@ -51,6 +58,11 @@ export class SystemObservations {
     if (target && listener) { try { target.off('keyboardHeightChange', listener); } catch (_) {} }
   }
 
+  /**
+   * 主线程替换旧主题观察，先同步交付当前配置，再订阅系统变化。
+   * @param token 本次所有权标识。
+   * @param callback true 为深色模式，可在初始回调中同步 stop/dispose。
+   */
   observeDarkMode(token: string, callback: (darkMode: boolean) => void): void {
     this.stopDarkMode();
     if (this.disposed) return;
@@ -76,6 +88,7 @@ export class SystemObservations {
     } catch (_) {}
   }
 
+  /** 幂等停止主题观察。@param token 省略停止当前观察；旧 token 不影响后继观察。 */
   stopDarkMode(token?: string): void {
     if (token !== undefined && token !== this.environmentToken) return;
     this.environmentGeneration++;
@@ -86,6 +99,7 @@ export class SystemObservations {
     if (context && id !== null) { try { context.off('environment', id); } catch (_) {} }
   }
 
+  /** 主线程幂等撤销所有观察；后续观察请求忽略。 */
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;

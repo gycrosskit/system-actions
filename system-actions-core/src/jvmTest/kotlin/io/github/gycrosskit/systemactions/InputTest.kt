@@ -12,6 +12,19 @@ class InputTest {
         assertEquals(ActionResult.Unavailable, actions.openNativeAppStore())
     }
 
+    @Test fun authorityPortsIpv6AndEscapedPathsPreserveValidInputs() {
+        for (url in listOf("HTTPS://example.com:1/path%20name", "http://example.com:65535", "https://[::1]/?q=%E4%B8%AD")) {
+            assertEquals(url, normalizedWebUrl(" $url "))
+        }
+        for (url in listOf("https://example.com:0", "https://example.com:-1", "https://user:pass@example.com",
+            "https://example.com/%", "https://example.com/\u0000", "https://[broken]/")) {
+            assertNull(normalizedWebUrl(url), url)
+        }
+        assertEquals("1".repeat(31), normalizedPhone("1".repeat(31)))
+        assertNull(normalizedPhone("+"))
+        assertNull(normalizedPhone("١٢٣"), "dial protocol accepts ASCII digits only")
+    }
+
     @Test fun validatesInputsBeforeAnySystemAction() {
         assertEquals("+8613812345678", normalizedPhone(" +86 138-1234-5678 "))
         listOf("", "tel:123", "*123#", "123;456", "12\n34", "1".repeat(32)).forEach { assertNull(normalizedPhone(it)) }

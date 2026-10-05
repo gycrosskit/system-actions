@@ -43,6 +43,14 @@ vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.Mo
   old.resolve('requested'); await flush(); assert.equal(replies.length, beforeCancel, 'old request must not deliver to reused id/callback');
   current.resolve('requested'); await flush(); assert.equal(replies.length, beforeCancel + 1);
 
+  const beforeDuplicate = calls.length, duplicateReplies = [];
+  invoke('dial', 'duplicate', '123');
+  const duplicateOriginal = completions.shift();
+  invoke('dial', 'duplicate', '456', value => duplicateReplies.push(value.status));
+  assert.deepEqual(duplicateReplies, ['invalid_input']);
+  assert.equal(calls.length, beforeDuplicate + 1, 'duplicate ID cannot start another system action');
+  duplicateOriginal.resolve('requested'); await flush();
+  assert.equal(duplicateReplies.length, 1, 'original receipt belongs to original callback');
   const beforeInvalid = calls.length;
   for (const params of ['null', '[]', '{', '{}', '{"requestId":3}']) {
     module.call('dial', params, result => assert.equal(result.status, 'invalid_input'));

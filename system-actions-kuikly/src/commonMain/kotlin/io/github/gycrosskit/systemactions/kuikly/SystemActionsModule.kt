@@ -31,7 +31,10 @@ class SystemActionsModule : Module(), SystemActions {
     override suspend fun openAppStore(listingUrl: String): ActionResult = perform("openAppStore", listingUrl)
     override suspend fun openNativeAppStore(applicationId: String?): ActionResult = perform("openNativeAppStore", applicationId)
 
-    /** 高度已经由当前 Window 的 px2vp 转成 vp；宿主只负责 inset 消费。 */
+    /**
+     * 替换本实例旧键盘观察，返回只停止本次观察的幂等取消函数。
+     * @param onChange 页面 Context 回调，高度已由当前 Window px2vp 转为 vp，初值 0。
+     */
     fun observeKeyboardHeight(onChange: (Float) -> Unit): () -> Unit {
         stopKeyboardHeight()
         if (disposed) return {}
@@ -46,6 +49,10 @@ class SystemActionsModule : Module(), SystemActions {
         return { if (keyboard === observer) stopKeyboardHeight() }
     }
 
+    /**
+     * 替换本实例旧主题观察，返回只停止本次观察的幂等取消函数。
+     * @param onChange 页面 Context 回调，true 为系统深色模式，原生提供初始值与后续变化。
+     */
     fun observeDarkMode(onChange: (Boolean) -> Unit): () -> Unit {
         stopDarkMode()
         if (disposed) return {}
@@ -58,12 +65,14 @@ class SystemActionsModule : Module(), SystemActions {
         return { if (darkMode === observer) stopDarkMode() }
     }
 
+    /** 幂等停止当前键盘观察并释放原生回调。 */
     fun stopKeyboardHeight() {
         val observer = keyboard ?: return
         keyboard = null
         stopObservation("stopKeyboardHeight", observer)
     }
 
+    /** 幂等停止当前系统主题观察并释放原生回调。 */
     fun stopDarkMode() {
         val observer = darkMode ?: return
         darkMode = null
@@ -122,6 +131,7 @@ class SystemActionsModule : Module(), SystemActions {
         toNative(false, "cancel", JSONObject().apply { put("requestId", id) }.toString(), null, false)
     }
 
+    /** 页面销毁时幂等释放观察和挂起请求；取消不能撤回已受理的系统动作。 */
     fun dispose() {
         if (disposed) return
         stopKeyboardHeight()
@@ -136,5 +146,5 @@ class SystemActionsModule : Module(), SystemActions {
         pending.clear()
     }
 
-    companion object { const val NAME = "GycSystemActionsModule" }
+    companion object { /** 与原生注册名一致的桥名称。 */ const val NAME = "GycSystemActionsModule" }
 }
