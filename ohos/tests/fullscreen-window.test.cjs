@@ -10,10 +10,11 @@ const flush = () => new Promise(resolve => setImmediate(resolve));
 function target() {
  return { calls: [], orientation: 1, full: false, layout: false, privacy: false,
   getPreferredOrientation() { return this.orientation; },
-  getWindowProperties() { return { isFullScreen: this.full, isLayoutFullScreen: this.layout, isPrivacyMode: this.privacy }; },
+  getWindowProperties() { return { isFullScreen: this.full, isLayoutFullScreen: this.layout, isPrivacyMode: this.privacy, isKeepScreenOn: this.keep || false }; },
   async setPreferredOrientation(value) { this.calls.push(['orientation', value]); this.orientation = value; },
   async setWindowSystemBarEnable(value) { this.calls.push(['bars', Array.from(value)]); },
   async setWindowLayoutFullScreen(value) { this.calls.push(['layout', value]); this.layout = value; },
+  async setWindowKeepScreenOn(value) { this.keep = value; },
   async setWindowPrivacyMode(value) { this.calls.push(['privacy', value]); this.privacy = value; }
  };
 }

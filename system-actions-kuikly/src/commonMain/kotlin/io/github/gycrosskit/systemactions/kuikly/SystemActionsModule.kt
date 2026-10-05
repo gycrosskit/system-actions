@@ -31,6 +31,16 @@ class SystemActionsModule : Module(), SystemActions {
     override suspend fun openAppStore(listingUrl: String): ActionResult = perform("openAppStore", listingUrl)
     override suspend fun openNativeAppStore(applicationId: String?): ActionResult = perform("openNativeAppStore", applicationId)
 
+    /** 写入原样文本；Requested 仅表示系统写入受理。 */
+    suspend fun copyText(value: String): ActionResult = perform("copyText", value)
+
+    /** 分享宿主普通沙箱文件；Requested 仅表示面板受理，文件生命周期仍归宿主。 */
+    suspend fun shareFile(path: String, title: String): ActionResult =
+        perform("shareFile", path, JSONObject().apply { put("title", title) })
+
+    /** 页面常亮 owner；false 或 dispose 释放自身 lease，不覆盖初始窗口或其他 owner。 */
+    suspend fun setKeepScreenOn(enabled: Boolean): ActionResult = perform("setKeepScreenOn", enabled.toString())
+
     /**
      * 替换本实例旧键盘观察，返回只停止本次观察的幂等取消函数。
      * @param onChange 页面 Context 回调，高度已由当前 Window px2vp 转为 vp，初值 0。
@@ -87,7 +97,7 @@ class SystemActionsModule : Module(), SystemActions {
         observer.callback = null
     }
 
-    private suspend fun perform(method: String, value: String? = null): ActionResult {
+    private suspend fun perform(method: String, value: String? = null, args: JSONObject = JSONObject()): ActionResult {
         if (disposed) return ActionResult.Unavailable
         val id = (++nextId).toString()
         var request: Pending? = null
@@ -102,7 +112,7 @@ class SystemActionsModule : Module(), SystemActions {
                     val entry = Pending(result)
                     request = entry
                     pending[id] = entry
-                    entry.callback = toNative(false, method, JSONObject().apply {
+                    entry.callback = toNative(false, method, args.apply {
                         put("requestId", id)
                         if (value != null) put("value", value)
                     }.toString(), { response ->

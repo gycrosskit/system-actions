@@ -1,6 +1,14 @@
 # GY CrossKit System Actions
 
-为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.3` 候选修正全屏退出方向并保留原生系统边界。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名，原生商店选择遵循下文的平台策略。
+[本轮完整源码审查](docs/完整源码审查.md) 列出全部生产文件、公开调用链、实际验证与未测项。
+
+为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.4` 候选补齐 OHOS 剪贴板、文件分享与常亮，并保留原生系统边界。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名，原生商店选择遵循下文的平台策略。
+
+## 0.2.0-rc.4 候选（未发布）
+
+本轮 Maven core/Kuikly 与 HAR 同为 `0.2.0-rc.4`，尚未发布；下文安装坐标用于发布后的精确消费。 Swift Package/Git Pod 保持已验 `0.2.0-rc.2`。
+
+OHOS `SystemActions.copyText(value)` 与 `shareFile(path, title)` 提供剪贴板和普通私有文件分享。`WindowPolicyController.createLease(resolver, keepScreenOn = false)` 增加常亮意图；旧调用维持默认行为。Kuikly Module 同步提供 `copyText`、`shareFile` 和 `setKeepScreenOn`。这部分源码不属于下文已发布 rc.3；渠道需以新版本重新验证。
 
 ## 架构与调用流程
 
@@ -92,7 +100,7 @@ KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.
 
 ## Window 与原生系统边界（0.2.0-rc.3 候选）
 
-本轮候选为 `0.2.0-rc.3`，修正 layout-only 全屏退出时不应回写方向的问题。Maven/HAR 已发布为 prerelease，JitPack 最终 ok 且全变体字节核验通过；真实远程 Android/iOS/OHOS 编译、Simulator 最终链接与 Release HAR 消费已通过，OHPM next 已接受但精确版本仍 NOTFOUND/审核中；无变化的 Swift Package/Git Pod 继续使用已验证 rc.2。既有 rc.2 已新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、
+上一版 `0.2.0-rc.3` 修正 layout-only 全屏退出时不应回写方向的问题。Maven/HAR 已发布为 prerelease，JitPack 最终 ok 且全变体字节核验通过；真实远程 Android/iOS/OHOS 编译、Simulator 最终链接与 Release HAR 消费已通过，OHPM next 已接受但精确版本仍 NOTFOUND/审核中；无变化的 Swift Package/Git Pod 继续使用已验证 rc.2。既有 rc.2 已新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、
 OHOS 键盘/环境观察及全屏 Window lease。历史 rc.2 的 Maven、Git Pod 与 Swift Package 独立消费者编译/链接已通过；发布与各渠道结果见
 [rc.3 远程验收](verification/rc3远程发布验收.md)，尚未完成的渠道不视为可安装。
 `0.2.0-rc.1` 为此前已发布的 Window 基线，2026-10-04 OHPM 精确查询仍返回 `NOTFOUND`。
@@ -159,7 +167,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.3")
+            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.4")
         }
     }
 }
@@ -168,11 +176,11 @@ kotlin {
 HarmonyOS 原生宿主：
 
 ```sh
-# 审核上架后使用；当前精确版本安装仍 NOTFOUND
-ohpm install @gycrosskit/system-actions-native@0.2.0-rc.3
+# rc.4 发布且审核可见后使用；候选尚未发布
+ohpm install @gycrosskit/system-actions-native@0.2.0-rc.4
 ```
 
-Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。本轮 Maven/HAR 精确使用 `0.2.0-rc.3`；OHPM 审核期间按固定 Release HAR SHA 安装，步骤见接入指南。历史 Registry `0.1.1` 不含 Window 策略，不能替代本轮 HAR。
+Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。本轮 Maven/HAR 候选精确使用 `0.2.0-rc.4`，尚未发布；上一版 rc.3 的固定 Release HAR SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代本轮 HAR。
 
 原生商店增强的历史稳定版本为 [Maven `0.1.3`](https://github.com/gycrosskit/system-actions/releases/tag/0.1.3)，JitPack 构建成功。[HAR `0.1.2` 归档](https://github.com/gycrosskit/system-actions/releases/tag/har-0.1.2)独立发布，当前 OHPM 公开元数据已列出 `0.1.2` 且 `latest=0.1.2`。它不含本轮 Window 与系统边界 API；旧审核期间的 NOTFOUND 留在历史验收记录。API 与回执边界见接入指南。
 

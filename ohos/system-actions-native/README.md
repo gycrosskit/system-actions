@@ -1,9 +1,9 @@
 # GY CrossKit System Actions Native
 
-当前 HAR 候选为 **0.2.0-rc.3**，修正 layout-only 全屏退出方向，保留跨 owner 累计恢复与原有 privacy lease。发布和远程消费尚待完成；OHPM 接受提交、审核与 Registry 安装分别核验。审核通过并可查询后安装：
+当前 HAR 候选为 **0.2.0-rc.4**，补齐剪贴板、普通私有文件分享和复用 WindowPolicy lease 的常亮。发布和远程消费尚待完成；OHPM 接受提交、审核与 Registry 安装分别核验。审核通过并可查询后安装：
 
 ```sh
-ohpm install @gycrosskit/system-actions-native@0.2.0-rc.3
+ohpm install @gycrosskit/system-actions-native@0.2.0-rc.4
 ```
 
 以下为已有渠道历史记录，不替代新候选验收。
@@ -45,11 +45,16 @@ await lease.update(true);
 await lease.release();
 ```
 
-宿主 `module.json5` 声明 `ohos.permission.PRIVACY_WINDOW`。同一 Ability 共用 controller；必须等保护设置成功才展示视频。多 owner 任意禁录即保持 privacy，最后一个释放才恢复进入前状态；获取窗口期间释放会抑制迟到结果，异步释放失败应由宿主处理，可重试 release。此接口不提供常亮、全屏、方向或系统栏能力。业务授权、播放器错误 UI、导航和生命周期均由宿主决定。
+宿主 `module.json5` 声明 `ohos.permission.PRIVACY_WINDOW`。同一 Ability 共用 controller；必须等保护设置成功才展示视频。多 owner 任意禁录即保持 privacy，最后一个释放才恢复进入前状态；获取窗口期间释放会抑制迟到结果，异步释放失败应由宿主处理，可重试 release。上述 rc.1 历史接口不提供常亮、全屏、方向或系统栏能力。业务授权、播放器错误 UI、导航和生命周期均由宿主决定。
 
 
 `0.2.0-rc.2` 的固定 GitHub Release HAR 已发布并通过真实独立消费；OHPM `next` 提交已接受，审核状态与 Registry 安装另计。
 该版 `GycSystemActionsModule` 提供键盘高度(vp)/环境观察和 stop/dispose；
 `WindowPolicyController.shared.createFullscreenLease` 与 privacy lease 共用串行队列。
 方向、系统栏目标及生命周期由宿主输入，完整 API/示例见仓库 `docs/接入指南.md`。
-0.2.0-rc.3 候选另修正 layout-only 全屏退出时的方向恢复门禁；此修复尚未发布，不能由 rc.2 的远程消费结果代替。
+0.2.0-rc.3 已发布并完成固定 Release HAR 的独立消费，修正 layout-only 全屏退出时的方向恢复门禁；历史结果见仓库 verification/rc3远程发布验收.md。
+
+## 0.2.0-rc.4 候选（未发布）
+
+新增 `SystemActions.copyText(value)` / `shareFile(path, title)`，只分享当前 UIAbility filesDir/cacheDir/tempDir 下普通文件，拒绝 URI、路径穿越和符号链接。UTD 由扩展名推导，不接受自报 MIME；`requested` 只表示系统受理。
+`createLease(resolver, keepScreenOn = false)` 复用窗口队列/owner恢复初值；传 true 请求常亮，未改变 privacy 时不要求 privacy 权限。Kuikly Module 提供 `copyText` / `shareFile` / `setKeepScreenOn` 并在取消/销毁时释放自身 lease；文件分享在异步检查后复核请求许可，取消或销毁阻止尚未展示的面板；详细边界见接入指南。

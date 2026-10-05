@@ -1,4 +1,10 @@
-# 0.2.0-rc.3
+# 更新日志
+
+## 0.2.0-rc.4
+
+新增组件级 clipboard、受控私有普通文件 ShareKit 分享和 Kuikly 入口；异步分享复核 owner 许可。屏幕常亮复用共享 WindowPolicy lease，保留基线、失败恢复重试，不无谓调用 privacy API。
+
+## 0.2.0-rc.3
 
 - 修正 layout-only 全屏退出的方向恢复，保留跨 owner touched、显式退出策略与失败重试。
 
