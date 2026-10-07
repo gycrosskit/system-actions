@@ -12,6 +12,16 @@ enum class ActionResult {
 
 /** 宿主系统动作；平台自动切到主线程，Kuikly 实现在页面 Context 调用。取消不撤回已受理的系统动作。 */
 interface SystemActions {
+    /** 原样写剪贴板；Requested 只表示写入受理，允许空文本，不读取剪贴板。 */
+    suspend fun copyText(value: String): ActionResult = ActionResult.Unavailable
+    /**
+     * 分享宿主拥有的普通文件，Requested 只表示面板受理，不表示用户完成分享。
+     * @param path 绝对本地路径，不接受 URI、空路径或点段；文件所有权仍归宿主。
+     * @param title 分享标题，由宿主本地化。
+     * Android 须配置宿主 FileProvider；iOS 须提供有当前 presenter 的 IosFileActions 并管理其 close。
+     */
+    suspend fun shareFile(path: String, title: String): ActionResult = ActionResult.Unavailable
+
     /**
      * 打开系统拨号入口；不表示电话已接通。
      * @param phone 允许可选前导 +、数字及空格/括号/连字符，trim 后数字与分隔部分总长最多 31。
@@ -34,3 +44,7 @@ interface SystemActions {
      */
     suspend fun openNativeAppStore(applicationId: String? = null): ActionResult = ActionResult.Unavailable
 }
+
+/** 公共边界只验证路径形状；文件存在、Provider/沙箱权限仍由原生验证。 */
+internal fun isValidSharePath(path: String): Boolean =
+    path.startsWith('/') && '\u0000' !in path && path.drop(1).split('/').all { it.isNotEmpty() && it != "." && it != ".." }

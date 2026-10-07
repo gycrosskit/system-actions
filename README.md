@@ -4,9 +4,11 @@
 
 为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.4` 预发行补齐 OHOS 剪贴板、文件分享与常亮，并保留原生系统边界。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名，原生商店选择遵循下文的平台策略。
 
+本地候选 Maven core/Kuikly **0.2.0-rc.5** 将 `copyText` / `shareFile` 接入既有共同 `SystemActions` 契约，Android/iOS 复用原文件服务，保留 WindowPolicy lease。OHOS 原生 ETS 与 Swift 源码未变，继续配套 HAR **0.2.0-rc.4** 与 Swift Package/Git Pod **0.2.0-rc.2**；候选未发布，见 [rc.5 候选验收](docs/0.2.0-rc.5候选验收.md)。
+
 ## 0.2.0-rc.4 发布状态
 
-Maven core/Kuikly `0.2.0-rc.4` 已提供 GitHub 预发行，JitPack 的精确标签/提交、完整 publication 和实际文件校验通过。Release HAR 已重下载校验；OHPM 以独立 `candidate-0.2.0-rc.4` 标签提交审核，精确 Registry 安装仍返回 NOTFOUND，旧 next 保持。全新远程 Maven 的 Android/iOS/OHOS 消费与 Simulator Framework 链接已通过。详情见[0.2.0-rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。 Swift Package/Git Pod 保持已验 `0.2.0-rc.2`。
+Maven core/Kuikly `0.2.0-rc.4` 已提供 GitHub 预发行，JitPack 的精确标签/提交、完整 publication 和实际文件校验通过。Release HAR 已重下载校验；OHPM 曾以独立 `candidate-0.2.0-rc.4` 标签提交审核；2026-10-07 重新精确查询与专属空目录/空缓存 Registry 安装已通过，旧 next 保持，见 [rc.5 候选验证](docs/0.2.0-rc.5候选验收.md)。全新远程 Maven 的 Android/iOS/OHOS 消费与 Simulator Framework 链接已通过。详情见[0.2.0-rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。 Swift Package/Git Pod 保持已验 `0.2.0-rc.2`。
 
 OHOS `SystemActions.copyText(value)` 与 `shareFile(path, title)` 提供剪贴板和普通私有文件分享。`WindowPolicyController.createLease(resolver, keepScreenOn = false)` 增加常亮意图；旧调用维持默认行为。Kuikly Module 同步提供 `copyText`、`shareFile` 和 `setKeepScreenOn`。这些能力随 rc.4 GitHub 预发行提供；OHPM 候选仍在审核，旧 rc.3 不含该能力。
 
@@ -167,7 +169,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.4")
+            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.5")
         }
     }
 }
@@ -180,7 +182,7 @@ HarmonyOS 原生宿主：
 ohpm install @gycrosskit/system-actions-native@0.2.0-rc.4
 ```
 
-Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。本轮 Maven/HAR 精确使用已提供 GitHub 预发行的 `0.2.0-rc.4`，OHPM 候选仍审核中；本轮固定 Release HAR 的校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)，上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代本轮 HAR。
+Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。候选 Maven rc.5 配套未变 HAR rc.4；HAR rc.4 本轮精确 Registry 查询与专属空缓存安装通过；本轮固定 Release HAR 的校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)，上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代本轮 HAR。
 
 原生商店增强的历史稳定版本为 [Maven `0.1.3`](https://github.com/gycrosskit/system-actions/releases/tag/0.1.3)，JitPack 构建成功。[HAR `0.1.2` 归档](https://github.com/gycrosskit/system-actions/releases/tag/har-0.1.2)独立发布，当前 OHPM 公开元数据已列出 `0.1.2` 且 `latest=0.1.2`。它不含本轮 Window 与系统边界 API；旧审核期间的 NOTFOUND 留在历史验收记录。API 与回执边界见接入指南。
 
@@ -231,3 +233,9 @@ Android 拨号使用 `ACTION_DIAL`，不申请直接呼叫权限。定位服务�
 OHOS KLIB 编译不代表 HAR 构建、ohpm 上架或真机验收。当前没有已确认可用的 DevEco/Hvigor runner，这些检查尚未自动化，不能作为 CI 通过范围。
 
 PR 的发布回归固定验证已发布 `0.2.0-rc.4` 基线，五个 job 都通过后才合并；Release 事件使用其精确标签。基线证明远程产物可消费，不代表 PR 新源码已发布。
+
+## CMP / Kuikly 共用系统服务
+
+`SystemActions.copyText` 和 `shareFile` 与拨号/外链一样，供 shared Kotlin 使用。Android 的两种 UI 入口都可持有 `AndroidSystemActions(context, fileProviderAuthority)`；authority 和目录映射来自宿主既有唯一 FileProvider。iOS 两种入口都可把既有 `IosFileActions(presenterResolver)` 传入 `IosSystemActions(fileActions)`，宿主退出时关闭原文件服务，不缓存旧 Scene，不另造 presenter。OHOS 使用现有 `SystemActionsModule` 与 HAR。默认缺少 Provider/presenter 时分享明确 `Unavailable`；`Requested` 是面板受理，用户分享完成结果仍由原平台文件 API 提供。
+
+WindowPolicy 保持独立多 owner lease：Android 复用 `AndroidWindowPolicy.acquire` 并 `close`，iOS 复用 Swift `WindowPolicyController.acquire` 并 `end`，OHOS 复用 HAR 的对应 owner 并 release。CMP、Kuikly 与播放器共享宿主既有 owner，不重复嵌套新 owner；最后一个 owner 结束时恢复原有常亮/保护状态。iOS 只支持录屏/镜像遮罩，不能承诺禁止静态截图。键盘与主题属于宿主 UI 策略，未添加全能 common 平台服务。

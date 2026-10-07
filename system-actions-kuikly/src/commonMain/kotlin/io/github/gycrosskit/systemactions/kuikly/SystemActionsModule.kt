@@ -32,10 +32,10 @@ class SystemActionsModule : Module(), SystemActions {
     override suspend fun openNativeAppStore(applicationId: String?): ActionResult = perform("openNativeAppStore", applicationId)
 
     /** 写入原样文本；Requested 仅表示系统写入受理。 */
-    suspend fun copyText(value: String): ActionResult = perform("copyText", value)
+    override suspend fun copyText(value: String): ActionResult = perform("copyText", value)
 
     /** 分享宿主普通沙箱文件；Requested 仅表示面板受理，文件生命周期仍归宿主。 */
-    suspend fun shareFile(path: String, title: String): ActionResult =
+    override suspend fun shareFile(path: String, title: String): ActionResult =
         perform("shareFile", path, JSONObject().apply { put("title", title) })
 
     /** 页面常亮 owner；false 或 dispose 释放自身 lease，不覆盖初始窗口或其他 owner。 */

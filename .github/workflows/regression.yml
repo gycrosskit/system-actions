@@ -87,7 +87,7 @@ jobs:
           cache: gradle
       - run: test -f "$ANDROID_HOME/platforms/android-36/android.jar"
       - run: bash scripts/ci-release.sh
-      - run: bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info -p verification-consumer compileDebugKotlinAndroid -PsystemActionsVersion="$VERSION" --refresh-dependencies --no-daemon --max-workers=1
+      - run: bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info -p verification-consumer compileDebugKotlinAndroid -PsystemActionsVersion="$VERSION" -PverifyFileActions=${{ github.event.release.tag_name == '0.2.0-rc.5' || inputs.version == '0.2.0-rc.5' }} --refresh-dependencies --no-daemon --max-workers=1
   release-native:
     if: github.event_name == 'pull_request' || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.version != '')
     runs-on: macos-15
@@ -110,4 +110,4 @@ jobs:
             x86_64) native_target=IosX64; native_test=iosX64Test ;;
             *) echo "Unsupported macOS architecture" >&2; exit 1 ;;
           esac
-          bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info -p verification-consumer linkDebugFramework${native_target} compileKotlinOhosArm64 -PsystemActionsVersion="$VERSION" --refresh-dependencies --no-daemon --max-workers=1
+          bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info -p verification-consumer linkDebugFramework${native_target} compileKotlinOhosArm64 -PsystemActionsVersion="$VERSION" -PverifyFileActions=${{ github.event.release.tag_name == '0.2.0-rc.5' || inputs.version == '0.2.0-rc.5' }} --refresh-dependencies --no-daemon --max-workers=1
