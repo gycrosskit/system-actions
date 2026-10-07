@@ -20,8 +20,36 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28])
+@Config(sdk = [28], shadows = [FileProviderBoundary::class])
 class AndroidSystemActionsTest {
+    @Test fun sharedServiceUsesClipboardAndProviderWithoutNewWindowOwner() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val app = RuntimeEnvironment.getApplication()
+            var launched: Intent? = null
+            val context = object : ContextWrapper(app) {
+                override fun startActivity(intent: Intent) { launched = intent }
+            }
+            val actions: SystemActions = AndroidSystemActions(context, "host.fileprovider")
+            assertEquals(ActionResult.Requested, actions.copyText("共同服务"))
+            val clipboard = app.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            assertEquals("共同服务", clipboard.primaryClip?.getItemAt(0)?.text?.toString())
+            assertEquals(ActionResult.InvalidInput, actions.shareFile("file:///tmp/a.zip", "分享"))
+            assertEquals(ActionResult.InvalidInput, actions.shareFile("/tmp/../a.zip", "分享"))
+            assertEquals(null, launched)
+            val file = java.io.File.createTempFile("service-", ".zip", app.cacheDir)
+            try {
+                assertEquals(ActionResult.Unavailable, AndroidSystemActions(context).shareFile(file.path, "分享"))
+                assertEquals(ActionResult.Requested, actions.shareFile(file.path, "分享"))
+                @Suppress("DEPRECATION")
+                val send = launched!!.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)!!
+                assertEquals(Intent.ACTION_SEND, send.action)
+                assertEquals("application/zip", send.type)
+                assertEquals(Intent.FLAG_GRANT_READ_URI_PERMISSION, send.flags)
+            } finally { file.delete() }
+        } finally { Dispatchers.resetMain() }
+    }
+
     @Test fun phoneAndWebUrlValidationPrecedesSystemLaunchAndPreservesNormalizedIntent() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {

@@ -18,9 +18,26 @@ internal actual fun hasValidWebAuthority(value: String): Boolean {
         (port == null || port.stringValue.toIntOrNull()?.let { it in 1..65535 } == true) && parts.URL != null
 }
 
-/** iOS UIApplication 动作实现，自动切主线程；按系统 openURL completion 返回受理状态。 */
+/**
+ * iOS 系统服务，自动切主线程；按系统 openURL completion 返回受理状态。
+ * @param fileActions 宿主持有的文件服务；分享须解析当前 presenter，宿主生命周期结束时调用其 close。
+ * 默认文件服务仅可复制文本，分享返回 Unavailable；不猜测业务根控制器或复制窗口 owner。
+ */
 @OptIn(ExperimentalForeignApi::class)
-class IosSystemActions : SystemActions {
+class IosSystemActions(private val fileActions: IosFileActions) : SystemActions {
+    constructor() : this(IosFileActions { null })
+
+    override suspend fun copyText(value: String): ActionResult = withContext(Dispatchers.Main.immediate) {
+        fileActions.copyText(value)
+    }
+
+    override suspend fun shareFile(path: String, title: String): ActionResult {
+        if (!isValidSharePath(path)) return ActionResult.InvalidInput
+        return withContext(Dispatchers.Main.immediate) {
+            fileActions.shareFile(path, title) {}
+        }
+    }
+
     override suspend fun dial(phone: String): ActionResult {
         val normalized = normalizedPhone(phone) ?: return ActionResult.InvalidInput
         return open("tel:$normalized")

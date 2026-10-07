@@ -9,9 +9,37 @@ import android.provider.Settings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import java.io.File
+import android.webkit.MimeTypeMap
 
-/** Android Intent 动作实现，自动切主线程。@param context 宿主 Context；非 Activity 时追加 NEW_TASK。 */
-class AndroidSystemActions(private val context: Context) : SystemActions {
+/**
+ * Android 系统服务，自动切主线程；CMP/Kuikly 共同使用，不持有窗口 owner。
+ * @param context 宿主 Context；非 Activity 时分享/外链追加 NEW_TASK。
+ * @param fileProviderAuthority 宿主唯一 FileProvider 的 authority；未配置时文件分享返回 Unavailable。
+ */
+class AndroidSystemActions(
+    private val context: Context,
+    private val fileProviderAuthority: String?,
+) : SystemActions {
+    constructor(context: Context) : this(context, null)
+
+    private val files = AndroidFileActions(context)
+
+    override suspend fun copyText(value: String): ActionResult = withContext(Dispatchers.Main.immediate) {
+        files.copyText(value)
+    }
+
+    override suspend fun shareFile(path: String, title: String): ActionResult {
+        if (!isValidSharePath(path)) return ActionResult.InvalidInput
+        return withContext(Dispatchers.Main.immediate) {
+            val authority = fileProviderAuthority?.takeUnless(String::isBlank) ?: return@withContext ActionResult.Unavailable
+            val file = File(path)
+            val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension.lowercase(Locale.ROOT))
+                ?: "application/octet-stream"
+            files.shareFile(file, authority, mime, title)
+        }
+    }
+
     override suspend fun dial(phone: String): ActionResult {
         val normalized = normalizedPhone(phone) ?: return ActionResult.InvalidInput
         return launch(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", normalized, null)))
