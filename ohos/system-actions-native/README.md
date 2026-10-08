@@ -4,11 +4,13 @@
 
 HAR **0.2.0-rc.4** 已提供剪贴板、普通私有文件分享和复用 WindowPolicy lease 的常亮；既有发布/Registry验收见根README及rc.5验收记录。此版 Maven/Swift 补充 Android/iOS 原生观察和全屏，不能由本 HAR 安装推导 Android/iOS 已接线。下列历史版本渠道记录保留其记录时点：
 
+OHPM `0.2.0-rc.5` 已提交审核，2026-10-08 精确 Registry 查询仍为 NOTFOUND；目前使用固定 Release HAR。下列 Registry 命令仅在精确版本上架后使用：
+
 ```sh
 ohpm install @gycrosskit/system-actions-native@0.2.0-rc.5
 ```
 
-当前源码候选新增 `GycSystemActionsModule(actions, windowPolicy)`：同一 Ability 的各页与原生 lease 注入同一个 `WindowPolicyController`，不同 Ability 各自持有；省略参数仅兼容单 Ability。该参数尚未进入上述已发布 HAR，接线示例见[接入指南](../../docs/接入指南.md#harmonyos-har)。
+HAR `0.2.0-rc.5` 已包含 `GycSystemActionsModule(actions, windowPolicy)`：同一 Ability 的各页与原生 lease 注入同一个 `WindowPolicyController`，不同 Ability 各自持有；省略参数仅兼容单 Ability。接线示例见[接入指南](../../docs/接入指南.md#harmonyos-har)。
 
 以下为已有渠道历史记录，不替代此版验收。
 
