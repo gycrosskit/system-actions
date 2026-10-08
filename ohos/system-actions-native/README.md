@@ -1,12 +1,14 @@
 # GY CrossKit System Actions Native
 
-当前 HAR 候选为 **0.2.0-rc.4**，补齐剪贴板、普通私有文件分享和复用 WindowPolicy lease 的常亮。发布和远程消费尚待完成；OHPM 接受提交、审核与 Registry 安装分别核验。审核通过并可查询后安装：
+适用版本：此版 Maven `0.2.0-rc.6` 复用已发布 HAR `0.2.0-rc.4` 的原字节。完整功能与五入口限制见[功能与平台差异](https://github.com/gycrosskit/system-actions/blob/0.2.0-rc.6/docs/功能与平台差异.md)；本版发布记录见[Release](https://github.com/gycrosskit/system-actions/releases/tag/0.2.0-rc.6)。此源码 README 的文档更新不重新发布或修改既有 HAR。
+
+HAR **0.2.0-rc.4** 已提供剪贴板、普通私有文件分享和复用 WindowPolicy lease 的常亮；既有发布/Registry验收见根README及rc.5验收记录。此版 Maven/Swift 补充 Android/iOS 原生观察和全屏，不能由本 HAR 安装推导 Android/iOS 已接线。下列历史版本渠道记录保留其记录时点：
 
 ```sh
 ohpm install @gycrosskit/system-actions-native@0.2.0-rc.4
 ```
 
-以下为已有渠道历史记录，不替代新候选验收。
+以下为已有渠道历史记录，不替代此版验收。
 
 
 HarmonyOS API 22 的拨号、HTTP(S) 外链、应用设置和商店能力，含可注入共享 `SystemActions` 的 Kuikly Renderer Module。
@@ -54,7 +56,7 @@ await lease.release();
 方向、系统栏目标及生命周期由宿主输入，完整 API/示例见仓库 `docs/接入指南.md`。
 0.2.0-rc.3 已发布并完成固定 Release HAR 的独立消费，修正 layout-only 全屏退出时的方向恢复门禁；历史结果见仓库 verification/rc3远程发布验收.md。
 
-## 0.2.0-rc.4 候选（未发布）
+## 0.2.0-rc.4 功能（历史发布边界见根README）
 
 新增 `SystemActions.copyText(value)` / `shareFile(path, title)`，只分享当前 UIAbility filesDir/cacheDir/tempDir 下普通文件，拒绝 URI、路径穿越和符号链接。UTD 由扩展名推导，不接受自报 MIME；`requested` 只表示系统受理。
 `createLease(resolver, keepScreenOn = false)` 复用窗口队列/owner恢复初值；传 true 请求常亮，未改变 privacy 时不要求 privacy 权限。Kuikly Module 提供 `copyText` / `shareFile` / `setKeepScreenOn` 并在取消/销毁时释放自身 lease；文件分享在异步检查后复核请求许可，取消或销毁阻止尚未展示的面板；详细边界见接入指南。

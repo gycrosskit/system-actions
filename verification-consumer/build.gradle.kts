@@ -4,7 +4,7 @@ plugins {
 }
 val verifyFileActions = providers.gradleProperty("verifyFileActions").orElse("false").get().toBoolean()
 kotlin {
-    val systemActionsVersion = providers.gradleProperty("systemActionsVersion").orElse("0.2.0-rc.5").get()
+    val systemActionsVersion = providers.gradleProperty("systemActionsVersion").orElse("0.2.0-rc.6").get()
     androidTarget()
     iosArm64()
     iosX64 { binaries.framework { baseName = "SystemActionsConsumer" } }
