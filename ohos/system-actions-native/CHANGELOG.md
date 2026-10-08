@@ -1,5 +1,9 @@
 # 更新日志
 
+## 0.2.0-rc.5
+
+GycSystemActionsModule 接受 Ability 级 windowPolicy 注入，隔离多 Ability 生命周期 owner。Maven / Swift / Git Pod 仍使用 0.2.0-rc.6。
+
 ## 0.2.0-rc.4
 
 新增组件级 clipboard、受控私有普通文件 ShareKit 分享和 Kuikly 入口；异步分享复核 owner 许可。屏幕常亮复用共享 WindowPolicy lease，保留基线、失败恢复重试，不无谓调用 privacy API。

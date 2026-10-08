@@ -33,5 +33,29 @@ vm.runInNewContext(source('GycSystemActionsModule'), { exports: modules, require
   const late = new modules.GycSystemActionsModule({});
   late.call('setKeepScreenOn', JSON.stringify({ requestId: 'late', value: 'true' }), () => assert.fail('destroyed module delivered'));
   await flush(); late.onDestroy(); resolveWindow(target); await flush(); assert.equal(target.keep, false, 'destroy during getLastWindow cannot acquire');
+  // Module owner is injected once per Ability; pages in that Ability must share it.
+  const windowA = { ...target, keep: false }, windowB = { ...target, keep: false };
+  let readsA = 0, readsB = 0;
+  kits.window.getLastWindow = async context => {
+    if (context.name === 'A') { readsA++; return windowA; }
+    readsB++; return windowB;
+  };
+  const ownerA = new policy.WindowPolicyController(), ownerB = new policy.WindowPolicyController();
+  const pageA = new modules.GycSystemActionsModule({}, ownerA);
+  const pageA2 = new modules.GycSystemActionsModule({}, ownerA);
+  const pageB = new modules.GycSystemActionsModule({}, ownerB);
+  pageA.controller = pageA2.controller = { getUIAbilityContext: () => ({ name: 'A' }) };
+  pageB.controller = { getUIAbilityContext: () => ({ name: 'B' }) };
+  const set = (page, id, value) => new Promise(resolve =>
+    page.call('setKeepScreenOn', JSON.stringify({ requestId: id, value }), resolve));
+  assert.equal((await set(pageA, 'A-on', 'true')).status, 'requested');
+  await set(pageA2, 'A2-on', 'true');
+  assert.equal((await set(pageB, 'B-on', 'true')).status, 'requested');
+  assert.equal(windowA.keep, true); assert.equal(windowB.keep, true);
+  assert.equal(readsA, 1); assert.equal(readsB, 1);
+  await set(pageA, 'A-off', 'false'); assert.equal(windowA.keep, true);
+  pageB.onDestroy(); await flush(); assert.equal(windowB.keep, false); assert.equal(windowA.keep, true);
+  pageA2.onDestroy(); await flush(); assert.equal(windowA.keep, false);
+  pageA.onDestroy();
   console.log('OHOS keep screen bridge checks passed: await, malformed input, release, old cancellation, new owner, restore retry and destroy before late Window.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

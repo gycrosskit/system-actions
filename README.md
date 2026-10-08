@@ -4,7 +4,7 @@
 
 core 提供系统动作；独立native服务提供窗口/观察能力。无CMP UI，system-actions-kuikly仅OHOS桥；A/i新观察与全屏需要宿主显式接线。
 
-适用版本：Maven / Swift Package / Git Pod 0.2.0-rc.6；HAR 0.2.0-rc.4沿用原字节。本次修复与平台边界见[功能与平台差异](docs/功能与平台差异.md)，构建与渠道验收见[版本发布记录](https://github.com/gycrosskit/system-actions/releases/tag/0.2.0-rc.6)；下方旧版本记录保留其历史范围。
+适用版本：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5` 发布候选，独立标签 `native-0.2.0-rc.7`。当前能力见功能与平台差异，发布及远程消费以固定 Release 验收为准。
 
 当前测试覆盖、执行时点和未验收项集中见[验证范围](docs/功能与平台差异.md#验证范围)，复现命令见[开发与验证](docs/开发与验证.md)。
 
@@ -119,7 +119,7 @@ OHOS 键盘/环境观察及全屏 Window lease。历史 rc.2 的 Maven、Git Pod
 
 Android Core 提供常亮和 `FLAG_SECURE` lease、`AndroidFileActions`；iOS 原生 `GYCWindowPolicy`
 Swift Package / Git Pod 提供常亮、录屏/镜像黑遮罩与 UIKit 工具，同版 KMP Core 提供文件分享与剪贴板。
-OHOS HAR 的 fullscreen/privacy 共用 `WindowPolicyController.shared` 与队列，窗口 layout/fullscreen
+OHOS HAR 的 fullscreen/privacy 在同一 Ability 共用一个 `WindowPolicyController` 与队列，窗口 layout/fullscreen
 分别保存；跨 View 接管累计恢复已修改的窗口状态。宿主输入方向、系统栏目标和业务录屏准入。
 iOS 使用公开 UIKit，无法阻止静态截图。Android API 24+、iOS 14+、HarmonyOS API 22。
 
@@ -140,11 +140,15 @@ lease.end()
 
 ```typescript
 import { WindowPolicyController, window } from '@gycrosskit/system-actions-native';
-const lease = WindowPolicyController.shared.createLease(() => window.getLastWindow(context));
+// Ability 创建时持有；同一 Ability 各页共用，不同 Ability 分开。
+const windowPolicy = new WindowPolicyController();
+const lease = windowPolicy.createLease(() => window.getLastWindow(context));
 await lease.update(false); // 必须成功后才展示视频
 await lease.update(true);
 await lease.release();
 ```
+
+当前源码候选允许 `GycSystemActionsModule(actions, windowPolicy)` 注入上述 Ability 级 controller；省略参数仅兼容原单 Ability 接入。该新增参数尚未发布到现有 HAR，多 Ability 接入需采用包含修复的新制品，详见接入指南。
 
 多 owner 与异步释放、Swift/CocoaPods 接线和限制见[接入指南](docs/接入指南.md#window-策略)。本地验证方法见[开发与验证](docs/开发与验证.md#window-策略验证)。
 
@@ -154,7 +158,7 @@ await lease.release();
 这些 API 从 0.2.0-rc.2 开始提供；当前使用 Maven rc.5/HAR rc.4/Swift rc.2 配套基线，不能以旧 Registry 包代替；接线示例见[系统边界迁移](docs/接入指南.md#系统边界迁移020-rc2)。
 Android 增加 AndroidX Core 1.16.0 以复用 FileProvider，但 provider 和私有目录仍由宿主唯一声明。
 iOS KMP 分享分别返回面板受理和实际 completion 终态；Swift 工具仍属于现有 `GYCWindowPolicy` product。
-OHOS fullscreen 与 privacy 共用 `WindowPolicyController.shared` 和串行队列，宿主输入方向/系统栏目标，
+OHOS fullscreen 与 privacy 在同一 Ability 共用 controller 和串行队列，宿主输入方向/系统栏目标，
 页面、主题、退出任务和 WebView 的 `FullScreenExitHandler` 保留在宿主或 WebView 事件层。
 
 ## 安装
@@ -189,7 +193,7 @@ HarmonyOS 原生宿主：
 
 ```sh
 # 当前配套 HAR；按精确版本安装
-ohpm install @gycrosskit/system-actions-native@0.2.0-rc.4
+ohpm install @gycrosskit/system-actions-native@0.2.0-rc.5
 ```
 
 Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。此版 Maven rc.6 配套 HAR rc.4，Swift Package/Git Pod 使用 rc.6；HAR rc.4 的精确 Registry 查询与专属空缓存安装记录见 [rc.5 验收](docs/0.2.0-rc.5候选验收.md)，固定 Release HAR 校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代当前 HAR；此版 Maven/Swift 包含 Android/iOS 观察/全屏 API，仍需宿主显式接线。
@@ -238,11 +242,13 @@ Android 拨号使用 `ACTION_DIAL`，不申请直接呼叫权限。定位服务�
 
 ## 自动回归
 
-[Component regression](.github/workflows/regression.yml) 在 PR 和 `main` 更新时运行现有 Python/Node 契约测试、Android 单元测试及编译，以及 macOS 上的 iOS/OHOS KLIB 编译；已有 iOS、JVM、Kuikly 独立测试也按该 workflow 执行。Release 发布或手动指定不可变版本后，校验 Release Maven 归档的 SHA-256、POM、metadata 与文件引用，并从 JitPack 独立编译 Android 消费者、链接 iOS 消费者、编译 OHOS Kuikly 消费者。此流程不发布二进制。
+[Component regression](.github/workflows/regression.yml) 的当前工作树候选按事件分阶段：PR 先判断变更范围，仅源码变更运行已有 Android/Native 测试与编译；纯文档 PR 和 `main` push 只运行轻量脚本/配置检查。手动运行不填版本时执行源码回归，未知路径保守按源码处理。候选尚未合入，线上生效与耗时以实际 Actions 运行为准。
+
+Maven Release 发布或手动填写精确已发布版本时，`verify-public` 统一校验一次冻结归档、精确 tag/commit、完整 publication 清单和公开文件；通过后 Android/Native 独立消费者从 JitPack 解析该版本。PR 不再反复消费旧基线；不使用 `mavenLocal`、本库源码或归档替换远程依赖。此流程不发布二进制。
 
 OHOS KLIB 编译不代表 HAR 构建、ohpm 上架或真机验收。当前没有已确认可用的 DevEco/Hvigor runner，这些检查尚未自动化，不能作为 CI 通过范围。
 
-PR 的发布回归固定验证已发布 `0.2.0-rc.4` 基线，五个 job 都通过后才合并；Release 事件使用其精确标签。基线证明远程产物可消费，不代表 PR 新源码已发布。
+阶段、缓存、有限网络重试、失败记录与证据边界见[共用 CI 规则](https://github.com/gycrosskit/.github/blob/main/docs/持续集成门禁.md)；本库实际平台命令以 workflow 为准。源码通过、远程消费、HAR/ohpm 与设备验收分别记录。
 
 ## CMP / Kuikly 共用系统服务
 

@@ -1,4 +1,4 @@
 {
   "name": "system-actions-consumer", "version": "0.2.0-rc.4", "main": "Index.ets",
-  "dependencies": { "@gycrosskit/system-actions-native": "0.2.0-rc.4" }
+  "dependencies": { "@gycrosskit/system-actions-native": "0.2.0-rc.5" }
 }

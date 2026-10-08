@@ -1,6 +1,6 @@
 {
   "name": "@gycrosskit/system-actions-native",
-  "version": "0.2.0-rc.4",
+  "version": "0.2.0-rc.5",
   "description": "HarmonyOS 拨号、外链、应用设置与商店详情",
   "main": "Index.ets",
   "author": {
