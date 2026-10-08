@@ -16,13 +16,16 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
   /** 与 Kotlin SystemActionsModule.NAME 一致的注册名。 */
   static readonly MODULE_NAME: string = 'GycSystemActionsModule';
   private actions: SystemActions | null;
+  private readonly windowPolicy: WindowPolicyController;
   private readonly pending: Map<string, PendingAction> = new Map();
   private destroyed: boolean = false;
   private keepScreenLease: WindowPolicyLease | null = null;
   private readonly observations: SystemObservations = new SystemObservations(() => this.controller?.getUIAbilityContext());
 
-  /** @param actions 页面注入的系统能力；销毁只取消自身请求，不销毁该实例。 */
-  constructor(actions: SystemActions) { super(); this.actions = actions; }
+  /** @param actions 页面系统能力。@param windowPolicy 同一 Ability 各页/native lease 共用，跨 Ability 分开；默认仅兼容原单 Ability 接入。 */
+  constructor(actions: SystemActions, windowPolicy: WindowPolicyController = WindowPolicyController.shared) {
+    super(); this.actions = actions; this.windowPolicy = windowPolicy;
+  }
   syncMode(): boolean { return false; }
 
   call(method: string, params: KRAny, callback: KuiklyRenderCallback | null): KRAny {
@@ -83,7 +86,7 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
       return 'requested';
     }
     const previous = this.keepScreenLease;
-    const lease = WindowPolicyController.shared.createLease(async () => {
+    const lease = this.windowPolicy.createLease(async () => {
       const context = this.controller?.getUIAbilityContext();
       if (!context) throw new Error('UIAbility unavailable');
       return window.getLastWindow(context);

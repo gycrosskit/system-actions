@@ -1,0 +1,2 @@
+# Immutable native tag HAR version SHA256 filename
+native-0.2.0-rc.7 0.2.0-rc.5 bf6629baa4c1d4822f1ee7cd09345d6caf4523b6b8417404884ab8df577fc13a SystemActionsNative.har

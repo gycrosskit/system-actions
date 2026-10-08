@@ -38,9 +38,10 @@ vm.runInNewContext(ts.transpileModule(fs.readFileSync(__dirname + '/../system-ac
   fail = true;
   assert.equal(await actions.shareFile('/private/files/a.zip', 'Share'), 'unavailable');
   fail = false; deferStat = true;
-  const modules = {};
+  const modules = {}, windowPolicy = {};
+  vm.runInNewContext(ts.transpileModule(fs.readFileSync(__dirname + '/../system-actions-native/src/main/ets/WindowPolicy.ets', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, { exports: windowPolicy, require: () => ({}) });
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(__dirname + '/../system-actions-native/src/main/ets/GycSystemActionsModule.ets', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, {
-    exports: modules, require: name => name === './SystemActions' ? output :
+    exports: modules, require: name => name === './SystemActions' ? output : name === './WindowPolicy' ? windowPolicy :
       name === './SystemObservations' ? { SystemObservations: class { dispose() {} } } :
       name === '@kuikly-open/render' ? { KuiklyRenderBaseModule: class { onDestroy() {} } } : {}
   });

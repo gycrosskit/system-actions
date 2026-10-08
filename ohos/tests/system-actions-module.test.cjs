@@ -4,10 +4,12 @@ const vm = require('node:vm');
 const ts = require(process.env.TYPESCRIPT_PATH || '/Applications/DevEco-Studio.app/Contents/tools/ohpm/node_modules/typescript');
 const exportsObject = {};
 const observations = {};
+const windowPolicy = {};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync(__dirname + '/../system-actions-native/src/main/ets/WindowPolicy.ets', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, { exports: windowPolicy, require: () => ({}) });
 vm.runInNewContext(ts.transpileModule(fs.readFileSync(__dirname + '/../system-actions-native/src/main/ets/SystemObservations.ets', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, { exports: observations, require: () => ({}) });
 const source = fs.readFileSync(__dirname + '/../system-actions-native/src/main/ets/GycSystemActionsModule.ets', 'utf8');
 vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText,
-  { exports: exportsObject, require: name => name === '@kuikly-open/render' ? { KuiklyRenderBaseModule: class { onDestroy() {} } } : name === './SystemObservations' ? observations : {} });
+  { exports: exportsObject, require: name => name === '@kuikly-open/render' ? { KuiklyRenderBaseModule: class { onDestroy() {} } } : name === './SystemObservations' ? observations : name === './WindowPolicy' ? windowPolicy : {} });
 
 (async () => {
   const calls = [], completions = [], replies = [];

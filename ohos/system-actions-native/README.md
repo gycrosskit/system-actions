@@ -1,12 +1,14 @@
 # GY CrossKit System Actions Native
 
-适用版本：此版 Maven `0.2.0-rc.6` 复用已发布 HAR `0.2.0-rc.4` 的原字节。完整功能与五入口限制见[功能与平台差异](https://github.com/gycrosskit/system-actions/blob/0.2.0-rc.6/docs/功能与平台差异.md)；本版发布记录见[Release](https://github.com/gycrosskit/system-actions/releases/tag/0.2.0-rc.6)。此源码 README 的文档更新不重新发布或修改既有 HAR。
+适用版本：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5`，独立标签 `native-0.2.0-rc.7`。当前能力见[功能与平台差异](https://github.com/gycrosskit/system-actions/blob/native-0.2.0-rc.7/docs/功能与平台差异.md)，发布及远程消费见[固定 Release](https://github.com/gycrosskit/system-actions/releases/tag/native-0.2.0-rc.7)。
 
 HAR **0.2.0-rc.4** 已提供剪贴板、普通私有文件分享和复用 WindowPolicy lease 的常亮；既有发布/Registry验收见根README及rc.5验收记录。此版 Maven/Swift 补充 Android/iOS 原生观察和全屏，不能由本 HAR 安装推导 Android/iOS 已接线。下列历史版本渠道记录保留其记录时点：
 
 ```sh
-ohpm install @gycrosskit/system-actions-native@0.2.0-rc.4
+ohpm install @gycrosskit/system-actions-native@0.2.0-rc.5
 ```
+
+当前源码候选新增 `GycSystemActionsModule(actions, windowPolicy)`：同一 Ability 的各页与原生 lease 注入同一个 `WindowPolicyController`，不同 Ability 各自持有；省略参数仅兼容单 Ability。该参数尚未进入上述已发布 HAR，接线示例见[接入指南](../../docs/接入指南.md#harmonyos-har)。
 
 以下为已有渠道历史记录，不替代此版验收。
 
