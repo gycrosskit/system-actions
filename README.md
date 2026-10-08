@@ -14,7 +14,7 @@ core 提供系统动作；独立native服务提供窗口/观察能力。无CMP U
 
 为 Android、iOS 和 HarmonyOS 提供拨号、HTTP(S) 外链、应用设置、定位设置及商店详情跳转；`0.2.0-rc.4` 预发行补齐 OHOS 剪贴板、文件分享与常亮，并保留原生系统边界。宿主提供商店 URL、业务域名白名单和提示文案；库不绑定品牌包名，原生商店选择遵循下文的平台策略。
 
-此版使用 Maven core/Kuikly **0.2.0-rc.6**、HAR **0.2.0-rc.4**、Swift Package/Git Pod **0.2.0-rc.6**。rc.5 已将 `copyText` / `shareFile` 接入共同 `SystemActions` 契约，Android/iOS 复用原文件服务；HAR rc.4 的 OHPM 审核已通过。rc.5 没有变更原生 ETS/Swift 配套版本，验收过程保留在 [rc.5 验收记录](docs/0.2.0-rc.5候选验收.md)。Android/iOS 观察和全屏服务适用于本版，宿主仍需完成生命周期接线。
+此版使用 Maven core/Kuikly **0.2.0-rc.6**、HAR **0.2.0-rc.5**、Swift Package/Git Pod **0.2.0-rc.6**。rc.5 已将 `copyText` / `shareFile` 接入共同 `SystemActions` 契约，Android/iOS 复用原文件服务；HAR rc.4 的 OHPM 审核已通过。rc.5 没有变更原生 ETS/Swift 配套版本，验收过程保留在 [rc.5 验收记录](docs/0.2.0-rc.5候选验收.md)。Android/iOS 观察和全屏服务适用于本版，宿主仍需完成生命周期接线。
 
 ## 0.2.0-rc.4 历史发布记录
 
@@ -196,7 +196,7 @@ HarmonyOS 原生宿主：
 ohpm install @gycrosskit/system-actions-native@0.2.0-rc.5
 ```
 
-Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。此版 Maven rc.6 配套 HAR rc.4，Swift Package/Git Pod 使用 rc.6；HAR rc.4 的精确 Registry 查询与专属空缓存安装记录见 [rc.5 验收](docs/0.2.0-rc.5候选验收.md)，固定 Release HAR 校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代当前 HAR；此版 Maven/Swift 包含 Android/iOS 观察/全屏 API，仍需宿主显式接线。
+Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。此版 Maven rc.6 配套 HAR rc.5，Swift Package/Git Pod 使用 rc.6；HAR rc.4 的精确 Registry 查询与专属空缓存安装记录见 [rc.5 验收](docs/0.2.0-rc.5候选验收.md)，固定 Release HAR 校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代当前 HAR；此版 Maven/Swift 包含 Android/iOS 观察/全屏 API，仍需宿主显式接线。
 
 原生商店增强的历史稳定版本为 [Maven `0.1.3`](https://github.com/gycrosskit/system-actions/releases/tag/0.1.3)，JitPack 构建成功。[HAR `0.1.2` 归档](https://github.com/gycrosskit/system-actions/releases/tag/har-0.1.2)独立发布；当时 OHPM 元数据列出 `0.1.2` 且 `latest=0.1.2`，该历史 dist-tag 不代表今日 Registry。它不含本轮 Window 与系统边界 API；旧审核期间的 NOTFOUND 留在历史验收记录。API 与回执边界见接入指南。
 

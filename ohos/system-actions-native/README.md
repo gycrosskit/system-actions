@@ -1,6 +1,6 @@
 # GY CrossKit System Actions Native
 
-适用版本：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5` 发布候选，独立标签 `native-0.2.0-rc.7`。当前能力见功能与平台差异，发布及远程消费以固定 Release 验收为准。
+适用版本：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5`，独立标签 `native-0.2.0-rc.7`。当前能力见[功能与平台差异](https://github.com/gycrosskit/system-actions/blob/native-0.2.0-rc.7/docs/功能与平台差异.md)，发布及远程消费见[固定 Release](https://github.com/gycrosskit/system-actions/releases/tag/native-0.2.0-rc.7)。
 
 HAR **0.2.0-rc.4** 已提供剪贴板、普通私有文件分享和复用 WindowPolicy lease 的常亮；既有发布/Registry验收见根README及rc.5验收记录。此版 Maven/Swift 补充 Android/iOS 原生观察和全屏，不能由本 HAR 安装推导 Android/iOS 已接线。下列历史版本渠道记录保留其记录时点：
 
