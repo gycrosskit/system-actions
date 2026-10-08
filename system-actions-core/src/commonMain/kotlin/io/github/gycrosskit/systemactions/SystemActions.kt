@@ -34,7 +34,7 @@ interface SystemActions {
     suspend fun openExternalUrl(url: String): ActionResult
     /** 打开当前宿主应用设置页；返回只说明系统受理。 */
     suspend fun openAppSettings(): ActionResult
-    /** Android 打开系统定位服务设置；iOS/OHOS 无独立公开入口，返回 Unavailable。 */
+    /** Android 打开系统定位服务设置；iOS/OHOS 当前未建立可靠公开的全局定位设置入口，返回 Unavailable。 */
     suspend fun openLocationSettings(): ActionResult = ActionResult.Unavailable
     /** 打开宿主提供的品牌商店详情。@param listingUrl 与 openExternalUrl 相同的 HTTP(S) 地址契约。 */
     suspend fun openAppStore(listingUrl: String): ActionResult = openExternalUrl(listingUrl)
