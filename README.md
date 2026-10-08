@@ -4,7 +4,7 @@
 
 core 提供系统动作；独立native服务提供窗口/观察能力。无CMP UI，system-actions-kuikly仅OHOS桥；A/i新观察与全屏需要宿主显式接线。
 
-适用版本：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5` 发布候选，独立标签 `native-0.2.0-rc.7`。当前能力见功能与平台差异，发布及远程消费以固定 Release 验收为准。
+适用版本：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5`，独立标签 `native-0.2.0-rc.7`。当前能力见功能与平台差异，发布及远程消费以固定 Release 验收为准。
 
 当前测试覆盖、执行时点和未验收项集中见[验证范围](docs/功能与平台差异.md#验证范围)，复现命令见[开发与验证](docs/开发与验证.md)。
 
@@ -148,7 +148,7 @@ await lease.update(true);
 await lease.release();
 ```
 
-当前源码候选允许 `GycSystemActionsModule(actions, windowPolicy)` 注入上述 Ability 级 controller；省略参数仅兼容原单 Ability 接入。该新增参数尚未发布到现有 HAR，多 Ability 接入需采用包含修复的新制品，详见接入指南。
+HAR 0.2.0-rc.5 允许 `GycSystemActionsModule(actions, windowPolicy)` 注入上述 Ability 级 controller；省略参数仅兼容原单 Ability 接入。多 Ability 接入需采用 HAR 0.2.0-rc.5 或后续兼容版本，详见接入指南。
 
 多 owner 与异步释放、Swift/CocoaPods 接线和限制见[接入指南](docs/接入指南.md#window-策略)。本地验证方法见[开发与验证](docs/开发与验证.md#window-策略验证)。
 
