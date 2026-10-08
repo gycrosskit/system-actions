@@ -1,14 +1,14 @@
 # GY CrossKit System Actions Native
 
-2026-10-08 当前源码与三端/五入口边界见[功能与平台差异](../../docs/功能与平台差异.md)；本包只承担上文所述原生能力，以下版本和渠道记录按各自日期阅读。
+适用版本：此版 Maven `0.2.0-rc.6` 复用已发布 HAR `0.2.0-rc.4` 的原字节。完整功能与五入口限制见[功能与平台差异](https://github.com/gycrosskit/system-actions/blob/0.2.0-rc.6/docs/功能与平台差异.md)；本版发布记录见[Release](https://github.com/gycrosskit/system-actions/releases/tag/0.2.0-rc.6)。此源码 README 的文档更新不重新发布或修改既有 HAR。
 
-HAR **0.2.0-rc.4** 已提供剪贴板、普通私有文件分享和复用 WindowPolicy lease 的常亮；既有发布/Registry验收见根README及rc.5验收记录。当前未发布候选主要补A/i原生观察和全屏，不能由本HAR安装推导A/i已接线。下列历史版本渠道记录保留其记录时点：
+HAR **0.2.0-rc.4** 已提供剪贴板、普通私有文件分享和复用 WindowPolicy lease 的常亮；既有发布/Registry验收见根README及rc.5验收记录。此版 Maven/Swift 补充 Android/iOS 原生观察和全屏，不能由本 HAR 安装推导 Android/iOS 已接线。下列历史版本渠道记录保留其记录时点：
 
 ```sh
 ohpm install @gycrosskit/system-actions-native@0.2.0-rc.4
 ```
 
-以下为已有渠道历史记录，不替代新候选验收。
+以下为已有渠道历史记录，不替代此版验收。
 
 
 HarmonyOS API 22 的拨号、HTTP(S) 外链、应用设置和商店能力，含可注入共享 `SystemActions` 的 Kuikly Renderer Module。
