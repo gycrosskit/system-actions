@@ -18,3 +18,7 @@ UIKit 原生源码未变，Swift Package/Git Pod 保留实际验证的 `0.2.0-rc
 `file` / `xcrun vtool -show-build` 确认最终 framework 为 arm64 Mach-O 动态库、平台 IOSSIMULATOR。未执行设备交互。
 
 失败与修复：初次 HAR 安装误在组件仓库根目录运行（缺少 oh-package 配置），改到独立 consumer 后成功；失败日志在 Wechat 忽略审计目录 `remote-har-install-wrong-directory.log`。
+
+## 版本修复与配套历史
+
+`0.2.0-rc.3` 修正 layout-only 全屏退出时不应回写方向的问题；无变化的 Swift Package/Git Pod 继续使用已验证 rc.2。既有 rc.2 新增剪贴板/私有文件分享、共用 UIKit 执行与 presenter 解析、OHOS 键盘/环境观察及全屏 Window lease，独立消费者结果见[系统边界闭合候选验收](系统边界闭合候选验收.md)。此前 rc.1 Window 基线的 2026-10-04 OHPM 精确查询仍为 NOTFOUND，见[Window 策略验收](Window策略候选验收.md)。
