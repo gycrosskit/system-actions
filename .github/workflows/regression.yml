@@ -143,7 +143,7 @@ jobs:
         timeout-minutes: 5
       - run: bash scripts/ci-pin-fork-host.sh
         timeout-minutes: 5
-      - run: python3 scripts/ci-run.py --log ci-diagnostics/android-1.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info :system-actions-core:jvmTest :system-actions-core:testDebugUnitTest :system-actions-core:compileDebugKotlinAndroid --no-daemon --max-workers=1
+      - run: python3 scripts/ci-run.py --log ci-diagnostics/android-1.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info :system-actions-core:jvmTest :system-actions-core:testDebugUnitTest :system-actions-core:compileDebugKotlinAndroid :system-actions-kuikly:testDebugUnitTest :system-actions-kuikly:compileDebugKotlinAndroid --no-daemon --max-workers=1
         timeout-minutes: 40
       - name: Save public CI diagnostics
         if: always()
@@ -201,13 +201,15 @@ jobs:
             x86_64) native_target=IosX64; native_test=iosX64Test ;;
             *) echo "Unsupported macOS architecture" >&2; exit 1 ;;
           esac
-          python3 scripts/ci-run.py --log ci-diagnostics/native-1.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info :system-actions-core:compileKotlinIosArm64 :system-actions-core:compileKotlin${native_target} :system-actions-core:compileKotlinOhosArm64 :system-actions-kuikly:compileKotlinOhosArm64 --no-daemon --max-workers=1
+          python3 scripts/ci-run.py --log ci-diagnostics/native-1.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info :system-actions-core:compileKotlinIosArm64 :system-actions-core:compileKotlin${native_target} :system-actions-core:compileKotlinOhosArm64 :system-actions-kuikly:compileKotlinOhosArm64 :system-actions-kuikly:compileKotlinIosArm64 :system-actions-kuikly:compileKotlin${native_target} --no-daemon --max-workers=1
       - run: python3 scripts/ci-run.py --log ci-diagnostics/native-2.log -- bash ios/Tests/run.sh
         if: needs.changes.outputs.source == 'true'
         timeout-minutes: 15
-      - run: python3 scripts/ci-run.py --log ci-diagnostics/native-3.log -- xcrun swiftc -typecheck -target "$(uname -m)-apple-ios15.0-simulator" -sdk "$(xcrun --sdk iphonesimulator --show-sdk-path)" ios/Sources/GYCWindowPolicy/*.swift
+      - run: |
+          python3 scripts/ci-run.py --log ci-diagnostics/native-3.log -- bash scripts/ci-build-kuikly-render.sh "$RUNNER_TEMP/system-actions-native-render" GYCWindowPolicy/Kuikly
+          python3 scripts/ci-run.py --log ci-diagnostics/native-module-lifecycle.log -- bash scripts/test-ios-module.sh "$RUNNER_TEMP/system-actions-native-render/Products"
         if: needs.changes.outputs.source == 'true'
-        timeout-minutes: 10
+        timeout-minutes: 20
       - name: Warm trusted main Native cache
         if: (github.event_name == 'workflow_dispatch' && inputs.warm_native_cache && github.ref == 'refs/heads/main') && steps.konan-cache.outputs.cache-hit != 'true'
         timeout-minutes: 40
@@ -331,7 +333,19 @@ jobs:
             *) echo "Unsupported macOS architecture" >&2; exit 1 ;;
           esac
           verify_file_actions="$(bash scripts/ci-file-actions.sh "$VERSION")"
-          python3 scripts/ci-run.py --log ci-diagnostics/release-native-1.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info -p verification-consumer linkDebugFramework${native_target} compileKotlinOhosArm64 -PsystemActionsVersion="$VERSION" -PverifyFileActions="$verify_file_actions" --refresh-dependencies --no-daemon --max-workers=1
+          render_args=()
+          case "$VERSION" in
+            0.1.3|0.2.0-rc.[1-6]) ;;
+            *)
+              render_dir=$(bash scripts/ci-build-kuikly-render.sh "$RUNNER_TEMP/system-actions-release-render" GYCWindowPolicy/Kuikly system-actions "$VERSION")
+              render_args=("-PkuiklyRenderFrameworkDir=$render_dir")
+              ;;
+          esac
+          python3 scripts/ci-run.py --log ci-diagnostics/release-native-1.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info -p verification-consumer linkDebugFramework${native_target} compileKotlinOhosArm64 -PsystemActionsVersion="$VERSION" "${render_args[@]}" -PverifyFileActions="$verify_file_actions" --refresh-dependencies --no-daemon --max-workers=1
+          if [[ -n "${render_dir:-}" ]]; then
+            case "$(uname -m)" in arm64) framework_target=iosSimulatorArm64 ;; x86_64) framework_target=iosX64 ;; esac
+            python3 scripts/ci-run.py --log ci-diagnostics/release-native-assembly.log -- xcrun swiftc -typecheck -target "$(uname -m)-apple-ios15.0-simulator" -sdk "$(xcrun --sdk iphonesimulator --show-sdk-path)" -F "verification-consumer/build/bin/$framework_target/debugFramework" -F "$render_dir" verification/KuiklyAssembly.swift
+          fi
       - name: Save complete Kotlin Native toolchains
         if: success() && steps.konan-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
