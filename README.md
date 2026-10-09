@@ -2,9 +2,11 @@
 
 ## 当前功能与平台边界
 
-core 提供系统动作；独立native服务提供窗口/观察能力。无CMP UI，system-actions-kuikly仅OHOS桥；A/i新观察与全屏需要宿主显式接线。
+本版源码提供 Maven / Git Pod `0.2.0-rc.7`，`GYCWindowPolicy/Kuikly`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
 
-适用版本：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5`，独立标签 `native-0.2.0-rc.7`。当前能力见[功能与平台差异](docs/功能与平台差异.md)，发布及远程消费以固定 Release 验收为准。
+core 提供系统动作与独立窗口/观察服务；无 CMP UI。`system-actions-kuikly` 提供 Android/iOS/OHOS 页面 Module，Android 真实 receiver 与可选 iOS Pod receiver 复用 core；全屏仍需宿主显式 native 接线。
+
+历史发布基线：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5`，独立标签 `native-0.2.0-rc.7`。当前能力见[功能与平台差异](docs/功能与平台差异.md)，发布及远程消费以固定 Release 验收为准。
 
 当前测试覆盖、执行时点和未验收项集中见[验证范围](docs/功能与平台差异.md#验证范围)，复现命令见[开发与验证](docs/开发与验证.md)。
 
@@ -99,7 +101,7 @@ classDiagram
 | 模块 | 平台与要求 |
 | --- | --- |
 | `system-actions-core` | Android API 24+ / iOS（宿主基线 iOS 14+）；公共 `SystemActions` 与原生实现 |
-| `system-actions-kuikly` | OHOS Kotlin Module；Kuikly `2.28.0-2.0.21-ohos` |
+| `system-actions-kuikly` | Android/iOS/OHOS Kotlin Module、Android receiver；Kuikly `2.28.0-2.0.21-ohos` |
 | `@gycrosskit/system-actions-native` | HarmonyOS API 22 兼容 HAR；原生 ArkTS 和 Kuikly Renderer Module，render `2.28.0` |
 
 KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.1 / AGP 8.10.1。iOS 编译链接需 macOS / Xcode，OHOS 需匹配 Native SDK。Core 的 OHOS 和 JVM 变体仅包含公共 API；JVM 不提供桌面系统动作。

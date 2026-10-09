@@ -154,7 +154,11 @@ class SystemActionsModule : Module(), SystemActions {
             cancelNative(id)
         }
         pending.clear()
+        // 已发布 OHOS HAR 只有 onDestroy，不能向旧协议发送新增方法。
+        if (nativeDisposeSupported) toNative(false, "dispose", null, null, false)
     }
 
     companion object { /** 与原生注册名一致的桥名称。 */ const val NAME = "GycSystemActionsModule" }
 }
+
+internal expect val nativeDisposeSupported: Boolean

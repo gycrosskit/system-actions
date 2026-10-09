@@ -23,5 +23,9 @@ EXTRACT
 python3 scripts/check-maven.py "$staging/maven" com.github.gycrosskit.system-actions "$VERSION" system-actions-core,system-actions-kuikly ios_arm64,ios_x64,ios_simulator_arm64,ohos_arm64
 # 标签必须解析为不可变发布提交；不把当前 PR 的 SHA 当成已发布版本。
 commit="$(git ls-remote https://github.com/gycrosskit/system-actions.git "refs/tags/$VERSION" "refs/tags/$VERSION^{}" | awk '$2 ~ /\^\{\}$/ {peeled=$1} $2 !~ /\^\{\}$/ {direct=$1} END {print peeled ? peeled : direct}')"
+case "$VERSION" in
+  0.1.3|0.2.0-rc.1|0.2.0-rc.2|0.2.0-rc.3|0.2.0-rc.4|0.2.0-rc.5|0.2.0-rc.6) expected_publications="system-actions-core,system-actions-core-android,system-actions-core-iosarm64,system-actions-core-iosx64,system-actions-core-iossimulatorarm64,system-actions-core-ohosarm64,system-actions-core-jvm,system-actions-kuikly,system-actions-kuikly-ohosarm64" ;;
+  *) expected_publications="system-actions-core,system-actions-core-android,system-actions-core-iosarm64,system-actions-core-iosx64,system-actions-core-iossimulatorarm64,system-actions-core-ohosarm64,system-actions-core-jvm,system-actions-kuikly,system-actions-kuikly-android,system-actions-kuikly-iosarm64,system-actions-kuikly-iosx64,system-actions-kuikly-iossimulatorarm64,system-actions-kuikly-ohosarm64" ;;
+esac
 python3 scripts/check-public-maven.py --repo system-actions --version "$VERSION" --commit "$commit" \
-  --expected-publications system-actions-core,system-actions-core-android,system-actions-core-iosarm64,system-actions-core-iosx64,system-actions-core-iossimulatorarm64,system-actions-core-ohosarm64,system-actions-core-jvm,system-actions-kuikly,system-actions-kuikly-ohosarm64 --output-dir "${CI_DIAGNOSTICS_DIR:-ci-diagnostics}/public"
+  --expected-publications "$expected_publications" --output-dir "${CI_DIAGNOSTICS_DIR:-ci-diagnostics}/public"
