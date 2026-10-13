@@ -101,6 +101,7 @@ jobs:
           python3 scripts/ci-run.py --log ci-diagnostics/contracts-1.log -- python3 scripts/test-check-maven.py
           python3 scripts/ci-run.py --log ci-diagnostics/contracts-2.log -- python3 scripts/test-jitpack-metadata.py
           python3 scripts/test-ci-file-actions.py
+          python3 verification/ci/test_ios_module_simulator.py
           TYPESCRIPT_PATH="$RUNNER_TEMP/ci-tools/node_modules/typescript" python3 scripts/ci-run.py --log ci-diagnostics/contracts-3.log -- node --test ohos/tests/*.test.cjs
       - name: Check source cache and test execution policy
         if: needs.changes.outputs.source == 'true'
@@ -156,6 +157,11 @@ jobs:
           persist-credentials: false
       - name: Install shared CI tools
         uses: gycrosskit/.github/actions/ci-tools@607ff44db144c68fc6523de38c04aac29e427b68
+      - name: Start lifecycle simulator before compilation
+        if: needs.changes.outputs.source == 'true'
+        id: module-simulator
+        timeout-minutes: 5
+        run: python3 scripts/ci-run.py --log ci-diagnostics/native-simulator-prepare.log -- bash scripts/test-ios-module.sh --prepare-simulator
       - name: Identify Native toolchain and Xcode
         if: (needs.changes.outputs.source == 'true') || (github.event_name == 'workflow_dispatch' && inputs.warm_native_cache && github.ref == 'refs/heads/main')
         id: native-key
@@ -200,7 +206,9 @@ jobs:
         timeout-minutes: 15
       - run: |
           python3 scripts/ci-run.py --log ci-diagnostics/native-3.log -- bash scripts/ci-build-kuikly-render.sh "$RUNNER_TEMP/system-actions-native-render" GYCWindowPolicy/Kuikly
-          python3 scripts/ci-run.py --log ci-diagnostics/native-module-lifecycle.log -- bash scripts/test-ios-module.sh "$RUNNER_TEMP/system-actions-native-render/Products"
+          python3 scripts/ci-run.py --log ci-diagnostics/native-module-lifecycle.log -- bash scripts/test-ios-module.sh "$RUNNER_TEMP/system-actions-native-render/Products" "${MODULE_SIMULATOR:?Simulator preparation did not produce a device}"
+        env:
+          MODULE_SIMULATOR: ${{ steps.module-simulator.outputs.device }}
         if: needs.changes.outputs.source == 'true'
         timeout-minutes: 20
       - name: Warm trusted main Native cache
@@ -219,6 +227,12 @@ jobs:
             !~/.konan/**/*.tmp
             !~/.konan/**/*.lock
           key: ${{ steps.konan-cache.outputs.cache-primary-key }}
+      - name: Clean up lifecycle simulator
+        if: always() && steps.module-simulator.outputs.device != ''
+        timeout-minutes: 5
+        env:
+          MODULE_SIMULATOR: ${{ steps.module-simulator.outputs.device }}
+        run: python3 scripts/ci-run.py --log ci-diagnostics/native-simulator-cleanup.log -- bash scripts/test-ios-module.sh --cleanup-simulator "$MODULE_SIMULATOR"
       - name: Save public CI diagnostics
         if: always()
         uses: gycrosskit/.github/actions/ci-diagnostics@607ff44db144c68fc6523de38c04aac29e427b68
