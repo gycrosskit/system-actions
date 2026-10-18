@@ -2,13 +2,15 @@
 
 ## 当前功能与平台边界
 
-本版源码提供 Maven / Git Pod `0.2.0-rc.7`，`GYCWindowPolicy/Kuikly`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
+本版 Swift/Git Pod 为 `0.2.0-rc.8`（独立 tag `native-0.2.0-rc.8`），Maven 沿用 `0.2.0-rc.7`，HAR 沿用 `0.2.0-rc.5`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
 
 core 提供系统动作与独立窗口/观察服务；无 CMP UI。`system-actions-kuikly` 提供 Android/iOS/OHOS 页面 Module，Android 真实 receiver 与可选 iOS Pod receiver 复用 core；全屏仍需宿主显式 native 接线。
 
 历史发布基线：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5`，独立标签 `native-0.2.0-rc.7`。当前能力见[功能与平台差异](docs/功能与平台差异.md)，发布及远程消费以固定 Release 验收为准。
 
 当前测试覆盖、执行时点和未验收项集中见[验证范围](docs/功能与平台差异.md#验证范围)，复现命令见[开发与验证](docs/开发与验证.md)。
+
+Swift `0.2.0-rc.8` 补充 iOS `SystemObservations.observeKeyboardHeight(_:onFrameChangeCompleted:)`：原单参数 API 保持不变，新增完成回调区分 will 阶段的零相交与 frame 变化/收起完成；浮动键盘移出当前 View 无需等待 didHide。具体时序与生命周期见[观察合同](docs/功能与平台差异.md#ios-键盘观察完成回调swift-020-rc8)，发布/精确远程消费结果见[原生版本 Release](https://github.com/gycrosskit/system-actions/releases/tag/native-0.2.0-rc.8)；宿主设备行为未验收。
 
 [历史完整源码审查](docs/完整源码审查.md) 列出全部生产文件、公开调用链、实际验证与未测项。
 
@@ -155,6 +157,14 @@ OHOS fullscreen 与 privacy 在同一 Ability 共用 controller 和串行队列�
 页面、主题、退出任务和 WebView 的 `FullScreenExitHandler` 保留在宿主或 WebView 事件层。
 
 ## 安装
+
+仅需 iOS 原生观察时使用独立 Git Pod（不增加 Shared 或 Renderer 依赖）：
+
+```ruby
+pod 'GYCWindowPolicy/Core', :git => 'https://github.com/gycrosskit/system-actions.git', :tag => 'native-0.2.0-rc.8'
+```
+
+这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；SPM 语义化版本仍可使用旧 `0.2.0-rc.7`，本次 native tag 不新增同号 Maven/SPM 版本。
 
 项目 `settings.gradle.kts` 的依赖仓库：
 

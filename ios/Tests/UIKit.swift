@@ -12,6 +12,7 @@
     public static let main = UIScreen()
     public var isCaptured = false
     public var coordinateSpace: UICoordinateSpace { self }
+    public init() {}
 }
 public struct UIViewAutoresizing: OptionSet {
     public let rawValue: Int
@@ -114,6 +115,8 @@ public final class UITraitCollection {
 }
 public enum UIResponder {
     public static let keyboardWillChangeFrameNotification = Notification.Name("keyboardFrame")
+    public static let keyboardDidChangeFrameNotification = Notification.Name("keyboardFrameCompleted")
+    public static let keyboardDidHideNotification = Notification.Name("keyboardHidden")
     public static let keyboardFrameEndUserInfoKey = "keyboardFrameEnd"
 }
 extension NSValue { public var cgRectValue: CGRect { rectValue } }

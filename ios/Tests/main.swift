@@ -75,12 +75,57 @@ struct WindowPolicyChecks {
     window.frameOrigin = CGPoint(x: 50, y: 100)
     let observations = SystemObservations { window }
     var heights: [CGFloat] = []
-    let oldStop = observations.observeKeyboardHeight { heights.append($0) }
+    let legacyObserve: (@escaping (CGFloat) -> Void) -> (() -> Void) = observations.observeKeyboardHeight
+    let oldStop = legacyObserve { heights.append($0) }
     _ = observations.observeKeyboardHeight { heights.append($0) }
     oldStop()
     NotificationCenter.default.post(name: UIResponder.keyboardWillChangeFrameNotification, object: nil,
         userInfo: [UIResponder.keyboardFrameEndUserInfoKey: NSValue(rect: CGRect(x: 50, y: 500, width: 300, height: 200))])
     precondition(heights == [0, 0, 200], "old stop cannot remove new owner; screen frame converts through offset Window to host points")
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+    precondition(heights == [0, 0, 200], "legacy height API keeps its will-change timing")
+
+    var changes: [CGFloat] = [], completed: [CGFloat] = []
+    let oldCompletedStop = observations.observeKeyboardHeight({ changes.append($0) }, onFrameChangeCompleted: { completed.append($0) })
+    let stopCompleted = observations.observeKeyboardHeight({ changes.append($0) }, onFrameChangeCompleted: { completed.append($0) })
+    oldCompletedStop()
+    precondition(changes == [0, 0] && completed.isEmpty, "completion has no synthetic initial value")
+    let intersectingFrame = NSValue(rect: CGRect(x: 50, y: 500, width: 300, height: 200))
+    NotificationCenter.default.post(name: UIResponder.keyboardWillChangeFrameNotification, object: nil,
+        userInfo: [UIResponder.keyboardFrameEndUserInfoKey: intersectingFrame])
+    precondition(changes == [0, 0, 200] && completed.isEmpty)
+    NotificationCenter.default.post(name: UIResponder.keyboardDidChangeFrameNotification, object: window.screen,
+        userInfo: [UIResponder.keyboardFrameEndUserInfoKey: intersectingFrame])
+    precondition(completed == [200] && changes == [0, 0, 200], "completed frame uses the same current host coordinate conversion")
+    let otherScreen = UIScreen()
+    for name in [UIResponder.keyboardWillChangeFrameNotification, UIResponder.keyboardDidChangeFrameNotification, UIResponder.keyboardDidHideNotification] {
+        NotificationCenter.default.post(name: name, object: otherScreen,
+            userInfo: [UIResponder.keyboardFrameEndUserInfoKey: intersectingFrame])
+    }
+    precondition(completed == [200] && changes == [0, 0, 200], "another display cannot update or clear the current host owner")
+    let floatingFrame = NSValue(rect: CGRect(x: 400, y: 300, width: 200, height: 200))
+    NotificationCenter.default.post(name: UIResponder.keyboardWillChangeFrameNotification, object: nil,
+        userInfo: [UIResponder.keyboardFrameEndUserInfoKey: floatingFrame])
+    precondition(changes.last == 0 && completed == [200], "will-change zero is not a completion receipt")
+    NotificationCenter.default.post(name: UIResponder.keyboardDidChangeFrameNotification, object: nil,
+        userInfo: [UIResponder.keyboardFrameEndUserInfoKey: floatingFrame])
+    precondition(completed == [200, 0], "floating keyboard can leave the host without a did-hide notification")
+    NotificationCenter.default.post(name: UIResponder.keyboardWillChangeFrameNotification, object: nil,
+        userInfo: [UIResponder.keyboardFrameEndUserInfoKey: intersectingFrame])
+    NotificationCenter.default.post(name: UIResponder.keyboardWillChangeFrameNotification, object: nil,
+        userInfo: [UIResponder.keyboardFrameEndUserInfoKey: NSValue(rect: CGRect(x: 50, y: 700, width: 300, height: 200))])
+    precondition(completed == [200, 0], "dismissal target frame cannot release a pending dialog before completion")
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+    precondition(completed == [200, 0, 0], "did-hide completes dismissal even without frame metadata")
+    stopCompleted()
+    let changeCount = changes.count
+    NotificationCenter.default.post(name: UIResponder.keyboardWillChangeFrameNotification, object: nil,
+        userInfo: [UIResponder.keyboardFrameEndUserInfoKey: intersectingFrame])
+    NotificationCenter.default.post(name: UIResponder.keyboardDidChangeFrameNotification, object: nil,
+        userInfo: [UIResponder.keyboardFrameEndUserInfoKey: intersectingFrame])
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+    precondition(changes.count == changeCount && completed == [200, 0, 0], "stop removes all notifications of this owner")
+    _ = observations.observeKeyboardHeight({ _ in }, onFrameChangeCompleted: { completed.append($0) })
     var themes: [Bool] = []
     let stopTheme = observations.observeDarkMode { themes.append($0) }
     _ = observations.observeDarkMode { themes.append($0) }
@@ -89,10 +134,45 @@ struct WindowPolicyChecks {
     observations.refresh()
     precondition(themes == [false, false, true])
     observations.dispose()
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+    precondition(completed == [200, 0, 0], "dispose removes completion notifications")
     _ = observations.observeDarkMode { _ in preconditionFailure("disposed observer must not reopen") }
     let reentrant = SystemObservations { window }
     _ = reentrant.observeDarkMode { _ in reentrant.dispose() }
     reentrant.refresh()
+    let keyboardReentrant = SystemObservations { window }
+    _ = keyboardReentrant.observeKeyboardHeight({ _ in keyboardReentrant.dispose() }, onFrameChangeCompleted: { _ in
+        preconditionFailure("disposing in the initial callback must not register completion notifications")
+    })
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+
+    let completionReentrant = SystemObservations { window }
+    var stoppedCompletions = 0
+    var stopDuringCompletion: () -> Void = {}
+    stopDuringCompletion = completionReentrant.observeKeyboardHeight({ _ in }, onFrameChangeCompleted: { _ in
+        stoppedCompletions += 1
+        stopDuringCompletion()
+    })
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+    precondition(stoppedCompletions == 1, "stopping inside completion removes every notification")
+    var oldCompletions = 0, newCompletions = 0
+    let replacedStop = completionReentrant.observeKeyboardHeight({ _ in }, onFrameChangeCompleted: { _ in
+        oldCompletions += 1
+        _ = completionReentrant.observeKeyboardHeight({ _ in }, onFrameChangeCompleted: { _ in newCompletions += 1 })
+    })
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+    replacedStop()
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+    precondition(oldCompletions == 1 && newCompletions == 1, "replacing inside completion preserves only the new owner")
+    var disposedCompletions = 0
+    _ = completionReentrant.observeKeyboardHeight({ _ in }, onFrameChangeCompleted: { _ in
+        disposedCompletions += 1
+        completionReentrant.dispose()
+    })
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+    NotificationCenter.default.post(name: UIResponder.keyboardDidHideNotification, object: nil)
+    precondition(disposedCompletions == 1, "disposing inside completion does not re-register observers")
 
     let fullscreenHost = FullscreenPolicyViewController()
     window.windowScene = UIWindowScene()
