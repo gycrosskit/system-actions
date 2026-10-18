@@ -101,6 +101,7 @@ jobs:
           python3 scripts/ci-run.py --log ci-diagnostics/contracts-1.log -- python3 scripts/test-check-maven.py
           python3 scripts/ci-run.py --log ci-diagnostics/contracts-2.log -- python3 scripts/test-jitpack-metadata.py
           python3 scripts/test-ci-file-actions.py
+          python3 verification/ci/test_swift_pod.py
           python3 verification/ci/test_ios_module_simulator.py
           TYPESCRIPT_PATH="$RUNNER_TEMP/ci-tools/node_modules/typescript" python3 scripts/ci-run.py --log ci-diagnostics/contracts-3.log -- node --test ohos/tests/*.test.cjs
       - name: Check source cache and test execution policy
@@ -272,6 +273,27 @@ jobs:
           verify_file_actions="$(bash scripts/ci-file-actions.sh "$VERSION")"
           python3 scripts/ci-run.py --log ci-diagnostics/release-android-1.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" --info -p verification-consumer compileDebugKotlinAndroid -PsystemActionsVersion="$VERSION" -PverifyFileActions="$verify_file_actions" --refresh-dependencies --no-daemon --max-workers=1
         timeout-minutes: 40
+      - name: Save public CI diagnostics
+        if: always()
+        uses: gycrosskit/.github/actions/ci-diagnostics@607ff44db144c68fc6523de38c04aac29e427b68
+        with:
+          status: ${{ job.status }}
+  release-swift:
+    if: (github.event_name == 'release' && github.event.release.tag_name == 'native-0.2.0-rc.8') || (github.event_name == 'workflow_dispatch' && inputs.version == 'native-0.2.0-rc.8')
+    runs-on: macos-15
+    timeout-minutes: 20
+    env:
+      VERSION: ${{ github.event.release.tag_name || inputs.version }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.release.tag_name || inputs.version }}
+      - name: Install shared CI tools
+        uses: gycrosskit/.github/actions/ci-tools@607ff44db144c68fc6523de38c04aac29e427b68
+      - name: Verify exact remote Git Pod and public Swift observation APIs
+        run: python3 scripts/ci-run.py --log ci-diagnostics/release-swift.log -- python3 scripts/ci-verify-swift-pod.py --tag "$VERSION" --build-dir "$RUNNER_TEMP/system-actions-swift-consumer" --proof ci-diagnostics/swift-pod-proof.json
       - name: Save public CI diagnostics
         if: always()
         uses: gycrosskit/.github/actions/ci-diagnostics@607ff44db144c68fc6523de38c04aac29e427b68
