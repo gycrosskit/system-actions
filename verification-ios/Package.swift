@@ -4,6 +4,6 @@ let package = Package(
     name: "WindowPolicyConsumer",
     platforms: [.iOS(.v14)],
     products: [.library(name: "WindowPolicyConsumer", targets: ["WindowPolicyConsumer"])],
-    dependencies: [.package(url: "https://github.com/gycrosskit/system-actions.git", exact: "0.2.0-rc.2")],
+    dependencies: [.package(url: "https://github.com/gycrosskit/system-actions.git", exact: "1.0.0")],
     targets: [.target(name: "WindowPolicyConsumer", dependencies: [.product(name: "GYCWindowPolicy", package: "system-actions")])]
 )

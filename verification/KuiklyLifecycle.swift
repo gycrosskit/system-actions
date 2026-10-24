@@ -115,6 +115,15 @@ private func runChecks() {
     precondition(releasedOffMain == nil, "queued cleanup must not retain module")
     DispatchQueue.main.async {
         precondition(created == 3 && called == 3 && disposed == 3, "queued work must be dropped and detached resources released once")
+        guard let runID = ProcessInfo.processInfo.environment["GYC_SYSTEM_ACTIONS_RUN_ID"], UUID(uuidString: runID) != nil else {
+            fatalError("Missing lifecycle run ID")
+        }
+        do {
+            let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let result = try JSONSerialization.data(withJSONObject: ["run_id": runID, "result": "KUIKLY_MODULE_LIFECYCLE_PASS"])
+            try result.write(to: folder.appendingPathComponent("ModuleLifecycle-\(runID).json"), options: .atomic)
+        } catch { fatalError("Cannot persist lifecycle completion: \(error)") }
         print("KUIKLY_MODULE_LIFECYCLE_PASS")
         fflush(stdout)
         exit(0)

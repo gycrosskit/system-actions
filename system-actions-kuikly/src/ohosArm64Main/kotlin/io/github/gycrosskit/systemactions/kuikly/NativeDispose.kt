@@ -1,3 +1,3 @@
 package io.github.gycrosskit.systemactions.kuikly
 
-internal actual val nativeDisposeSupported = false
+internal actual val nativeDisposeSupported = true

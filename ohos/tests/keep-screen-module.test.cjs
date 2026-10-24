@@ -29,6 +29,8 @@ vm.runInNewContext(source('GycSystemActionsModule'), { exports: modules, require
   invoke('cancel', 'old'); invoke('setKeepScreenOn', 'next', 'true');
   oldWindow(target); await flush();
   resolveWindow(target); await flush(); assert.equal(target.keep, true, 'cancelled old owner cannot release newer owner');
+  module.call('dispose', null, null); await flush();
+  assert.equal(target.keep, false, 'explicit Module dispose must release its lease before Renderer destruction');
   module.onDestroy(); await flush(); assert.equal(target.keep, false);
   const late = new modules.GycSystemActionsModule({});
   late.call('setKeepScreenOn', JSON.stringify({ requestId: 'late', value: 'true' }), () => assert.fail('destroyed module delivered'));

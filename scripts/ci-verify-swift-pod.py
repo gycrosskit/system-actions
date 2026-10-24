@@ -30,7 +30,7 @@ def main():
     parser.add_argument('--build-dir', required=True, type=Path)
     parser.add_argument('--proof', required=True, type=Path)
     args = parser.parse_args()
-    assert re.fullmatch(r'native-\d+\.\d+\.\d+-rc\.\d+', args.tag), 'Expected immutable native RC tag'
+    assert re.fullmatch(r'native-\d+\.\d+\.\d+(?:-rc\.\d+)?', args.tag), 'Expected immutable native release tag'
     assert args.build_dir.is_absolute() and not args.build_dir.exists(), 'Use a fresh absolute consumer directory'
     checkout = Path.cwd()
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()

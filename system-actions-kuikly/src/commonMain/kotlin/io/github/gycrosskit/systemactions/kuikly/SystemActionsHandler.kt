@@ -3,6 +3,7 @@ package io.github.gycrosskit.systemactions.kuikly
 import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import io.github.gycrosskit.systemactions.ActionResult
 import io.github.gycrosskit.systemactions.SystemActions
+import io.github.gycrosskit.systemactions.FileShareOutcome
 import kotlinx.coroutines.*
 
 /** Android/iOS receiver 共用协议；调用、取消、原生观察与回调均在 Main 串行。 */
@@ -66,11 +67,17 @@ internal class SystemActionsHandler(
         }
         val value = args.opt("value") as? String ?: ""
         val job = scope.launch(start = CoroutineStart.LAZY) {
+            var outcome: FileShareOutcome? = null
             val result = try {
                 when (method) {
                     "copyText" -> actions.copyText(value)
                     "shareFile" -> (args.opt("title") as? String)?.let { actions.shareFile(value, it) }
                         ?: ActionResult.InvalidInput
+                    "shareFileWithOutcome" -> (args.opt("title") as? String)?.let {
+                        val share = actions.shareFileWithOutcome(value, it)
+                        outcome = share.outcome
+                        share.acceptance
+                    } ?: ActionResult.InvalidInput
                     "dial" -> actions.dial(value)
                     "openExternalUrl" -> actions.openExternalUrl(value)
                     "openAppSettings" -> actions.openAppSettings()
@@ -85,8 +92,9 @@ internal class SystemActionsHandler(
                 }
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { ActionResult.Unavailable }
+            if (!isActive || pending[id] !== coroutineContext[Job]) return@launch
             pending.remove(id)
-            if (!disposed) callback(status(result))
+            if (!disposed) callback(status(result, outcome))
         }
         pending[id] = job
         job.invokeOnCompletion { if (pending[id] === job) pending.remove(id) }
@@ -107,7 +115,8 @@ internal class SystemActionsHandler(
         closeNative()
     }
 
-    private fun status(result: ActionResult) = JSONObject().apply {
+    private fun status(result: ActionResult, outcome: FileShareOutcome? = null) = JSONObject().apply {
+        if (outcome != null) put("outcome", outcome.name.lowercase())
         put("status", when (result) {
             ActionResult.Requested -> "requested"
             ActionResult.InvalidInput -> "invalid_input"

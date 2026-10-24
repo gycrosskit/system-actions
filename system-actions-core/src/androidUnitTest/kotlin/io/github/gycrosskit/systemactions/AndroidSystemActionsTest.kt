@@ -91,4 +91,15 @@ class AndroidSystemActionsTest {
             assertEquals(ActionResult.Unavailable, actions.openLocationSettings())
         } finally { Dispatchers.resetMain() }
     }
+    @Test fun missingClipboardDoesNotReportAcceptance() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val context = object : ContextWrapper(RuntimeEnvironment.getApplication()) {
+                override fun getSystemService(name: String): Any? =
+                    if (name == android.content.Context.CLIPBOARD_SERVICE) null else super.getSystemService(name)
+            }
+            assertEquals(ActionResult.Unavailable, AndroidSystemActions(context).copyText("sample"))
+        } finally { Dispatchers.resetMain() }
+    }
+
 }
