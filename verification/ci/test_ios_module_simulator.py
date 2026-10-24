@@ -27,6 +27,9 @@ if args[:2] == ['--sdk', 'iphonesimulator']:
         if case == 'compile_failure':
             sys.exit(18)
         Path(args[args.index('-o') + 1]).write_text('mock app')
+elif args[:1] == ['swift']:
+    assert '-module-cache-path' in args and args[-1].endswith('main.swift')
+    sys.exit(21 if case == 'native_services_failure' else 0)
 elif args[:3] == ['simctl', 'list', 'runtimes']:
     print(json.dumps({'runtimes': [{
         'isAvailable': case != 'no_runtime',
@@ -84,6 +87,10 @@ with tempfile.TemporaryDirectory() as directory:
                           output_path=temp if case == 'output_failure' else output)
         assert result.returncode != 0 and output.read_text() == '', case
         assert sim[-2:] == ['shutdown', 'delete'] if case != 'no_runtime' else sim == ['list']
+
+    result, sim = run('native_services_failure', str(products), DEVICE)
+    assert result.returncode != 0 and not sim
+    assert 'LIFECYCLE_PHASE compile.start' not in result.stdout
 
     result, sim = run('normal', str(products), DEVICE)
     assert result.returncode == 0 and sim == ['bootstatus', 'install', 'launch', 'uninstall']
