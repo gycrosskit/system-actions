@@ -279,7 +279,7 @@ jobs:
         with:
           status: ${{ job.status }}
   release-swift:
-    if: (github.event_name == 'release' && github.event.release.tag_name == 'native-0.2.0-rc.8') || (github.event_name == 'workflow_dispatch' && inputs.version == 'native-0.2.0-rc.8')
+    if: (github.event_name == 'release' && github.event.release.tag_name == 'native-1.0.0') || (github.event_name == 'workflow_dispatch' && inputs.version == 'native-1.0.0')
     runs-on: macos-15
     timeout-minutes: 20
     env:

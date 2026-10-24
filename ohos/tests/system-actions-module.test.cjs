@@ -14,6 +14,7 @@ vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.Mo
 (async () => {
   const calls = [], completions = [], replies = [];
   const actions = {
+    shareFile: async (path, title) => { calls.push(['share', path, title]); return 'requested'; },
     dial: value => { calls.push(['dial', value]); return new Promise((resolve, reject) => completions.push({ resolve, reject })); },
     openExternalUrl: async value => { calls.push(['url', value]); return 'invalid_input'; },
     openAppSettings: async () => { calls.push(['settings']); return 'requested'; },
@@ -58,12 +59,18 @@ vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.Mo
     module.call('dial', params, result => assert.equal(result.status, 'invalid_input'));
   }
   assert.equal(calls.length, beforeInvalid);
+  const shareReplies = [];
+  module.call('shareFileWithOutcome', JSON.stringify({ requestId: 'share', value: '/private/a.zip', title: 'Share' }), reply => shareReplies.push(reply));
+  await flush();
+  assert.equal(shareReplies.length, 1);
+  assert.equal(shareReplies[0].status, 'requested');
+  assert.equal(shareReplies[0].outcome, 'unknown', 'OHOS acceptance cannot imply user completion');
   invoke('unknown', 'unknown'); await flush(); assert.equal(replies.at(-1), 'unavailable');
   invoke('dial', 'destroy', '123'); const delayed = completions.shift();
   const beforeDestroy = replies.length;
   module.onDestroy(); delayed.resolve('requested'); await flush();
   invoke('openAppSettings', 'after-destroy'); await flush();
   assert.equal(replies.length, beforeDestroy);
-  assert.equal(calls.length, beforeInvalid + 1, 'destroyed module must not dispatch');
+  assert.equal(calls.length, beforeInvalid + 2, 'destroyed module must not dispatch');
   console.log('system-actions Kuikly wait/cancel/dispose checks passed');
 })().catch(error => { console.error(error); process.exitCode = 1; });

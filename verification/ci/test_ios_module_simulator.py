@@ -3,6 +3,7 @@
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 
@@ -27,6 +28,9 @@ if args[:2] == ['--sdk', 'iphonesimulator']:
         if case == 'compile_failure':
             sys.exit(18)
         Path(args[args.index('-o') + 1]).write_text('mock app')
+elif args[:1] == ['swift']:
+    assert '-module-cache-path' in args and args[-1].endswith('main.swift')
+    sys.exit(21 if case == 'native_services_failure' else 0)
 elif args[:3] == ['simctl', 'list', 'runtimes']:
     print(json.dumps({'runtimes': [{
         'isAvailable': case != 'no_runtime',
@@ -35,8 +39,24 @@ elif args[:3] == ['simctl', 'list', 'runtimes']:
     }]}))
 elif args[:2] == ['simctl', 'create']:
     print(os.environ['MOCK_DEVICE'])
+elif args[:2] == ['simctl', 'get_app_container']:
+    print(os.environ['MOCK_DATA'])
+elif args[:2] == ['simctl', 'spawn']:
+    print('fixture scoped lifecycle diagnostics')
 elif args[:2] == ['simctl', 'launch']:
-    if case != 'missing_pass':
+    run_id = os.environ.get('SIMCTL_CHILD_GYC_SYSTEM_ACTIONS_RUN_ID', os.environ['MOCK_DEVICE'])
+    receipt = Path(os.environ['MOCK_DATA']) / 'Documents' / ('ModuleLifecycle-' + run_id + '.json')
+    payload = json.dumps({'run_id': os.environ['MOCK_DEVICE'] if case == 'stale_receipt' else run_id,
+                          'result': 'KUIKLY_MODULE_LIFECYCLE_PASS'})
+    if case == 'delayed_receipt':
+        import subprocess
+        subprocess.Popen([sys.executable, '-c',
+            'import sys,time;from pathlib import Path;time.sleep(0.2);p=Path(sys.argv[1]);t=p.with_suffix(".tmp");t.write_text(sys.argv[2]);t.replace(p)',
+            str(receipt), payload], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    elif case != 'missing_pass':
+        receipt.write_text('invalid json' if case == 'malformed_receipt' else payload)
+    print('com.gycrosskit.systemactions.module.lifecycle: 4242')
+    if case in ['missing_pass', 'launch_failure']:
         print('KUIKLY_MODULE_LIFECYCLE_PASS')
     if case == 'launch_failure':
         sys.exit(19)
@@ -51,6 +71,20 @@ else:
 
 with tempfile.TemporaryDirectory() as directory:
     temp = Path(directory)
+    fixture = temp / 'component'
+    fixture_script = fixture / 'scripts/test-ios-module.sh'
+    fixture_script.parent.mkdir(parents=True)
+    fixture_script.write_text(SCRIPT.read_text().replace('timeout=90', 'timeout=0.5')
+        .replace('deadline = time.monotonic() + 90', 'deadline = time.monotonic() + 0.5')
+        .replace('Path.home()', 'Path(' + repr(str(temp)) + ')'))
+    for relative in ['verification/test-native-services.py',
+                     'ios/Sources/GYCSystemActionsKuikly/GycSystemActionsNativeServices.swift',
+                     'verification/KuiklyLifecycle.swift']:
+        destination = fixture / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, destination)
+    data = temp / 'Data/Documents'
+    data.mkdir(parents=True)
     bin_dir = temp / 'bin'
     bin_dir.mkdir()
     for tool in ['xcrun', 'codesign']:
@@ -63,14 +97,14 @@ with tempfile.TemporaryDirectory() as directory:
     calls = temp / 'calls.jsonl'
     output = temp / 'github-output'
     environment = dict(os.environ, PATH=str(bin_dir) + os.pathsep + os.environ['PATH'],
-                       TMPDIR=str(temp), MOCK_CALLS=str(calls), MOCK_DEVICE=DEVICE)
+                       TMPDIR=str(temp), MOCK_CALLS=str(calls), MOCK_DEVICE=DEVICE, MOCK_DATA=str(data.parent))
 
     def run(case, *args, output_path=output):
         calls.write_text('')
         output.write_text('')
         environment['MOCK_CASE'] = case
         environment['GITHUB_OUTPUT'] = str(output_path)
-        result = subprocess.run(['bash', str(SCRIPT), *args], env=environment,
+        result = subprocess.run(['bash', str(fixture_script), *args], env=environment,
                                 capture_output=True, text=True, timeout=15)
         commands = [json.loads(line) for line in calls.read_text().splitlines()]
         sim = [c[2] for c in commands if c[:2] == ['xcrun', 'simctl']]
@@ -85,14 +119,19 @@ with tempfile.TemporaryDirectory() as directory:
         assert result.returncode != 0 and output.read_text() == '', case
         assert sim[-2:] == ['shutdown', 'delete'] if case != 'no_runtime' else sim == ['list']
 
+    result, sim = run('native_services_failure', str(products), DEVICE)
+    assert result.returncode != 0 and not sim
+    assert 'LIFECYCLE_PHASE compile.start' not in result.stdout
+
     result, sim = run('normal', str(products), DEVICE)
-    assert result.returncode == 0 and sim == ['bootstatus', 'install', 'launch', 'uninstall']
+    assert result.returncode == 0 and sim == ['bootstatus', 'install', 'get_app_container', 'launch', 'uninstall'], (result.stdout, result.stderr, sim)
     assert 'LIFECYCLE_PHASE launch.pass' in result.stdout
+    assert 'Fresh lifecycle receipt:' in result.stdout
     assert all(f'LIFECYCLE_PHASE {phase}' in result.stdout for phase in [
         'compile.start', 'compile.end', 'sign.start', 'sign.end',
         'simulator.ready.start', 'simulator.ready.end', 'install.start', 'install.end'])
     for case in ['compile_failure', 'sign_failure', 'ready_failure', 'install_failure',
-                 'missing_pass', 'launch_failure']:
+                 'missing_pass', 'launch_failure', 'stale_receipt', 'malformed_receipt']:
         result, sim = run(case, str(products), DEVICE)
         assert result.returncode != 0 and 'LIFECYCLE_PHASE launch.pass' not in result.stdout, case
         assert not any(c in sim for c in ['create', 'boot', 'shutdown', 'delete']), case
@@ -102,6 +141,9 @@ with tempfile.TemporaryDirectory() as directory:
             assert sim[-1] == 'uninstall', case
         result, sim = run('normal', '--cleanup-simulator', DEVICE)
         assert result.returncode == 0 and sim == ['shutdown', 'delete']
+
+    result, sim = run('delayed_receipt', str(products), DEVICE)
+    assert result.returncode == 0 and 'Fresh lifecycle receipt:' in result.stdout
 
     for case in ['normal', 'ready_failure', 'missing_pass']:
         result, sim = run(case, str(products))

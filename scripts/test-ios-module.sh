@@ -63,6 +63,7 @@ case "$products" in
 esac
 [[ "$products" = /* ]] || { echo 'Products directory must be absolute' >&2; exit 1; }
 repo_dir=$(cd "$(dirname "$0")/.." && pwd)
+python3 "$repo_dir/verification/test-native-services.py"
 work_dir=$(mktemp -d "${TMPDIR:-/tmp}/gyc-module-test.XXXXXX")
 device=${2:-}
 app="$work_dir/ModuleTest.app"
@@ -103,7 +104,57 @@ phase install.start
 xcrun simctl install "$device" "$app"
 installed=true
 phase install.end
+container=$(xcrun simctl get_app_container "$device" "$bundle_id" data)
+run_id=$(python3 -c 'import uuid; print(uuid.uuid4())')
+mkdir -p "$repo_dir/ci-diagnostics"
 phase launch.start
-xcrun simctl launch --console --terminate-running-process "$device" "$bundle_id" | tee "$work_dir/result.log"
-grep -q '^KUIKLY_MODULE_LIFECYCLE_PASS$' "$work_dir/result.log"
+python3 - "$device" "$bundle_id" "$container" "$run_id" "$repo_dir/ci-diagnostics" <<'RESULT'
+import json, os, resource, subprocess, sys, time
+from pathlib import Path
+
+device, bundle, container, run_id, diagnostics = sys.argv[1:]
+deadline = time.monotonic() + 90
+receipt = Path(container, 'Documents', 'ModuleLifecycle-' + run_id + '.json')
+console = Path(diagnostics, 'system-actions-module-' + run_id + '.log')
+started = time.time_ns()
+def fail(message):
+    print(message, file=sys.stderr)
+    with Path(diagnostics, 'system-actions-failure-' + run_id + '.log').open('wb') as output:
+        try:
+            subprocess.run(['xcrun', 'simctl', 'spawn', device, 'log', 'show', '--last', '2m', '--style', 'compact',
+                '--predicate', 'process == "ModuleTest"'], stdout=output, stderr=subprocess.STDOUT, timeout=10,
+                preexec_fn=lambda: resource.setrlimit(resource.RLIMIT_FSIZE, (8388608, 8388608)))
+        except subprocess.TimeoutExpired:
+            print('Lifecycle diagnostic capture timed out', file=sys.stderr)
+    folders = [Path.home() / 'Library/Logs/DiagnosticReports',
+        Path.home() / 'Library/Developer/CoreSimulator/Devices' / device / 'data/Library/Logs/DiagnosticReports']
+    reports = [p for folder in folders for p in folder.glob('ModuleTest*')
+        if p.is_file() and p.stat().st_mtime_ns >= started]
+    for index, report in enumerate(sorted(reports, key=lambda p: p.stat().st_mtime_ns, reverse=True)[:3]):
+        with report.open('rb') as source:
+            Path(diagnostics, 'system-actions-crash-' + str(index) + '-' + report.name + '.txt').write_bytes(source.read(262144))
+    sys.exit(1)
+try:
+    with console.open('wb') as output:
+        result = subprocess.run(['xcrun', 'simctl', 'launch', '--console', '--terminate-running-process', device, bundle],
+            env={**os.environ, 'SIMCTL_CHILD_GYC_SYSTEM_ACTIONS_RUN_ID': run_id},
+            stdout=output, stderr=subprocess.STDOUT, timeout=90,
+            preexec_fn=lambda: resource.setrlimit(resource.RLIMIT_FSIZE, (8388608, 8388608)))
+except subprocess.TimeoutExpired:
+    fail('Lifecycle launch timed out; completion is not verified')
+sys.stdout.buffer.write(console.read_bytes())
+if result.returncode != 0:
+    fail('Lifecycle launch failed: ' + str(result.returncode))
+# simctl 可能先返回 PID；必须等待本次 App 完成全部原始断言，不能仅凭 console 放行。
+while not receipt.is_file() and time.monotonic() < deadline:
+    time.sleep(0.1)
+try:
+    value = json.loads(receipt.read_text())
+except (OSError, ValueError) as error:
+    fail('Lifecycle completion receipt unavailable: ' + str(error))
+if value != {'run_id': run_id, 'result': 'KUIKLY_MODULE_LIFECYCLE_PASS'}:
+    fail('Lifecycle completion receipt does not match this run')
+Path(diagnostics, 'system-actions-module-' + run_id + '.json').write_text(json.dumps(value) + '\n')
+print('Fresh lifecycle receipt: ' + run_id + ' KUIKLY_MODULE_LIFECYCLE_PASS')
+RESULT
 phase launch.pass

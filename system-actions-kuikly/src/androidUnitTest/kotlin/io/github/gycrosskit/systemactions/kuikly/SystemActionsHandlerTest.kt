@@ -3,6 +3,8 @@ package io.github.gycrosskit.systemactions.kuikly
 import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import io.github.gycrosskit.systemactions.ActionResult
 import io.github.gycrosskit.systemactions.SystemActions
+import io.github.gycrosskit.systemactions.FileShareOutcome
+import io.github.gycrosskit.systemactions.FileShareResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
 import org.junit.Test
@@ -69,6 +71,62 @@ class SystemActionsHandlerTest {
             handler.call("copyText", "{}", replies::add)
             assertEquals(1, replies.size)
         } finally { handler.dispose(); Dispatchers.resetMain() }
+    }
+
+    @Test fun terminalShareCancellationCannotAffectRetry() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        val pending = mutableListOf<CancellableContinuation<FileShareResult>>()
+        val actions = object : Actions() {
+            override suspend fun shareFileWithOutcome(path: String, title: String): FileShareResult =
+                suspendCancellableCoroutine { pending += it }
+        }
+        val handler = SystemActionsHandler(actions, { true }, { {} }, { {} }, {})
+        val replies = mutableListOf<String>()
+        val args = "{\"requestId\":\"same\",\"value\":\"/tmp/a.zip\",\"title\":\"Share\"}"
+        try {
+            handler.call("shareFileWithOutcome", args, replies::add)
+            handler.call("cancel", "{\"requestId\":\"same\"}", replies::add)
+            assertTrue(pending[0].isCancelled)
+            handler.call("shareFileWithOutcome", args, replies::add)
+            pending[0].resume(FileShareResult(ActionResult.Requested, FileShareOutcome.Failed))
+            assertTrue(replies.isEmpty())
+            pending[1].resume(FileShareResult(ActionResult.Requested, FileShareOutcome.Cancelled))
+            assertEquals("requested", JSONObject(replies.single()).optString("status"))
+            assertEquals("cancelled", JSONObject(replies.single()).optString("outcome"))
+            handler.call("shareFileWithOutcome", args, replies::add)
+            handler.dispose()
+            assertTrue(pending[2].isCancelled)
+            pending[2].resume(FileShareResult(ActionResult.Requested, FileShareOutcome.Completed))
+            assertEquals(1, replies.size)
+        } finally { handler.dispose(); Dispatchers.resetMain() }
+    }
+
+    @Test fun lateUncancellableOutcomeCannotRemoveReplacementRequest() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        val pending = mutableListOf<CancellableContinuation<FileShareResult>>()
+        val actions = object : Actions() {
+            override suspend fun shareFileWithOutcome(path: String, title: String): FileShareResult =
+                withContext(NonCancellable) { suspendCancellableCoroutine { pending += it } }
+        }
+        val handler = SystemActionsHandler(actions, { true }, { {} }, { {} }, {})
+        val replies = mutableListOf<String>()
+        val args = "{\"requestId\":\"same\",\"value\":\"/tmp/a.zip\",\"title\":\"Share\"}"
+        try {
+            handler.call("shareFileWithOutcome", args, replies::add)
+            handler.call("cancel", "{\"requestId\":\"same\"}", replies::add)
+            handler.call("shareFileWithOutcome", args, replies::add)
+            pending[0].resume(FileShareResult(ActionResult.Requested, FileShareOutcome.Failed))
+            assertTrue(replies.isEmpty())
+            // 旧操作完成不能删掉新等待，新请求仍能被取消。
+            handler.call("cancel", "{\"requestId\":\"same\"}", replies::add)
+            pending[1].resume(FileShareResult(ActionResult.Requested, FileShareOutcome.Completed))
+            assertTrue(replies.isEmpty())
+        } finally { handler.dispose(); Dispatchers.resetMain() }
+    }
+
+    @Test fun unsupportedTerminalReceiptDoesNotInventCompletion() = runTest {
+        val result = Actions().shareFileWithOutcome("/tmp/a.zip", "Share")
+        assertEquals(FileShareResult(ActionResult.Requested, FileShareOutcome.Unknown), result)
     }
 
     @Test fun oldStopAndLateObserverCannotAffectReplacement() = runTest {

@@ -30,6 +30,7 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
 
   call(method: string, params: KRAny, callback: KuiklyRenderCallback | null): KRAny {
     if (this.destroyed) { return null; }
+    if (method === 'dispose') { this.releaseResources(); return null; }
     let args: ActionParams;
     try {
       args = JSON.parse(typeof params === 'string' ? params : '{}') as ActionParams;
@@ -65,7 +66,7 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
     const result = method === 'openNativeAppStore' ? this.openNativeStore(actions, args.value, pending) :
       method === 'setKeepScreenOn' ? this.setKeepScreenOn(args.value, pending) : this.perform(actions, method, args, pending);
     result.then((status: ActionResult) => {
-      this.deliver(id, pending, status);
+      this.deliver(id, pending, status, method === 'shareFileWithOutcome' && status === 'requested');
     }).catch(() => { this.deliver(id, pending, 'unavailable'); });
     return null;
   }
@@ -106,6 +107,7 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
     switch (method) {
       case 'copyText': return actions.copyText(value);
       case 'shareFile':
+      case 'shareFileWithOutcome':
         if (typeof args.title !== 'string') return 'invalid_input';
         return actions.shareFile(value, args.title, () => !this.destroyed && pending.callback !== null);
       case 'dial': return actions.dial(value);
@@ -117,16 +119,18 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
     }
   }
 
-  private deliver(id: string, pending: PendingAction, status: ActionResult): void {
+  private deliver(id: string, pending: PendingAction, status: ActionResult, unknownOutcome: boolean = false): void {
     if (this.destroyed || this.pending.get(id) !== pending) { return; }
     this.pending.delete(id);
     const callback = pending.callback;
     pending.callback = null;
     pending.cancel = null;
-    callback?.({ status });
+    if (unknownOutcome) callback?.({ status, outcome: 'unknown' });
+    else callback?.({ status });
   }
 
-  onDestroy(): void {
+  private releaseResources(): void {
+    if (this.destroyed) return;
     this.destroyed = true;
     this.observations.dispose();
     this.keepScreenLease?.release().catch(() => {});
@@ -138,6 +142,10 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
     });
     this.pending.clear();
     this.actions = null;
+  }
+
+  onDestroy(): void {
+    this.releaseResources();
     super.onDestroy();
   }
 }

@@ -1,5 +1,10 @@
 # 更新日志
 
+## 1.0.0（未发布）
+
+- Maven、iOS Pod 与 OHPM 统一版本为 1.0.0；同仓模块使用同版，Kuikly 配套保持 2.29.1。
+- 本地源码/产物消费与设备、远程发布验收分别记录；不覆盖旧标签或修改历史发布字节。
+
 ## 0.2.0-rc.5
 
 GycSystemActionsModule 接受 Ability 级 windowPolicy 注入，隔离多 Ability 生命周期 owner。Maven / Swift / Git Pod 仍使用 0.2.0-rc.6。
