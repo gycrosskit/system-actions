@@ -1,5 +1,9 @@
 # 更新日志
 
+## Unreleased
+
+- Kuikly KMP 与宿主统一为 `2.29.1-2.0.21-ohos`，配套 iOS/OHOS Renderer 固定 `2.29.1`；同步配置与锁文件，后续随宿主升级。尚未发布，完整 SDK 与消费验证分别记录。
+
 ## 0.2.0-rc.6（2026-10-08）
 
 - 补Android/iOS native观察和全屏窗口策略；修正owner/恢复边界；明确宿主接线及iOS能力限制。

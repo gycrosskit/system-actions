@@ -15,7 +15,7 @@ Pod::Spec.new do |spec|
   spec.subspec 'Kuikly' do |kuikly|
     kuikly.source_files = 'ios/Sources/GYCSystemActionsKuikly/**/*.swift'
     kuikly.dependency 'GYCWindowPolicy/Core'
-    kuikly.dependency 'OpenKuiklyIOSRender', '2.28.0'
+    kuikly.dependency 'OpenKuiklyIOSRender', '2.29.1'
   end
   spec.frameworks = 'UIKit'
 end
