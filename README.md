@@ -1,8 +1,12 @@
 # GY CrossKit System Actions
 
+> 当前源码候选统一为 **1.0.0**：Maven（core/Kuikly）、iOS Pod 与 OHPM 使用同版；尚未发布，示例坐标须待发布后远程消费。本地验证使用显式源码/本地 HAR，Kuikly 基线为 2.29.1，真机与新版本远程消费另验。
+
+当前源码为未发布的 Kuikly 2.29.1 配套候选；带发布标签的说明保留历史范围。新增 API 必须消费配套源码，不能用旧远程版本验证代替。
+
 ## 当前功能与平台边界
 
-本版 Swift/Git Pod 为 `0.2.0-rc.8`（独立 tag `native-0.2.0-rc.8`），Maven 沿用 `0.2.0-rc.7`，HAR 沿用 `0.2.0-rc.5`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
+本版 Swift/Git Pod 为 `1.0.0`（独立 tag `native-1.0.0`），Maven 与 HAR 同步为 `1.0.0`（未发布）。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
 
 core 提供系统动作与独立窗口/观察服务；不提供页面 UI。`system-actions-kuikly` 提供 Android/iOS/OHOS 页面 Module，Android 真实 receiver 与可选 iOS Pod receiver 复用 core；全屏仍需宿主显式 native 接线。
 
@@ -103,8 +107,8 @@ classDiagram
 | 模块 | 平台与要求 |
 | --- | --- |
 | `system-actions-core` | Android API 24+ / iOS（宿主基线 iOS 14+）；公共 `SystemActions` 与原生实现 |
-| `system-actions-kuikly` | Android/iOS/OHOS Kotlin Module、Android receiver；Kuikly `2.28.0-2.0.21-ohos` |
-| `@gycrosskit/system-actions-native` | HarmonyOS API 22 兼容 HAR；原生 ArkTS 和 Kuikly Renderer Module，render `2.28.0` |
+| `system-actions-kuikly` | Android/iOS/OHOS Kotlin Module、Android receiver；Kuikly `2.29.1-2.0.21-ohos` |
+| `@gycrosskit/system-actions-native` | HarmonyOS API 22 兼容 HAR；原生 ArkTS 和 Kuikly Renderer Module，render `2.29.1` |
 
 KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.1 / AGP 8.10.1。iOS 编译链接需 macOS / Xcode，OHOS 需匹配 Native SDK。Core 的 OHOS 和 JVM 变体仅包含公共 API；JVM 不提供桌面系统动作。
 
@@ -143,7 +147,7 @@ await lease.update(true);
 await lease.release();
 ```
 
-HAR 0.2.0-rc.5 允许 `GycSystemActionsModule(actions, windowPolicy)` 注入上述 Ability 级 controller；省略参数仅兼容原单 Ability 接入。多 Ability 接入需采用 HAR 0.2.0-rc.5 或后续兼容版本，详见接入指南。
+HAR 1.0.0 允许 `GycSystemActionsModule(actions, windowPolicy)` 注入上述 Ability 级 controller；省略参数仅兼容原单 Ability 接入。多 Ability 接入需采用 HAR 1.0.0 或后续兼容版本，详见接入指南。
 
 多 owner 与异步释放、Swift/CocoaPods 接线和限制见[接入指南](docs/接入指南.md#window-策略)。本地验证方法见[开发与验证](docs/开发与验证.md#window-策略验证)。
 
@@ -161,10 +165,10 @@ OHOS fullscreen 与 privacy 在同一 Ability 共用 controller 和串行队列�
 仅需 iOS 原生观察时使用独立 Git Pod（不增加 Shared 或 Renderer 依赖）：
 
 ```ruby
-pod 'GYCWindowPolicy/Core', :git => 'https://github.com/gycrosskit/system-actions.git', :tag => 'native-0.2.0-rc.8'
+pod 'GYCWindowPolicy/Core', :git => 'https://github.com/gycrosskit/system-actions.git', :tag => 'native-1.0.0'
 ```
 
-这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；SPM 语义化版本仍可使用旧 `0.2.0-rc.7`，本次 native tag 不新增同号 Maven/SPM 版本。
+这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；SPM 语义化版本仍可使用旧 `1.0.0`，本次 native tag 不新增同号 Maven/SPM 版本。
 
 项目 `settings.gradle.kts` 的依赖仓库：
 
@@ -186,7 +190,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.system-actions:system-actions-core:0.2.0-rc.6")
+            implementation("com.github.gycrosskit.system-actions:system-actions-core:1.0.0")
         }
     }
 }
@@ -196,7 +200,7 @@ HarmonyOS 原生宿主：
 
 ```sh
 # 当前配套 HAR；按精确版本安装
-ohpm install @gycrosskit/system-actions-native@0.2.0-rc.5
+ohpm install @gycrosskit/system-actions-native@1.0.0
 ```
 
 Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。此版 Maven rc.6 配套 HAR rc.5，Swift Package/Git Pod 使用 rc.6；HAR rc.4 的精确 Registry 查询与专属空缓存安装记录见 [rc.5 验收](docs/0.2.0-rc.5候选验收.md)，固定 Release HAR 校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代当前 HAR；此版 Maven/Swift 包含 Android/iOS 观察/全屏 API，仍需宿主显式接线。
@@ -261,6 +265,6 @@ OHOS KLIB 编译不代表 HAR 构建、ohpm 上架或真机验收。当前没有
 
 ## 原生与 Kuikly 共用系统服务
 
-`SystemActions.copyText` 和 `shareFile` 与拨号/外链一样，供 shared Kotlin 使用。Android 的两种 UI 入口都可持有 `AndroidSystemActions(context, fileProviderAuthority)`；authority 和目录映射来自宿主既有唯一 FileProvider。iOS 两种入口都可把既有 `IosFileActions(presenterResolver)` 传入 `IosSystemActions(fileActions)`，宿主退出时关闭原文件服务，不缓存旧 Scene，不另造 presenter。OHOS 使用现有 `SystemActionsModule` 与 HAR。默认缺少 Provider/presenter 时分享明确 `Unavailable`；`Requested` 是面板受理，用户分享完成结果仍由原平台文件 API 提供。
+`SystemActions.copyText` 和 `shareFile` 与拨号/外链一样，供 shared Kotlin 使用。Android 的两种 UI 入口都可持有 `AndroidSystemActions(context, fileProviderAuthority)`；authority 和目录映射来自宿主既有唯一 FileProvider。iOS 两种入口都可把既有 `IosFileActions(presenterResolver)` 传入 `IosSystemActions(fileActions)`，宿主退出时关闭原文件服务，不缓存旧 Scene，不另造 presenter。OHOS 使用现有 `SystemActionsModule` 与 HAR。默认缺少 Provider/presenter 时分享明确 `Unavailable`；`Requested` 是面板受理，需要终态时使用本地候选 `shareFileWithOutcome`（尚未发布）：iOS 透传真实 Completed/Cancelled/Failed，Android/OHOS 受理后返回 Unknown；缺少回执不推断成功，取消、超时与页面销毁只清理本次等待。
 
 WindowPolicy 保持独立多 owner lease：Android 复用 `AndroidWindowPolicy.acquire` 并 `close`，iOS 复用 Swift `WindowPolicyController.acquire` 并 `end`，OHOS 复用 HAR 的对应 owner 并 release。原生页面、Kuikly 与播放器共享宿主既有 owner，不重复嵌套新 owner；最后一个 owner 结束时恢复原有常亮/保护状态。iOS 只支持录屏/镜像遮罩，不能承诺禁止静态截图。键盘与主题属于宿主 UI 策略，未添加全能 common 平台服务。

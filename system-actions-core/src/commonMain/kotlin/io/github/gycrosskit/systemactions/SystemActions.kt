@@ -22,6 +22,12 @@ interface SystemActions {
      */
     suspend fun shareFile(path: String, title: String): ActionResult = ActionResult.Unavailable
 
+    /** 等待可用的系统分享终态；没有可靠回执的平台受理后立即返回 Unknown，不占用等待槽位。 */
+    suspend fun shareFileWithOutcome(path: String, title: String): FileShareResult {
+        val acceptance = shareFile(path, title)
+        return FileShareResult(acceptance, if (acceptance == ActionResult.Requested) FileShareOutcome.Unknown else null)
+    }
+
     /**
      * 打开系统拨号入口；不表示电话已接通。
      * @param phone 允许可选前导 +、数字及空格/括号/连字符，trim 后数字与分隔部分总长最多 31。

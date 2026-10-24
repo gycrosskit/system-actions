@@ -3,6 +3,7 @@ package io.github.gycrosskit.systemactions
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withContext
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLComponents
@@ -35,6 +36,30 @@ class IosSystemActions(private val fileActions: IosFileActions) : SystemActions 
         if (!isValidSharePath(path)) return ActionResult.InvalidInput
         return withContext(Dispatchers.Main.immediate) {
             fileActions.shareFile(path, title) {}
+        }
+    }
+
+    override suspend fun shareFileWithOutcome(path: String, title: String): FileShareResult {
+        if (!isValidSharePath(path)) return FileShareResult(ActionResult.InvalidInput, null)
+        return withContext(Dispatchers.Main.immediate) {
+            var accepted = false
+            var finished = false
+            try {
+                withTimeoutOrNull(115_000L) {
+                    suspendCancellableCoroutine { pending ->
+                        if (!pending.isActive) return@suspendCancellableCoroutine
+                        val acceptance = fileActions.shareFile(path, title) { outcome ->
+                            finished = true
+                            if (pending.isActive) pending.resume(FileShareResult(ActionResult.Requested, outcome))
+                        }
+                        accepted = acceptance == ActionResult.Requested
+                        if (!accepted && pending.isActive) pending.resume(FileShareResult(acceptance, null))
+                    }
+                } ?: FileShareResult(ActionResult.Requested, FileShareOutcome.Unknown)
+            } finally {
+                // 只关闭本次已受理且仍在等待的面板，不能取消别的请求。
+                if (accepted && !finished) fileActions.close()
+            }
         }
     }
 

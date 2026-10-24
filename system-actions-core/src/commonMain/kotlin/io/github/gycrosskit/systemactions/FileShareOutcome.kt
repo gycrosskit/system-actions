@@ -8,4 +8,9 @@ enum class FileShareOutcome {
     Cancelled,
     /** 系统 completion 返回错误。 */
     Failed,
+    /** 当前平台没有可靠终态回执，或等待超时；不能推断分享成功。 */
+    Unknown,
 }
+
+/** 未受理时 outcome 为 null；Requested 与系统终态始终分别表达。 */
+data class FileShareResult(val acceptance: ActionResult, val outcome: FileShareOutcome?)

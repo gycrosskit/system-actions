@@ -63,6 +63,7 @@ case "$products" in
 esac
 [[ "$products" = /* ]] || { echo 'Products directory must be absolute' >&2; exit 1; }
 repo_dir=$(cd "$(dirname "$0")/.." && pwd)
+python3 "$repo_dir/verification/test-native-services.py"
 work_dir=$(mktemp -d "${TMPDIR:-/tmp}/gyc-module-test.XXXXXX")
 device=${2:-}
 app="$work_dir/ModuleTest.app"

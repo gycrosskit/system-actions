@@ -3,7 +3,7 @@ plugins {
     id("com.android.library") version "8.10.1"
 }
 val verifyFileActions = providers.gradleProperty("verifyFileActions").orElse("false").get().toBoolean()
-val systemActionsVersion = providers.gradleProperty("systemActionsVersion").orElse("0.2.0-rc.7").get()
+val systemActionsVersion = providers.gradleProperty("systemActionsVersion").orElse("1.0.0").get()
 val verifyKuiklyNative = systemActionsVersion !in setOf("0.1.3", "0.2.0-rc.1", "0.2.0-rc.2", "0.2.0-rc.3", "0.2.0-rc.4", "0.2.0-rc.5", "0.2.0-rc.6")
 val kuiklyRenderFrameworkDir = providers.gradleProperty("kuiklyRenderFrameworkDir").orNull
 kotlin {
