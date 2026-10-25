@@ -1,12 +1,12 @@
 # GY CrossKit System Actions
 
-> 当前源码候选统一为 **1.0.0**：Maven（core/Kuikly）、iOS Pod 与 OHPM 使用同版；尚未发布，示例坐标须待发布后远程消费。本地验证使用显式源码/本地 HAR，Kuikly 基线为 2.29.1，真机与新版本远程消费另验。
+> 当前源码候选统一为 **1.0.1**：Maven（core/Kuikly）、iOS Pod 与 OHPM 使用同版；尚未发布，示例坐标须待发布后远程消费。本地验证使用显式源码/本地 HAR，Kuikly 基线为 2.29.1，真机与新版本远程消费另验。
 
 当前源码为未发布的 Kuikly 2.29.1 配套候选；带发布标签的说明保留历史范围。新增 API 必须消费配套源码，不能用旧远程版本验证代替。
 
 ## 当前功能与平台边界
 
-本版 Swift/Git Pod 为 `1.0.0`（独立 tag `native-1.0.0`），Maven 与 HAR 同步为 `1.0.0`（未发布）。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
+本版 Swift/Git Pod 为 `1.0.1`（独立 tag `native-1.0.1`），Maven 与 HAR 同步为 `1.0.1`（未发布）。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
 
 core 提供系统动作与独立窗口/观察服务；不提供页面 UI。`system-actions-kuikly` 提供 Android/iOS/OHOS 页面 Module，Android 真实 receiver 与可选 iOS Pod receiver 复用 core；全屏仍需宿主显式 native 接线。
 
@@ -14,7 +14,7 @@ core 提供系统动作与独立窗口/观察服务；不提供页面 UI。`syst
 
 当前测试覆盖、执行时点和未验收项集中见[验证范围](docs/功能与平台差异.md#验证范围)，复现命令见[开发与验证](docs/开发与验证.md)。
 
-Swift `0.2.0-rc.8` 补充 iOS `SystemObservations.observeKeyboardHeight(_:onFrameChangeCompleted:)`：原单参数 API 保持不变，新增完成回调区分 will 阶段的零相交与 frame 变化/收起完成；浮动键盘移出当前 View 无需等待 didHide。具体时序与生命周期见[观察合同](docs/功能与平台差异.md#ios-键盘观察完成回调swift-100)，发布/精确远程消费结果见[原生版本 Release](https://github.com/gycrosskit/system-actions/releases/tag/native-0.2.0-rc.8)；宿主设备行为未验收。
+Swift `0.2.0-rc.8` 补充 iOS `SystemObservations.observeKeyboardHeight(_:onFrameChangeCompleted:)`：原单参数 API 保持不变，新增完成回调区分 will 阶段的零相交与 frame 变化/收起完成；浮动键盘移出当前 View 无需等待 didHide。具体时序与生命周期见[观察合同](docs/功能与平台差异.md#ios-键盘观察完成回调swift-101)，发布/精确远程消费结果见[原生版本 Release](https://github.com/gycrosskit/system-actions/releases/tag/native-0.2.0-rc.8)；宿主设备行为未验收。
 
 [历史完整源码审查](docs/完整源码审查.md) 列出全部生产文件、公开调用链、实际验证与未测项。
 
@@ -147,7 +147,7 @@ await lease.update(true);
 await lease.release();
 ```
 
-HAR 1.0.0 允许 `GycSystemActionsModule(actions, windowPolicy)` 注入上述 Ability 级 controller；省略参数仅兼容原单 Ability 接入。多 Ability 接入需采用 HAR 1.0.0 或后续兼容版本，详见接入指南。
+HAR 1.0.1 允许 `GycSystemActionsModule(actions, windowPolicy)` 注入上述 Ability 级 controller；省略参数仅兼容原单 Ability 接入。多 Ability 接入需采用 HAR 1.0.1 或后续兼容版本，详见接入指南。
 
 多 owner 与异步释放、Swift/CocoaPods 接线和限制见[接入指南](docs/接入指南.md#window-策略)。本地验证方法见[开发与验证](docs/开发与验证.md#window-策略验证)。
 
@@ -165,10 +165,10 @@ OHOS fullscreen 与 privacy 在同一 Ability 共用 controller 和串行队列�
 仅需 iOS 原生观察时使用独立 Git Pod（不增加 Shared 或 Renderer 依赖）：
 
 ```ruby
-pod 'GYCWindowPolicy/Core', :git => 'https://github.com/gycrosskit/system-actions.git', :tag => 'native-1.0.0'
+pod 'GYCWindowPolicy/Core', :git => 'https://github.com/gycrosskit/system-actions.git', :tag => 'native-1.0.1'
 ```
 
-这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；SPM 语义化版本仍可使用旧 `1.0.0`，本次 native tag 不新增同号 Maven/SPM 版本。
+这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；本轮 SPM 同样固定 `native-1.0.1` revision，Maven 使用配套 `1.0.1`。旧 `1.0.0` 标签保留，不能用其产物替代当前候选验证。
 
 项目 `settings.gradle.kts` 的依赖仓库：
 
@@ -190,7 +190,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.system-actions:system-actions-core:1.0.0")
+            implementation("com.github.gycrosskit.system-actions:system-actions-core:1.0.1")
         }
     }
 }
@@ -200,7 +200,7 @@ HarmonyOS 原生宿主：
 
 ```sh
 # 当前配套 HAR；按精确版本安装
-ohpm install @gycrosskit/system-actions-native@1.0.0
+ohpm install @gycrosskit/system-actions-native@1.0.1
 ```
 
 Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。此版 Maven rc.6 配套 HAR rc.5，Swift Package/Git Pod 使用 rc.6；HAR rc.4 的精确 Registry 查询与专属空缓存安装记录见 [rc.5 验收](docs/0.2.0-rc.5候选验收.md)，固定 Release HAR 校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代当前 HAR；此版 Maven/Swift 包含 Android/iOS 观察/全屏 API，仍需宿主显式接线。
