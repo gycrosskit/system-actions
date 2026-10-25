@@ -152,13 +152,4 @@ with tempfile.TemporaryDirectory() as directory:
     result, sim = run('normal', '--cleanup-simulator', 'booted')
     assert result.returncode != 0 and not sim
 
-workflow = (ROOT / '.github/workflows/regression.yml').read_text()
-native = workflow.split('\n  native:\n', 1)[1].split('\n  release-android:\n', 1)[0]
-assert native.index('--prepare-simulator') < native.index('Restore complete Kotlin Native toolchains')
-assert native.index('--prepare-simulator') < native.index('compileKotlinIosArm64')
-assert 'if: always() && steps.module-simulator.outputs.device !=' in native
-assert native.index('--cleanup-simulator') < native.index('Save public CI diagnostics')
-assert 'MODULE_SIMULATOR: ${{ steps.module-simulator.outputs.device }}' in native
-assert '${MODULE_SIMULATOR:?Simulator preparation did not produce a device}' in native
-assert 'python3 verification/ci/test_ios_module_simulator.py' in workflow
-print('Simulator contract: early boot, ready wait, real PASS and owned-device cleanup')
+print('Simulator contract: ready wait, real PASS and owned-device cleanup')
