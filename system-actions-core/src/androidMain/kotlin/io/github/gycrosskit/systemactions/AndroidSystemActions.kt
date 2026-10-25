@@ -13,7 +13,7 @@ import java.io.File
 import android.webkit.MimeTypeMap
 
 /**
- * Android 系统服务，自动切主线程；CMP/Kuikly 共同使用，不持有窗口 owner。
+ * Android 系统服务，自动切主线程；原生与 Kuikly 共同使用，不持有窗口 owner。
  * @param context 宿主 Context；非 Activity 时分享/外链追加 NEW_TASK。
  * @param fileProviderAuthority 宿主唯一 FileProvider 的 authority；未配置时文件分享返回 Unavailable。
  */

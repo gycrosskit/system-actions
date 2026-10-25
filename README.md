@@ -14,7 +14,7 @@ core 提供系统动作与独立窗口/观察服务；不提供页面 UI。`syst
 
 当前测试覆盖、执行时点和未验收项集中见[验证范围](docs/功能与平台差异.md#验证范围)，复现命令见[开发与验证](docs/开发与验证.md)。
 
-Swift `0.2.0-rc.8` 补充 iOS `SystemObservations.observeKeyboardHeight(_:onFrameChangeCompleted:)`：原单参数 API 保持不变，新增完成回调区分 will 阶段的零相交与 frame 变化/收起完成；浮动键盘移出当前 View 无需等待 didHide。具体时序与生命周期见[观察合同](docs/功能与平台差异.md#ios-键盘观察完成回调swift-020-rc8)，发布/精确远程消费结果见[原生版本 Release](https://github.com/gycrosskit/system-actions/releases/tag/native-0.2.0-rc.8)；宿主设备行为未验收。
+Swift `0.2.0-rc.8` 补充 iOS `SystemObservations.observeKeyboardHeight(_:onFrameChangeCompleted:)`：原单参数 API 保持不变，新增完成回调区分 will 阶段的零相交与 frame 变化/收起完成；浮动键盘移出当前 View 无需等待 didHide。具体时序与生命周期见[观察合同](docs/功能与平台差异.md#ios-键盘观察完成回调swift-100)，发布/精确远程消费结果见[原生版本 Release](https://github.com/gycrosskit/system-actions/releases/tag/native-0.2.0-rc.8)；宿主设备行为未验收。
 
 [历史完整源码审查](docs/完整源码审查.md) 列出全部生产文件、公开调用链、实际验证与未测项。
 
@@ -255,13 +255,13 @@ Android 拨号使用 `ACTION_DIAL`，不申请直接呼叫权限。定位服务�
 
 ## 自动回归
 
-[Component regression](.github/workflows/regression.yml) 按事件分阶段：PR 先判断变更范围，仅源码变更运行已有 Android/Native 测试与编译；纯文档 PR 和 `main` push 只运行轻量脚本/配置检查。手动运行不填版本时执行源码回归，未知路径保守按源码处理。源码 PR 执行验收，main 保持轻量检查，Release 验证精确远程坐标与消费者；线上耗时以实际 Actions 运行为准。
+当前源码回归使用[统一远程验证（Jenkins）](https://github.com/gycrosskit/.github/blob/main/docs/统一远程验证.md)，按已推送源码 ref/SHA 选择对应组件；平台命令与参数以受信 Jenkins recipe 为准。实际执行范围、测试数量、结果与耗时以绑定源码/CI SHA 的构建回执为准，轻量检查或跳过不算平台测试通过。
 
-Maven Release 发布或手动填写精确已发布版本时，`verify-public` 统一校验一次冻结归档、精确 tag/commit、完整 publication 清单和公开文件；通过后 Android/Native 独立消费者从 JitPack 解析该版本。PR 不再反复消费旧基线；不使用 `mavenLocal`、本库源码或归档替换远程依赖。此流程不发布二进制。
+候选冻结与消费按[发布流程](https://github.com/gycrosskit/.github/blob/main/docs/发布流程.md)使用独立 Job：`component-ci/package` 绑定准确 SOURCE_SHA 生成冻结候选并验证私有消费，`component-ci/release` 绑定准确 Tag/候选执行发布及独立公开消费。核对冻结归档、精确 tag/commit、完整 publication 清单和公开文件，不使用 `mavenLocal`、本库源码或 staging 替换公开依赖；各阶段证据分别记录。
 
 OHOS KLIB 编译不代表 HAR 构建、ohpm 上架或真机验收。当前没有已确认可用的 DevEco/Hvigor runner，这些检查尚未自动化，不能作为 CI 通过范围。
 
-阶段、缓存、有限网络重试、失败记录与证据边界见[共用 CI 规则](https://github.com/gycrosskit/.github/blob/main/docs/持续集成门禁.md)；本库实际平台命令以 workflow 为准。源码通过、远程消费、HAR/ohpm 与设备验收分别记录。
+阶段、缓存、有限网络重试、失败记录与证据边界见[共用 CI 规则](https://github.com/gycrosskit/.github/blob/main/docs/持续集成门禁.md)；本库实际平台命令以 Jenkins 的固定版本 recipe 为准。源码通过、远程消费、HAR/ohpm 与设备验收分别记录。
 
 ## 原生与 Kuikly 共用系统服务
 
