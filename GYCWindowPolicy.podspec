@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'GYCWindowPolicy'
-  spec.version = '1.0.1'
+  spec.version = '1.0.2'
   spec.summary = 'iOS 播放窗口常亮与录屏遮罩策略'
   spec.homepage = 'https://github.com/gycrosskit/system-actions'
   spec.license = { :type => 'Apache-2.0', :file => 'LICENSE' }
@@ -15,7 +15,7 @@ Pod::Spec.new do |spec|
   spec.subspec 'Kuikly' do |kuikly|
     kuikly.source_files = 'ios/Sources/GYCSystemActionsKuikly/**/*.swift'
     kuikly.dependency 'GYCWindowPolicy/Core'
-    kuikly.dependency 'OpenKuiklyIOSRender', '2.29.1'
+    kuikly.dependency 'OpenKuiklyIOSRender', '>= 2.29.1', '< 3.0'
   end
   spec.frameworks = 'UIKit'
 end
