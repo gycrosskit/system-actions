@@ -2,13 +2,13 @@
 
 Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费验证边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。
 
-> iOS Git Pod `1.0.2`（`native-1.0.2`），HAR/OHPM `1.0.2`（`har-1.0.2`）；Maven 保留 `1.0.1`。发布与精确消费状态见对应 Release；旧 Tag、归档及摘要不变。
+> 当前候选：Maven `1.1.0`，HAR/OHPM `1.1.0`（`har-1.1.0`）；未修改的 Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。候选尚未发布，精确公开版本与消费结果须分别验收；旧 Tag、归档及摘要不变。
 
 组件构建最低基线为 Kuikly 2.29.1；允许范围、宿主选择及 2.30 消费边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。带日期的历史结果不代替当前渠道验收。
 
 ## 当前功能与平台边界
 
-本版 Swift/Git Pod 与 HAR 为 `1.0.2`（分别为 `native-1.0.2`、`har-1.0.2`）；Maven 保留 `1.0.1`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
+本轮准备 Maven/HAR `1.1.0` 候选，Swift/Git Pod 保留 `native-1.0.2`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
 
 core 提供系统动作与独立窗口/观察服务；不提供页面 UI。`system-actions-kuikly` 提供 Android/iOS/OHOS 页面 Module，Android 真实 receiver 与可选 iOS Pod receiver 复用 core；全屏仍需宿主显式 native 接线。
 
@@ -170,7 +170,7 @@ OHOS fullscreen 与 privacy 在同一 Ability 共用 controller 和串行队列�
 pod 'GYCWindowPolicy/Core', :git => 'https://github.com/gycrosskit/system-actions.git', :tag => 'native-1.0.2'
 ```
 
-这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；本轮 SPM 同样固定 `native-1.0.2` revision，Maven 使用配套 `1.0.1`。旧 `1.0.0` 标签保留，不能用其产物替代当前候选验证。
+这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；本轮 SPM 同样固定 `native-1.0.2` revision，Maven 候选使用 `1.1.0`。旧 `1.0.0` 标签保留，不能用其产物替代当前候选验证。
 
 项目 `settings.gradle.kts` 的依赖仓库：
 
@@ -192,7 +192,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.system-actions:system-actions-core:1.0.1")
+            implementation("com.github.gycrosskit.system-actions:system-actions-core:1.1.0")
         }
     }
 }
@@ -202,10 +202,12 @@ HarmonyOS 原生宿主：
 
 ```sh
 # 当前配套 HAR；按精确版本安装
-ohpm install @gycrosskit/system-actions-native@1.0.2
+ohpm install @gycrosskit/system-actions-native@1.1.0
 ```
 
 Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。此版 Maven rc.6 配套 HAR rc.5，Swift Package/Git Pod 使用 rc.6；HAR rc.4 的精确 Registry 查询与专属空缓存安装记录见 [rc.5 验收](docs/0.2.0-rc.5候选验收.md)，固定 Release HAR 校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代当前 HAR；此版 Maven/Swift 包含 Android/iOS 观察/全屏 API，仍需宿主显式接线。
+
+原生纯文本读取候选提供 `readClipboardText()` 与 typed result；不经过 Kuikly Renderer，平台限制和 OHOS 私有 NAPI 见[接入指南](docs/接入指南.md#原生剪贴板读取当前源码候选)。
 
 ## 快速使用
 

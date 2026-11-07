@@ -15,6 +15,7 @@ kotlin {
         androidMain.dependencies {
             implementation("androidx.core:core:1.16.0")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2") }
+        ohosArm64Main.dependencies { implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2-1.0.0") }
         commonTest.dependencies { implementation(kotlin("test")) }
         androidUnitTest.dependencies {
             implementation("org.robolectric:robolectric:4.16")

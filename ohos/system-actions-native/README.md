@@ -1,6 +1,6 @@
 # GY CrossKit System Actions Native
 
-> iOS Git Pod `1.0.2`（`native-1.0.2`），HAR/OHPM `1.0.2`（`har-1.0.2`）；Maven 保留 `1.0.1`。发布与精确消费状态见对应 Release；旧 Tag、归档及摘要不变。
+> 当前候选：Maven `1.1.0`，HAR/OHPM `1.1.0`（`har-1.1.0`）；未修改的 Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。候选尚未发布，精确公开版本与消费结果须分别验收；旧 Tag、归档及摘要不变。
 
 历史适用版本：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5`，独立标签 `native-0.2.0-rc.7`。当前能力见[功能与平台差异](https://github.com/gycrosskit/system-actions/blob/native-0.2.0-rc.7/docs/功能与平台差异.md)，发布及远程消费见[固定 Release](https://github.com/gycrosskit/system-actions/releases/tag/native-0.2.0-rc.7)。
 
@@ -9,7 +9,7 @@ HAR **0.2.0-rc.4** 已提供剪贴板、普通私有文件分享和复用 Window
 OHPM `0.2.0-rc.5` 已提交审核，2026-10-08 精确 Registry 查询仍为 NOTFOUND；目前使用固定 Release HAR。下列 Registry 命令仅在精确版本上架后使用：
 
 ```sh
-ohpm install @gycrosskit/system-actions-native@1.0.2
+ohpm install @gycrosskit/system-actions-native@1.1.0
 ```
 
 HAR `1.0.1` 已包含 `GycSystemActionsModule(actions, windowPolicy)`：同一 Ability 的各页与原生 lease 注入同一个 `WindowPolicyController`，不同 Ability 各自持有；省略参数仅兼容单 Ability。接线示例见[接入指南](../../docs/接入指南.md#harmonyos-har)。
