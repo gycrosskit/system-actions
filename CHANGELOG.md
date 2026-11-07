@@ -1,5 +1,12 @@
 # 更新日志
 
+## 1.1.0（候选，尚未发布）
+
+- 新增 `SystemActions.readClipboardText()` 与 `ClipboardReadResult`，区分文本、无文本、拒绝、不可用与失败；Android/iOS 使用平台剪贴板，OHOS KMP 经宿主显式安装的 N-API bridge 接入 HAR。
+- HAR 导出原生 bridge 头；未安装、拒绝或平台错误保持失败关闭，不记录剪贴板内容，宿主负责在前台用户操作中调用与原生接线。
+- Maven 与 HAR/OHPM 使用新候选 `1.1.0`；Swift/Git Pod 源码未改，保留 `native-1.0.2`。构建、公开发布、精确远程消费与设备业务分别验收，旧版本与摘要不变。
+
+
 ## Native/HAR 1.0.2
 
 - iOS Git Pod 使用 `native-1.0.2`，HAR/OHPM 使用 `har-1.0.2`；Maven 保留已发布 `1.0.1`，不重发未修改的 KMP 产物。

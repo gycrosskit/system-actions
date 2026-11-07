@@ -11,7 +11,10 @@ enum class ActionResult {
 }
 
 /** 宿主系统动作；平台自动切到主线程，Kuikly 实现在页面 Context 调用。取消不撤回已受理的系统动作。 */
-interface SystemActions {
+interface SystemActions : ClipboardTextReader {
+    /** 只有原生实现支持读取；通用 Kuikly Module 保持 Unavailable。 */
+    override suspend fun readClipboardText(): ClipboardReadResult = ClipboardReadResult.Unavailable
+
     /** 原样写剪贴板；Requested 只表示写入受理，允许空文本，不读取剪贴板。 */
     suspend fun copyText(value: String): ActionResult = ActionResult.Unavailable
     /**

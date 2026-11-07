@@ -7,6 +7,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withContext
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLComponents
+import platform.UIKit.UIPasteboard
 import platform.UIKit.UIApplication
 import platform.UIKit.UIApplicationOpenSettingsURLString
 import kotlin.coroutines.resume
@@ -30,6 +31,11 @@ class IosSystemActions(private val fileActions: IosFileActions) : SystemActions 
 
     override suspend fun copyText(value: String): ActionResult = withContext(Dispatchers.Main.immediate) {
         fileActions.copyText(value)
+    }
+
+    override suspend fun readClipboardText(): ClipboardReadResult = withContext(Dispatchers.Main.immediate) {
+        // UIPasteboard 没有可靠的拒绝回执；nil 只能表示没有可读取的 string。
+        UIPasteboard.generalPasteboard.string?.let(ClipboardReadResult::Text) ?: ClipboardReadResult.NoText
     }
 
     override suspend fun shareFile(path: String, title: String): ActionResult {

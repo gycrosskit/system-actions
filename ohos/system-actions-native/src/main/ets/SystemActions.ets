@@ -1,5 +1,5 @@
 import { uniformTypeDescriptor } from '@kit.ArkData';
-import { pasteboard } from '@kit.BasicServicesKit';
+import { pasteboard, BusinessError } from '@kit.BasicServicesKit';
 import { fileIo, fileUri } from '@kit.CoreFileKit';
 import { systemShare } from '@kit.ShareKit';
 import { call } from '@kit.TelephonyKit';
@@ -9,6 +9,11 @@ import { productViewManager } from '@kit.AppGalleryKit';
 
 /** requested 仅代表系统受理；invalid_input 未调用系统；unavailable 为不支持或系统失败。 */
 export type ActionResult = 'requested' | 'invalid_input' | 'unavailable';
+/** 原文只交给宿主私有 NAPI，不注册到 Kuikly Renderer。 */
+export interface ClipboardReadResult {
+  status: 'text' | 'no_text' | 'denied' | 'unavailable' | 'failed';
+  value?: string;
+}
 /** 宿主拥有的 AppGallery 等待句柄，20 秒无出现回执结算 unavailable。 */
 export interface NativeStoreRequest {
   /** onAppear 返回 requested，错误、消失、超时与取消返回 unavailable；至多结算一次。 */
@@ -29,6 +34,21 @@ export class SystemActions {
       await pasteboard.getSystemPasteboard().setData(pasteboard.createPlainTextData(value));
       return 'requested';
     } catch (_) { return 'unavailable'; }
+  }
+
+  /** 仅读取第一条 plain text；不拼接、不转换 URI，也不记录原文。 */
+  async readClipboardText(): Promise<ClipboardReadResult> {
+    try {
+      const data = await pasteboard.getSystemPasteboard().getData();
+      if (data.getRecordCount() === 0) return { status: 'no_text' };
+      const record = data.getRecord(0);
+      if (record.mimeType !== pasteboard.MIMETYPE_TEXT_PLAIN || typeof record.plainText !== 'string') {
+        return { status: 'no_text' };
+      }
+      return { status: 'text', value: record.plainText };
+    } catch (error) {
+      return { status: (error as BusinessError).code === 201 ? 'denied' : 'failed' };
+    }
   }
 
   /**

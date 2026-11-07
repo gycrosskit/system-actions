@@ -22,6 +22,55 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], shadows = [FileProviderBoundary::class])
 class AndroidSystemActionsTest {
+    @Test fun clipboardReadsOnlyFirstActualTextWithFocusedActivity() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val controller = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup()
+        try {
+            val activity = controller.get()
+            val actions = AndroidSystemActions(activity)
+            val clipboard = activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            assertEquals(ClipboardReadResult.Unavailable, AndroidSystemActions(activity.applicationContext).readClipboardText())
+            controller.windowFocusChanged(true)
+            for (value in listOf("", " ", "a\u0000b", "长".repeat(20000))) {
+                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("", value).apply {
+                    addItem(android.content.ClipData.Item("ignored"))
+                })
+                assertEquals(ClipboardReadResult.Text(value), actions.readClipboardText())
+            }
+            clipboard.setPrimaryClip(android.content.ClipData.newRawUri("", android.net.Uri.parse("https://example.com")))
+            assertEquals(ClipboardReadResult.NoText, actions.readClipboardText())
+            clipboard.setPrimaryClip(android.content.ClipData.newIntent("", Intent(Intent.ACTION_VIEW)))
+            assertEquals(ClipboardReadResult.NoText, actions.readClipboardText())
+            controller.windowFocusChanged(false)
+            assertEquals(ClipboardReadResult.Unavailable, actions.readClipboardText())
+        } finally {
+            controller.pause().stop().destroy()
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test fun clipboardDistinguishesExplicitDenialFromFailureAndEmptyClip() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val controller = org.robolectric.Robolectric.buildActivity(ClipboardFailureActivity::class.java).setup()
+        try {
+            controller.windowFocusChanged(true)
+            val activity = controller.get()
+            val actions = AndroidSystemActions(activity)
+            val clipboard = activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            clipboard.clearPrimaryClip()
+            assertEquals(ClipboardReadResult.NoText, actions.readClipboardText())
+            activity.failure = SecurityException()
+            assertEquals(ClipboardReadResult.Denied, actions.readClipboardText())
+            activity.failure = IllegalStateException()
+            assertEquals(ClipboardReadResult.Failed, actions.readClipboardText())
+            activity.failure = kotlinx.coroutines.CancellationException()
+            kotlin.test.assertFailsWith<kotlinx.coroutines.CancellationException> { actions.readClipboardText() }
+        } finally {
+            controller.pause().stop().destroy()
+            Dispatchers.resetMain()
+        }
+    }
+
     @Test fun sharedServiceUsesClipboardAndProviderWithoutNewWindowOwner() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
@@ -102,4 +151,12 @@ class AndroidSystemActionsTest {
         } finally { Dispatchers.resetMain() }
     }
 
+}
+
+class ClipboardFailureActivity : android.app.Activity() {
+    var failure: RuntimeException? = null
+    override fun getSystemService(name: String): Any? {
+        if (name == android.content.Context.CLIPBOARD_SERVICE) failure?.let { throw it }
+        return super.getSystemService(name)
+    }
 }
