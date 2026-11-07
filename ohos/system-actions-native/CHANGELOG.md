@@ -1,6 +1,8 @@
 # 更新日志
 
-## 1.1.0 （候选，尚未发布）
+## 1.1.0
+
+状态：候选，发布与远程消费以各渠道回执为准。
 
 - 新增 `SystemActions.readClipboardText()` 与 `ClipboardReadResult`，区分文本、无文本、拒绝、不可用与失败；Android/iOS 使用平台剪贴板，OHOS KMP 经宿主显式安装的 N-API bridge 接入 HAR。
 - HAR 导出原生 bridge 头；未安装、拒绝或平台错误保持失败关闭，不记录剪贴板内容，宿主负责在前台用户操作中调用与原生接线。

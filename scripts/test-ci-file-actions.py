@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import subprocess
+import json
 import re
 from pathlib import Path
 
@@ -16,5 +17,16 @@ versions = re.findall(r'^\s*version = providers\.environmentVariable\("VERSION"\
 assert len(versions) == 1, 'Current source version declaration must match the explicit build format'
 source_version = versions[0]
 assert subprocess.check_output(['bash', str(script), source_version], text=True).strip() == 'true', source_version
+root = build.parent
+har_version = json.loads((root / 'ohos/system-actions-native/oh-package.json5').read_text())['version']
+for path, current in ((root / 'CHANGELOG.md', source_version),
+                      (root / 'ohos/system-actions-native/CHANGELOG.md', har_version)):
+    sections = re.findall(r'^##[ \t]+(.*?)\n(.*?)(?=^#{1,2}[ \t]|\Z)', path.read_text(), re.MULTILINE | re.DOTALL)
+    current_sections = [(title, body) for title, body in sections
+                        if re.match(re.escape(current) + r'($|[ \t（(])', title)]
+    assert len(current_sections) == 1, f'{path}: current version must appear exactly once'
+    title, body = current_sections[0]
+    assert title == current, f'{path}: use ## <version>; put release status in the body'
+    assert re.search(r'^-[ \t]+\S', body, re.MULTILINE), f'{path}: current version needs change entries'
 print('File-actions release mappings and rejection checks passed')
 print(f'Current source version {source_version}: mapped and file-actions probe enabled')
