@@ -1,11 +1,13 @@
 package io.github.gycrosskit.systemactions
 
 import android.app.Activity
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -27,6 +29,27 @@ class AndroidSystemActions(
 
     override suspend fun copyText(value: String): ActionResult = withContext(Dispatchers.Main.immediate) {
         files.copyText(value)
+    }
+
+    override suspend fun readClipboardText(): ClipboardReadResult = withContext(Dispatchers.Main.immediate) {
+        val activity = context as? Activity ?: return@withContext ClipboardReadResult.Unavailable
+        if (activity.isFinishing || activity.isDestroyed || !activity.hasWindowFocus()) {
+            return@withContext ClipboardReadResult.Unavailable
+        }
+        try {
+            val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                ?: return@withContext ClipboardReadResult.Unavailable
+            val clip = clipboard.primaryClip ?: return@withContext ClipboardReadResult.NoText
+            if (clip.itemCount == 0) return@withContext ClipboardReadResult.NoText
+            val text = clip.getItemAt(0).text ?: return@withContext ClipboardReadResult.NoText
+            ClipboardReadResult.Text(text.toString())
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: SecurityException) {
+            ClipboardReadResult.Denied
+        } catch (_: RuntimeException) {
+            ClipboardReadResult.Failed
+        }
     }
 
     override suspend fun shareFile(path: String, title: String): ActionResult {
