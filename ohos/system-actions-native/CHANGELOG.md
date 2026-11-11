@@ -2,7 +2,7 @@
 
 ## 1.1.1
 
-状态：待发布；Release HAR、OHPM 精确版本安装和实际 ArkTS 消费分别验收。
+状态：已发布；[Release HAR](https://github.com/gycrosskit/system-actions/releases/tag/har-1.1.1) 与私有 OHPM `@gycrosskit/system-actions-native@1.1.1` 的同字节下载、精确安装及实际 ArkTS 消费分别通过 [release #150](http://121.36.107.201:18080/job/component-ci/job/release/150/) / [#151](http://121.36.107.201:18080/job/component-ci/job/release/151/)。这不表示官方 Registry 审核或 Harmony 真机验收。
 
 - `GycSystemActionsModule(actions, windowPolicy, openNativeAppStore?)` 支持可选宿主商店回调，返回 `NativeStoreRequest` 并复用原请求级取消、销毁与迟回执保护。
 - 未注入回调时保留 AppGallery 默认行为；宿主负责当前 App 的更新选择和专用网页兜底，不改变显式其他应用和 HTTP(S) URL 合同。
