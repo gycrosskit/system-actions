@@ -1,5 +1,5 @@
 import { KRAny, KuiklyRenderBaseModule, KuiklyRenderCallback } from '@kuikly-open/render';
-import { ActionResult, SystemActions } from './SystemActions';
+import { ActionResult, NativeStoreRequest, SystemActions } from './SystemActions';
 import { WindowPolicyController, WindowPolicyLease } from './WindowPolicy';
 import { window } from '@kit.ArkUI';
 import { SystemObservations } from './SystemObservations';
@@ -17,14 +17,16 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
   static readonly MODULE_NAME: string = 'GycSystemActionsModule';
   private actions: SystemActions | null;
   private readonly windowPolicy: WindowPolicyController;
+  private openNativeAppStore: ((applicationId?: string) => NativeStoreRequest) | undefined;
   private readonly pending: Map<string, PendingAction> = new Map();
   private destroyed: boolean = false;
   private keepScreenLease: WindowPolicyLease | null = null;
   private readonly observations: SystemObservations = new SystemObservations(() => this.controller?.getUIAbilityContext());
 
   /** @param actions 页面系统能力。@param windowPolicy 同一 Ability 各页/native lease 共用，跨 Ability 分开；默认仅兼容原单 Ability 接入。 */
-  constructor(actions: SystemActions, windowPolicy: WindowPolicyController = WindowPolicyController.shared) {
-    super(); this.actions = actions; this.windowPolicy = windowPolicy;
+  constructor(actions: SystemActions, windowPolicy: WindowPolicyController = WindowPolicyController.shared,
+    openNativeAppStore?: (applicationId?: string) => NativeStoreRequest) {
+    super(); this.actions = actions; this.windowPolicy = windowPolicy; this.openNativeAppStore = openNativeAppStore;
   }
   syncMode(): boolean { return false; }
 
@@ -72,7 +74,7 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
   }
 
   private async openNativeStore(actions: SystemActions, value: string | undefined, pending: PendingAction): Promise<ActionResult> {
-    const request = actions.requestNativeAppStore(value);
+    const request = this.openNativeAppStore ? this.openNativeAppStore(value) : actions.requestNativeAppStore(value);
     pending.cancel = request.cancel;
     return request.result;
   }
@@ -142,6 +144,7 @@ export class GycSystemActionsModule extends KuiklyRenderBaseModule {
     });
     this.pending.clear();
     this.actions = null;
+    this.openNativeAppStore = undefined;
   }
 
   onDestroy(): void {

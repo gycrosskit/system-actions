@@ -2,13 +2,13 @@
 
 Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费验证边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。
 
-> 当前候选：Maven `1.1.0`，HAR/OHPM `1.1.0`（`har-1.1.0`）；未修改的 Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。候选尚未发布，精确公开版本与消费结果须分别验收；旧 Tag、归档及摘要不变。
+> 当前源码候选：Maven/HAR `1.1.1`，包含宿主商店策略接线，尚未发布；Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。旧 `1.1.0` Tag、归档和摘要不变；候选本地消费、公开版本与设备行为分别验收。
 
 组件构建最低基线为 Kuikly 2.29.1；允许范围、宿主选择及 2.30 消费边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。带日期的历史结果不代替当前渠道验收。
 
 ## 当前功能与平台边界
 
-本轮准备 Maven/HAR `1.1.0` 候选，Swift/Git Pod 保留 `native-1.0.2`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
+本轮准备 Maven/HAR `1.1.1` 候选，Swift/Git Pod 保留 `native-1.0.2`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
 
 core 提供系统动作与独立窗口/观察服务；不提供页面 UI。`system-actions-kuikly` 提供 Android/iOS/OHOS 页面 Module，Android 真实 receiver 与可选 iOS Pod receiver 复用 core；全屏仍需宿主显式 native 接线。
 
@@ -170,7 +170,7 @@ OHOS fullscreen 与 privacy 在同一 Ability 共用 controller 和串行队列�
 pod 'GYCWindowPolicy/Core', :git => 'https://github.com/gycrosskit/system-actions.git', :tag => 'native-1.0.2'
 ```
 
-这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；本轮 SPM 同样固定 `native-1.0.2` revision，Maven 候选使用 `1.1.0`。旧 `1.0.0` 标签保留，不能用其产物替代当前候选验证。
+这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；本轮 SPM 同样固定 `native-1.0.2` revision，Maven 候选使用 `1.1.1`。旧 `1.0.0` 标签保留，不能用其产物替代当前候选验证。
 
 项目 `settings.gradle.kts` 的依赖仓库：
 
@@ -192,7 +192,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.system-actions:system-actions-core:1.1.0")
+            implementation("com.github.gycrosskit.system-actions:system-actions-core:1.1.1")
         }
     }
 }
@@ -202,7 +202,7 @@ HarmonyOS 原生宿主：
 
 ```sh
 # 当前配套 HAR；按精确版本安装
-ohpm install @gycrosskit/system-actions-native@1.1.0
+ohpm install @gycrosskit/system-actions-native@1.1.1
 ```
 
 Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。此版 Maven rc.6 配套 HAR rc.5，Swift Package/Git Pod 使用 rc.6；HAR rc.4 的精确 Registry 查询与专属空缓存安装记录见 [rc.5 验收](docs/0.2.0-rc.5候选验收.md)，固定 Release HAR 校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代当前 HAR；此版 Maven/Swift 包含 Android/iOS 观察/全屏 API，仍需宿主显式接线。
@@ -230,7 +230,7 @@ suspend fun openHelp(actions: SystemActions): ActionResult =
 
 还支持 `dial(phone)`、`openAppSettings()`、`openLocationSettings()`、`openAppStore(listingUrl)`；新增 `openNativeAppStore(applicationId = null)`。`Requested` 仅表示系统受理，`InvalidInput` 表示输入拒绝，`Unavailable` 表示无法打开。ArkTS 的对应状态为 `requested` / `invalid_input` / `unavailable`。
 
-原生商店使用当前应用标识或宿主显式传入的 applicationId/bundleName：Android 优先匹配设备厂商商店，再尝试固定第三方商店；OHOS 使用 AppGallery `loadProduct` 并等待 `onAppear`，iOS 返回 `Unavailable`。业务商店 URL 和升级决策继续由宿主提供。取消和超时结束等待，不能关闭 SDK 已显示的商店页面。
+原生商店使用当前应用标识或宿主显式传入的 applicationId/bundleName：Android 优先匹配设备厂商商店，再尝试固定第三方商店；OHOS 使用 AppGallery `loadProduct` 并等待 `onAppear`，iOS 返回 `Unavailable`。业务商店 URL 和升级决策继续由宿主提供。Module 可注入宿主商店处理回调，详见[宿主商店策略](docs/接入指南.md#宿主商店策略)；未注入时保留上述缺省行为。Android 固定包名直接启动，不依赖市场 `<queries>` 或预查询。取消和超时结束等待，不能关闭 SDK 已显示的商店页面。
 
 Android 拨号使用 `ACTION_DIAL`，不申请直接呼叫权限。定位服务设置仅支持 Android；iOS/OHOS 返回不可用。商店地址只接受 HTTP(S)，可能由商店或浏览器处理；系统调用取消后无法撤回已打开页面。
 
@@ -245,7 +245,7 @@ Android 拨号使用 `ACTION_DIAL`，不申请直接呼叫权限。定位服务�
 - [GitHub Releases](https://github.com/gycrosskit/system-actions/releases)：Maven / HAR 版本和归档。
 - [GitHub Issues](https://github.com/gycrosskit/system-actions/issues)：提供平台、版本、输入和最小复现。
 
-已有记录覆盖 Android/iOS/OHOS 远程产物消费、iOS Simulator Framework 链接、OHPM Registry 安装与 HAR 编译；真实系统页面和 Kuikly 设备交互仍待验收。
+既有版本的远程产物消费、Simulator Framework、OHPM 与 HAR 记录保留原范围；新增商店回调的宿主联调与当前发布验证边界见[商店策略验证](docs/功能与平台差异.md#商店策略验证)，不由一个渠道或设备推定其他能力通过。
 
 自有源码使用 [Apache-2.0](LICENSE)，第三方依赖遵循各自许可。
 

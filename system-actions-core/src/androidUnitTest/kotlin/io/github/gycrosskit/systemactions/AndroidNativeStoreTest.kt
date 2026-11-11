@@ -3,10 +3,6 @@ package io.github.gycrosskit.systemactions
 import android.content.ActivityNotFoundException
 import android.content.ContextWrapper
 import android.content.Intent
-import android.content.pm.ActivityInfo
-import android.content.pm.ApplicationInfo
-import android.content.pm.ResolveInfo
-import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -17,7 +13,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
-import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowBuild
 import kotlin.test.assertEquals
@@ -37,19 +32,6 @@ class AndroidNativeStoreTest {
         }
     }
 
-    private fun resolve(packageName: String, uri: String, resolvedPackage: String = packageName) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri)).setPackage(packageName)
-        val resolution = ResolveInfo().apply {
-            activityInfo = ActivityInfo().apply {
-                this.packageName = resolvedPackage
-                name = "$resolvedPackage.StoreActivity"
-                // 未提供 ApplicationInfo 时 Robolectric 会按 Intent.package 填充，掩盖异包测试。
-                applicationInfo = ApplicationInfo().apply { this.packageName = resolvedPackage }
-            }
-        }
-        shadowOf(application.packageManager).addResolveInfoForIntent(intent, resolution)
-    }
-
     @Test fun manufacturerAndPackageSelectTheNativeStoreBeforeThirdParty() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
@@ -65,10 +47,8 @@ class AndroidNativeStoreTest {
                 Triple("Meizu", "com.meizu.mstore", "market://details?id=test.brand"),
                 Triple("samsung", "com.sec.android.app.samsungapps", "samsungapps://ProductDetail/test.brand"),
             )
-            resolve("com.tencent.android.qqdownloader", "tmast://appdetails?packagename=test.brand")
             for ((manufacturer, packageName, uri) in expected) {
                 ShadowBuild.setManufacturer(manufacturer)
-                resolve(packageName, uri)
                 launched.clear()
                 assertEquals(ActionResult.Requested, AndroidSystemActions(context).openNativeAppStore("test.brand"))
                 assertEquals(packageName, launched.single().`package`, manufacturer)
@@ -87,9 +67,6 @@ class AndroidNativeStoreTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
             ShadowBuild.setManufacturer("honor")
-            resolve("com.hihonor.appmarket", "appmarket://details?id=test.brand")
-            resolve("com.hihonor.appmarket", "market://details?id=test.brand")
-            resolve("com.huawei.appmarket", "appmarket://details?id=test.brand")
             reject = { it.`package` == "com.hihonor.appmarket" }
             assertEquals(ActionResult.Requested, AndroidSystemActions(context).openNativeAppStore("test.brand"))
             assertEquals(listOf("appmarket", "market", "appmarket"), launched.map { it.data?.scheme })
@@ -102,11 +79,6 @@ class AndroidNativeStoreTest {
         try {
             ShadowBuild.setManufacturer("unknown")
             val appId = context.packageName
-            resolve("com.tencent.android.qqdownloader", "tmast://appdetails?packagename=$appId")
-            resolve("com.tencent.android.qqdownloader", "market://details?id=$appId")
-            resolve("com.qihoo.appstore", "market://details?id=$appId")
-            resolve("com.baidu.appsearch", "market://details?id=$appId")
-            resolve("com.android.vending", "market://details?id=$appId")
             reject = { it.`package` != "com.android.vending" }
             assertEquals(ActionResult.Requested, AndroidSystemActions(context).openNativeAppStore())
             assertEquals(listOf("com.tencent.android.qqdownloader", "com.tencent.android.qqdownloader", "com.qihoo.appstore", "com.baidu.appsearch", "com.android.vending"), launched.map { it.`package` })
@@ -116,7 +88,7 @@ class AndroidNativeStoreTest {
         } finally { Dispatchers.resetMain() }
     }
 
-    @Test fun rejectsUriInjectionMissingStoreAndDifferentResolvingPackage() = runTest {
+    @Test fun validatesAppIdAndLaunchesWithoutPackageVisibility() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
             ShadowBuild.setManufacturer("huawei")
@@ -125,10 +97,33 @@ class AndroidNativeStoreTest {
                 assertEquals(ActionResult.InvalidInput, actions.openNativeAppStore(id))
             }
             assertTrue(launched.isEmpty())
+            assertEquals(ActionResult.Requested, actions.openNativeAppStore("test.brand"))
+            assertEquals("com.huawei.appmarket", launched.single().`package`)
+            reject = { true }
             assertEquals(ActionResult.Unavailable, actions.openNativeAppStore("test.brand"))
-            resolve("com.huawei.appmarket", "appmarket://details?id=test.brand", "evil.store")
-            assertEquals(ActionResult.Unavailable, actions.openNativeAppStore("test.brand"))
-            assertTrue(launched.isEmpty())
         } finally { Dispatchers.resetMain() }
     }
+    @Test fun hostSelectedMarketIsPackageBoundValidatedAndDoesNotProbeVisibility() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val actions = AndroidSystemActions(context)
+            for (url in listOf("intent://details?id=x", "file://details/x", "content://details/x",
+                "javascript://details/x", "data://details/x", "market://user@details/x", "market://details/%GG",
+                "market://details/a b", "market://details/x#Intent;end", "market://details/\u0000")) {
+                assertEquals(ActionResult.InvalidInput, actions.openMarketDetails("com.host.market", url), url)
+            }
+            assertEquals(ActionResult.InvalidInput, actions.openMarketDetails("invalid", "market://details?id=x"))
+            assertTrue(launched.isEmpty())
+            assertEquals(ActionResult.Requested, actions.openMarketDetails("com.host.market", "newmarket://details?id=host.app"))
+            assertEquals("com.host.market", launched.single().`package`)
+            assertEquals("newmarket://details?id=host.app", launched.single().dataString)
+            reject = { true }
+            assertEquals(ActionResult.Unavailable, actions.openMarketDetails("com.host.market", "market://details?id=x"))
+            reject = { throw kotlinx.coroutines.CancellationException() }
+            kotlin.test.assertFailsWith<kotlinx.coroutines.CancellationException> {
+                actions.openMarketDetails("com.host.market", "market://details?id=x")
+            }
+        } finally { Dispatchers.resetMain() }
+    }
+
 }

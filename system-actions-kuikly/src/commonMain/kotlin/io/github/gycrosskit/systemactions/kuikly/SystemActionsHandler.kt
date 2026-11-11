@@ -13,6 +13,7 @@ internal class SystemActionsHandler(
     private val observeKeyboard: ((Float) -> Unit) -> (() -> Unit),
     private val observeDark: ((Boolean) -> Unit) -> (() -> Unit),
     private val closeNative: () -> Unit,
+    private val openNativeAppStore: (suspend (String?) -> ActionResult)? = null,
 ) {
     private class Observation(val id: String) { var stop: (() -> Unit)? = null }
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -83,7 +84,8 @@ internal class SystemActionsHandler(
                     "openAppSettings" -> actions.openAppSettings()
                     "openLocationSettings" -> actions.openLocationSettings()
                     "openAppStore" -> actions.openAppStore(value)
-                    "openNativeAppStore" -> actions.openNativeAppStore(args.opt("value") as? String)
+                    "openNativeAppStore" -> openNativeAppStore?.invoke(args.opt("value") as? String)
+                        ?: actions.openNativeAppStore(args.opt("value") as? String)
                     "setKeepScreenOn" -> when (value) {
                         "true", "false" -> if (setKeepScreenOn(value == "true")) ActionResult.Requested else ActionResult.Unavailable
                         else -> ActionResult.InvalidInput

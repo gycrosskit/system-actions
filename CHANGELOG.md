@@ -1,5 +1,13 @@
 # 更新日志
 
+## 1.1.1
+
+状态：待发布；Maven、HAR/OHPM 与远程消费分别以实际回执验收，Swift/Git Pod 保留 `native-1.0.2`。
+
+- Android 商店直接使用 `ACTION_VIEW + setPackage + startActivity`，移除 `resolveActivity` 硬门禁及市场 `<queries>`；新增 `openMarketDetails(packageName, appUrl)`，继续验证输入并固定接收包。
+- Android Module/注册入口与 iOS Kotlin handler 支持宿主商店回调，保留旧公开构造器、注册签名、默认行为和显式 URL 合同。
+- Harmony Module 支持返回 `NativeStoreRequest` 的宿主回调，沿用请求级取消、销毁及迟回执保护。厂商选择、品牌配置和网页兜底仍归宿主。
+
 ## 1.1.0
 
 状态：候选，发布与远程消费以各渠道回执为准。
