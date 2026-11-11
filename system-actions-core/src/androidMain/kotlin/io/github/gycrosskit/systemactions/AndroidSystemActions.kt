@@ -11,6 +11,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import java.net.URI
 import java.io.File
 import android.webkit.MimeTypeMap
 
@@ -83,16 +84,29 @@ class AndroidSystemActions(
             val targets = storeTargets(appId, Build.MANUFACTURER.trim().lowercase(Locale.ROOT))
             for (target in targets) {
                 for (uri in target.uris) {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri)).setPackage(target.packageName)
-                    // 只接受固定商店包名，不能让其他注册相同 scheme 的应用替代详情页。
-                    val resolved = try { intent.resolveActivity(context.packageManager) } catch (_: RuntimeException) { null }
-                    if (resolved?.packageName == target.packageName && launch(intent) == ActionResult.Requested) {
+                    if (openMarketDetails(target.packageName, uri) == ActionResult.Requested) {
                         return@withContext ActionResult.Requested
                     }
                 }
             }
             ActionResult.Unavailable
         }
+    }
+
+    /** 打开宿主选择的商店；固定接收包，不查询包可见性，Requested 仅表示系统受理。 */
+    suspend fun openMarketDetails(packageName: String, appUrl: String): ActionResult {
+        if (packageName.length > 255 || !APP_ID.matches(packageName)) return ActionResult.InvalidInput
+        if (appUrl.length > 4096 || appUrl.any { it.isWhitespace() || it.code <= 31 || it.code == 127 || it == '\\' } ||
+            Regex("%(?![0-9A-Fa-f]{2})").containsMatchIn(appUrl)) return ActionResult.InvalidInput
+        val uri = try { URI(appUrl) } catch (_: Exception) { return ActionResult.InvalidInput }
+        if (!uri.isAbsolute || uri.isOpaque || uri.host.isNullOrEmpty() || uri.rawUserInfo != null || uri.rawFragment != null ||
+            uri.scheme.lowercase(Locale.ROOT) in setOf("intent", "file", "content", "javascript", "data", "android.resource")) {
+            return ActionResult.InvalidInput
+        }
+        if (uri.scheme.equals("http", true) || uri.scheme.equals("https", true)) {
+            if (normalizedWebUrl(appUrl) == null) return ActionResult.InvalidInput
+        }
+        return launch(Intent(Intent.ACTION_VIEW, Uri.parse(appUrl)).setPackage(packageName))
     }
 
     private fun storeTargets(appId: String, manufacturer: String): List<StoreTarget> {
@@ -132,6 +146,7 @@ class AndroidSystemActions(
             if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
             ActionResult.Requested
-        } catch (_: RuntimeException) { ActionResult.Unavailable }
+        } catch (cancelled: CancellationException) { throw cancelled }
+        catch (_: RuntimeException) { ActionResult.Unavailable }
     }
 }
