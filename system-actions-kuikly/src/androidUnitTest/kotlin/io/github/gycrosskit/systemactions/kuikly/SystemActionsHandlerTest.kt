@@ -28,6 +28,33 @@ class SystemActionsHandlerTest {
         override suspend fun openNativeAppStore(applicationId: String?) = ActionResult.Unavailable
     }
 
+    @Test fun hostStorePolicyUsesExistingCancellationAndDoesNotDeliverLateResult() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        val ids = mutableListOf<String?>()
+        val pending = mutableListOf<CancellableContinuation<ActionResult>>()
+        val handler = SystemActionsHandler(Actions(), { true }, { {} }, { {} }, {}, { id ->
+            ids += id
+            suspendCancellableCoroutine { pending += it }
+        })
+        val replies = mutableListOf<String>()
+        try {
+            handler.call("openNativeAppStore", "{\"requestId\":\"self\"}", replies::add)
+            assertEquals(listOf<String?>(null), ids)
+            pending[0].resume(ActionResult.Requested)
+            assertEquals("requested", JSONObject(replies.single()).optString("status"))
+            handler.call("openNativeAppStore", "{\"requestId\":\"other\",\"value\":\"other.app\"}", replies::add)
+            assertEquals("other.app", ids.last())
+            handler.call("cancel", "{\"requestId\":\"other\"}", replies::add)
+            assertTrue(pending[1].isCancelled)
+            pending[1].resume(ActionResult.Requested)
+            handler.call("openNativeAppStore", "{\"requestId\":\"destroy\"}", replies::add)
+            handler.dispose()
+            assertTrue(pending[2].isCancelled)
+            pending[2].resume(ActionResult.Requested)
+            assertEquals(1, replies.size)
+        } finally { handler.dispose(); Dispatchers.resetMain() }
+    }
+
     @Test fun validatesParametersAndPreservesEmptyClipboardText() = runTest {
         Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
         val actions = Actions()

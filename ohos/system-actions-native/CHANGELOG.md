@@ -1,5 +1,13 @@
 # 更新日志
 
+## 1.1.1
+
+状态：待发布；Release HAR、OHPM 精确版本安装和实际 ArkTS 消费分别验收。
+
+- `GycSystemActionsModule(actions, windowPolicy, openNativeAppStore?)` 支持可选宿主商店回调，返回 `NativeStoreRequest` 并复用原请求级取消、销毁与迟回执保护。
+- 未注入回调时保留 AppGallery 默认行为；宿主负责当前 App 的更新选择和专用网页兜底，不改变显式其他应用和 HTTP(S) URL 合同。
+- Maven core/Kuikly 配套版本为 `1.1.1`，Swift/Git Pod 无源码变化，保留 `native-1.0.2`。
+
 ## 1.1.0
 
 状态：候选，发布与远程消费以各渠道回执为准。

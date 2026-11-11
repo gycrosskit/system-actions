@@ -12,6 +12,13 @@ import io.github.gycrosskit.systemactions.*
 
 /** 每个 Renderer 的系统动作接收端；不持有宿主进程服务或独立 SDK runtime。 */
 class AndroidSystemActionsModule(private val fileProviderAuthority: String? = null) : KuiklyRenderBaseModule() {
+    private var openNativeAppStore: (suspend (String?) -> ActionResult)? = null
+
+    /** 宿主可接管商店策略；回调沿用当前 Renderer 的主线程、取消与销毁边界。 */
+    constructor(fileProviderAuthority: String?, openNativeAppStore: suspend (String?) -> ActionResult) : this(fileProviderAuthority) {
+        this.openNativeAppStore = openNativeAppStore
+    }
+
     private val main = Handler(Looper.getMainLooper())
     @Volatile private var destroyed = false
     private var handler: SystemActionsHandler? = null
@@ -34,7 +41,7 @@ class AndroidSystemActionsModule(private val fileProviderAuthority: String? = nu
                     { change -> nativeObservations()?.observeDarkMode(change) ?: {} }, {
                         observations?.dispose(); observations = null
                         keepScreen?.close(); keepScreen = null
-                    }).also { handler = it }
+                    }, openNativeAppStore).also { handler = it }
             }
             current?.call(method, params.orEmpty()) { result -> if (!destroyed) callback?.invoke(result) }
                 ?: callback?.invoke("{\"status\":\"unavailable\"}")
@@ -62,7 +69,7 @@ class AndroidSystemActionsModule(private val fileProviderAuthority: String? = nu
 
     override fun onDestroy() {
         destroyed = true
-        val cleanup = { handler?.dispose(); handler = null; kuiklyRenderContext = null }
+        val cleanup = { handler?.dispose(); handler = null; openNativeAppStore = null; kuiklyRenderContext = null }
         if (Looper.myLooper() == Looper.getMainLooper()) cleanup() else main.post { cleanup() }
     }
 
@@ -75,4 +82,12 @@ class AndroidSystemActionsModule(private val fileProviderAuthority: String? = nu
 /** 在宿主既有 registerExternalModule 入口调用；factory 每个 Renderer 生成独占 owner。 */
 fun IKuiklyRenderExport.registerGycSystemActionsModule(fileProviderAuthority: String? = null) {
     moduleExport(SystemActionsModule.NAME) { AndroidSystemActionsModule(fileProviderAuthority) }
+}
+
+/** 同一宿主商店策略覆盖普通页面与 raw Module；缺省注册仍保留组件通用行为。 */
+fun IKuiklyRenderExport.registerGycSystemActionsModule(
+    fileProviderAuthority: String?,
+    openNativeAppStore: suspend (String?) -> ActionResult,
+) {
+    moduleExport(SystemActionsModule.NAME) { AndroidSystemActionsModule(fileProviderAuthority, openNativeAppStore) }
 }
