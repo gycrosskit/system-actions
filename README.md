@@ -2,13 +2,13 @@
 
 Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费验证边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。
 
-> 当前源码候选：Maven/HAR `1.1.1`，包含宿主商店策略接线，尚未发布；Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。旧 `1.1.0` Tag、归档和摘要不变；候选本地消费、公开版本与设备行为分别验收。
+> 当前已发布：Maven/HAR 与私有 OHPM `1.1.1`，包含宿主商店策略接线；Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。旧 Tag、归档与摘要不变；精确渠道验收及设备边界统一见[商店策略验证](docs/功能与平台差异.md#商店策略验证)。
 
 组件构建最低基线为 Kuikly 2.29.1；允许范围、宿主选择及 2.30 消费边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。带日期的历史结果不代替当前渠道验收。
 
 ## 当前功能与平台边界
 
-本轮准备 Maven/HAR `1.1.1` 候选，Swift/Git Pod 保留 `native-1.0.2`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
+当前 Maven/HAR 正式版本为 `1.1.1`，Swift/Git Pod 保留 `native-1.0.2`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
 
 core 提供系统动作与独立窗口/观察服务；不提供页面 UI。`system-actions-kuikly` 提供 Android/iOS/OHOS 页面 Module，Android 真实 receiver 与可选 iOS Pod receiver 复用 core；全屏仍需宿主显式 native 接线。
 
@@ -170,7 +170,7 @@ OHOS fullscreen 与 privacy 在同一 Ability 共用 controller 和串行队列�
 pod 'GYCWindowPolicy/Core', :git => 'https://github.com/gycrosskit/system-actions.git', :tag => 'native-1.0.2'
 ```
 
-这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；本轮 SPM 同样固定 `native-1.0.2` revision，Maven 候选使用 `1.1.1`。旧 `1.0.0` 标签保留，不能用其产物替代当前候选验证。
+这是固定 Git tag 消费，不是 CocoaPods Specs 上架声明；本轮 SPM 同样固定 `native-1.0.2` revision，Maven 使用正式版本 `1.1.1`。旧 `1.0.0` 标签保留，不能用其产物替代当前版本验证。
 
 项目 `settings.gradle.kts` 的依赖仓库：
 
