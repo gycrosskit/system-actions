@@ -2,11 +2,13 @@
 
 ## 1.1.1
 
-状态：待发布；Maven、HAR/OHPM 与远程消费分别以实际回执验收，Swift/Git Pod 保留 `native-1.0.2`。
+状态：已发布；[Maven 1.1.1](https://github.com/gycrosskit/system-actions/releases/tag/1.1.1)、[HAR 1.1.1](https://github.com/gycrosskit/system-actions/releases/tag/har-1.1.1) 与私有 OHPM 精确版本消费已分别确认，Swift/Git Pod 保留 `native-1.0.2`。
 
 - Android 商店直接使用 `ACTION_VIEW + setPackage + startActivity`，移除 `resolveActivity` 硬门禁及市场 `<queries>`；新增 `openMarketDetails(packageName, appUrl)`，继续验证输入并固定接收包。
 - Android Module/注册入口与 iOS Kotlin handler 支持宿主商店回调，保留旧公开构造器、注册签名、默认行为和显式 URL 合同。
 - Harmony Module 支持返回 `NativeStoreRequest` 的宿主回调，沿用请求级取消、销毁及迟回执保护。厂商选择、品牌配置和网页兜底仍归宿主。
+
+发行验收：[源码 verify #192](http://121.36.107.201:18080/job/component-ci/job/verify/192/) 通过 34 个行为、23 个合同及 8 个 OHOS 脚本测试，均零失败、零跳过。[Maven package #142](http://121.36.107.201:18080/job/component-ci/job/package/142/) 冻结 13 个 publication；[release #149](http://121.36.107.201:18080/job/component-ci/job/release/149/) 已确认公开，但其消费者入口因 CI pin 不匹配失败，原失败保留。随后用 Store 对应的干净 `c595cafb37a187b0b8b4c7386cba25930573d4d6` 受管入口、原 journal 和准确 Tag 单独完成 `PUBLIC_CONSUMERS_CONFIRMED`（无延期平台）；没有重发制品。[HAR release #150](http://121.36.107.201:18080/job/component-ci/job/release/150/) 与[私有 OHPM release #151](http://121.36.107.201:18080/job/component-ci/job/release/151/) 均成功，使用同一 #143 冻结 HAR。设备联调范围见[商店策略验证](docs/功能与平台差异.md#商店策略验证)。
 
 ## 1.1.0
 
