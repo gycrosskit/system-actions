@@ -6,7 +6,7 @@ const source = fs.readFileSync(__dirname + '/../system-actions-native/src/main/e
 let calls = [], complete, failed = false;
 let clipboardRecords = [], clipboardError;
 function record(mimeType, entries) {
-  return {mimeType, plainText: entries['text/plain'],
+  return {mimeType, plainText: mimeType === 'text/plain' ? entries['text/plain'] : undefined,
     getValidTypes: types => types.filter(type => Object.hasOwn(entries, type)),
     getData: async type => entries[type]};
 }
