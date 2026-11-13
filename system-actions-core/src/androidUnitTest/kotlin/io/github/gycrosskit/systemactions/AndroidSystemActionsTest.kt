@@ -37,7 +37,16 @@ class AndroidSystemActionsTest {
                 })
                 assertEquals(ClipboardReadResult.Text(value), actions.readClipboardText())
             }
-            clipboard.setPrimaryClip(android.content.ClipData.newRawUri("", android.net.Uri.parse("https://example.com")))
+            val styled = android.text.SpannableString(" 原文 ").apply {
+                setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 1, 3, 0)
+            }
+            clipboard.setPrimaryClip(android.content.ClipData.newPlainText("", styled))
+            assertEquals(ClipboardReadResult.Text(" 原文 "), actions.readClipboardText())
+            clipboard.setPrimaryClip(android.content.ClipData.newHtmlText("", "原文", "<b>different</b>"))
+            assertEquals(ClipboardReadResult.Text("原文"), actions.readClipboardText())
+            clipboard.setPrimaryClip(android.content.ClipData.newRawUri("", android.net.Uri.parse("https://example.com")).apply {
+                addItem(android.content.ClipData.Item("ignored"))
+            })
             assertEquals(ClipboardReadResult.NoText, actions.readClipboardText())
             clipboard.setPrimaryClip(android.content.ClipData.newIntent("", Intent(Intent.ACTION_VIEW)))
             assertEquals(ClipboardReadResult.NoText, actions.readClipboardText())
