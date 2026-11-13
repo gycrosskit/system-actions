@@ -1,5 +1,13 @@
 # GY CrossKit System Actions Native
 
+当前源码为 HAR／私有 OHPM `1.1.2` 候选，尚未发布。剪贴板读取兼容首条富文本记录已有的纯文本表示；Maven 保留 `1.1.1`，Swift/Git Pod 保留 `native-1.0.2`。下方安装示例仍指向已发布版本。
+
+候选 `1.1.2` 发布并确认私库可用后使用：
+
+```sh
+ohpm install @gycrosskit/system-actions-native@1.1.2
+```
+
 > Maven/HAR 与私有 OHPM `1.1.1` 已发布并完成精确消费，新增宿主商店策略回调；Swift/Git Pod 保留 `native-1.0.2`。原件与设备边界统一见[商店策略验证](../../docs/功能与平台差异.md#商店策略验证)，旧标签与制品不变。
 
 历史适用版本：Maven / Swift Package / Git Pod `0.2.0-rc.6`；HAR `0.2.0-rc.5`，独立标签 `native-0.2.0-rc.7`。当前能力见[功能与平台差异](https://github.com/gycrosskit/system-actions/blob/native-0.2.0-rc.7/docs/功能与平台差异.md)，发布及远程消费见[固定 Release](https://github.com/gycrosskit/system-actions/releases/tag/native-0.2.0-rc.7)。

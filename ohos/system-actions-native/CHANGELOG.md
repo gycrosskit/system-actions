@@ -1,5 +1,13 @@
 # 更新日志
 
+## 1.1.2
+
+状态：候选，尚未发布；正式下载、安装与消费以渠道回执为准。
+
+- 剪贴板读取改为获取首条记录已有的 `text/plain` 表示，兼容主 MIME 为富文本的多格式记录；不解析 HTML、不转换 URI，也不扫描后续记录。
+- 保留空串、空白、NUL、长文本及原有拒绝／失败映射，三端读取合同一致。
+- 仅更新 HAR／私有 OHPM；Maven 保留 `1.1.1`，Swift/Git Pod 保留 `native-1.0.2`。
+
 ## 1.1.1
 
 状态：已发布；[Release HAR](https://github.com/gycrosskit/system-actions/releases/tag/har-1.1.1) 与私有 OHPM `@gycrosskit/system-actions-native@1.1.1` 的同字节下载、精确安装及实际 ArkTS 消费分别通过 [release #150](http://121.36.107.201:18080/job/component-ci/job/release/150/) / [#151](http://121.36.107.201:18080/job/component-ci/job/release/151/)。这不表示官方 Registry 审核或 Harmony 真机验收。
