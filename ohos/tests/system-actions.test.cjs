@@ -5,6 +5,11 @@ const ts = require(process.env.TYPESCRIPT_PATH || '/Applications/DevEco-Studio.a
 const source = fs.readFileSync(__dirname + '/../system-actions-native/src/main/ets/SystemActions.ets', 'utf8');
 let calls = [], complete, failed = false;
 let clipboardRecords = [], clipboardError;
+function record(mimeType, entries) {
+  return {mimeType, plainText: entries['text/plain'],
+    getValidTypes: types => types.filter(type => Object.hasOwn(entries, type)),
+    getData: async type => entries[type]};
+}
 const pasteboard = {
   MIMETYPE_TEXT_PLAIN: 'text/plain',
   getSystemPasteboard: () => ({ getData: async () => {
@@ -24,12 +29,24 @@ vm.runInNewContext(ts.transpileModule(source, {compilerOptions: {module: ts.Modu
   const actions = new exportsObject.SystemActions(context);
   assert.equal((await actions.readClipboardText()).status, 'no_text');
   for (const value of ['', ' ', 'a\0b', '长'.repeat(20000)]) {
-    clipboardRecords = [{mimeType: 'text/plain', plainText: value}, {mimeType: 'text/plain', plainText: 'ignored'}];
+    clipboardRecords = [record('text/plain', {'text/plain': value}), record('text/plain', {'text/plain': 'ignored'})];
     const result = await actions.readClipboardText();
     assert.equal(result.status, 'text'); assert.equal(result.value, value);
   }
-  clipboardRecords = [{mimeType: 'text/uri', plainText: 'https://example.com'}];
-  assert.equal((await actions.readClipboardText()).status, 'no_text');
+  for (const value of ['', ' ', 'a\0b', '长'.repeat(20000)]) {
+    clipboardRecords = [record('text/html', {'text/html': '<b>different</b>', 'text/plain': value})];
+    assert.deepEqual(JSON.parse(JSON.stringify(await actions.readClipboardText())), {status: 'text', value});
+  }
+  for (const first of [record('text/uri', {'text/uri': 'https://example.com'}),
+    record('text/html', {'text/html': '<b>no plain representation</b>'}),
+    record('text/plain', {'text/plain': new Uint8Array([65])})]) {
+    clipboardRecords = [first, record('text/plain', {'text/plain': 'ignored'})];
+    assert.equal((await actions.readClipboardText()).status, 'no_text');
+  }
+  for (const code of [201, 27787277]) {
+    clipboardRecords = [{getValidTypes: () => ['text/plain'], getData: async () => {throw {code};}}];
+    assert.equal((await actions.readClipboardText()).status, code === 201 ? 'denied' : 'failed');
+  }
   clipboardError = {code: 201}; assert.equal((await actions.readClipboardText()).status, 'denied');
   clipboardError = {code: 27787277}; assert.equal((await actions.readClipboardText()).status, 'failed');
   clipboardError = undefined;

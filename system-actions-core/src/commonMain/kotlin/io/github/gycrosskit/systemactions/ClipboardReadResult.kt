@@ -1,6 +1,6 @@
 package io.github.gycrosskit.systemactions
 
-/** 只返回第一条真实文本，原样保留空串、空白和控制字符；不转换 URI/Intent。 */
+/** 只返回第一条记录的真实文本表示，原样保留空串、空白和控制字符；不转换 URI/Intent。 */
 sealed interface ClipboardReadResult {
     data class Text(val value: String) : ClipboardReadResult
     data object NoText : ClipboardReadResult
