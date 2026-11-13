@@ -2,15 +2,15 @@
 
 Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费验证边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。
 
-> 当前已发布：Maven/HAR 与私有 OHPM `1.1.1`，包含宿主商店策略接线；Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。旧 Tag、归档与摘要不变；精确渠道验收及设备边界统一见[商店策略验证](docs/功能与平台差异.md#商店策略验证)。
+> 当前已发布：Maven `1.1.1`、HAR 与私有 OHPM `1.1.2`，包含宿主商店策略接线；Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。旧 Tag、归档与摘要不变；精确渠道验收及设备边界统一见[商店策略验证](docs/功能与平台差异.md#商店策略验证)。
 
-待发布候选：HAR／私有 OHPM `1.1.2` 修复富文本记录附带纯文本时的读取，Maven 和 Swift 沿用已发布版本。合同与验证边界见[原生剪贴板读取](docs/功能与平台差异.md#原生剪贴板读取当前源码候选)。
+已发布：[HAR／私有 OHPM `1.1.2`](https://github.com/gycrosskit/system-actions/releases/tag/har-1.1.2) 修复富文本记录附带纯文本时的读取，Maven 和 Swift 沿用已发布版本。合同与验证边界见[原生剪贴板读取](docs/功能与平台差异.md#原生剪贴板读取当前源码候选)。
 
 组件构建最低基线为 Kuikly 2.29.1；允许范围、宿主选择及 2.30 消费边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。带日期的历史结果不代替当前渠道验收。
 
 ## 当前功能与平台边界
 
-当前 Maven/HAR 正式版本为 `1.1.1`，Swift/Git Pod 保留 `native-1.0.2`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
+当前 Maven 正式版本为 `1.1.1`，HAR／私有 OHPM 为 `1.1.2`，Swift/Git Pod 保留 `native-1.0.2`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
 
 core 提供系统动作与独立窗口/观察服务；不提供页面 UI。`system-actions-kuikly` 提供 Android/iOS/OHOS 页面 Module，Android 真实 receiver 与可选 iOS Pod receiver 复用 core；全屏仍需宿主显式 native 接线。
 

@@ -1,5 +1,12 @@
 # 更新日志
 
+## HAR／私有 OHPM 1.1.2
+
+状态：已发布；[HAR 1.1.2](https://github.com/gycrosskit/system-actions/releases/tag/har-1.1.2) 与私有 OHPM 精确版本均完成独立远程消费。Maven 保留 `1.1.1`，Swift/Git Pod 保留 `native-1.0.2`。
+
+- OHOS 读取首条剪贴板记录已有的 `text/plain` 表示，兼容富文本主 MIME；不解析 HTML/RTF、不扫描后续记录，保持空串、空白与内嵌 NUL。
+- Android/iOS 实现保持原样，补充 Android 与 OHOS 回归及三端合同说明。源码、SDK、发布和设备证据见[剪贴板验证](docs/功能与平台差异.md#原生剪贴板读取当前源码候选)。
+
 ## 1.1.1
 
 状态：已发布；[Maven 1.1.1](https://github.com/gycrosskit/system-actions/releases/tag/1.1.1)、[HAR 1.1.1](https://github.com/gycrosskit/system-actions/releases/tag/har-1.1.1) 与私有 OHPM 精确版本消费已分别确认，Swift/Git Pod 保留 `native-1.0.2`。
