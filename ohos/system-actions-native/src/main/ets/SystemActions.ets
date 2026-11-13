@@ -36,16 +36,17 @@ export class SystemActions {
     } catch (_) { return 'unavailable'; }
   }
 
-  /** 仅读取第一条 plain text；不拼接、不转换 URI，也不记录原文。 */
+  /** 只读取首条记录的真实纯文本表示；不转换富文本或 URI，也不记录原文。 */
   async readClipboardText(): Promise<ClipboardReadResult> {
     try {
       const data = await pasteboard.getSystemPasteboard().getData();
       if (data.getRecordCount() === 0) return { status: 'no_text' };
       const record = data.getRecord(0);
-      if (record.mimeType !== pasteboard.MIMETYPE_TEXT_PLAIN || typeof record.plainText !== 'string') {
+      if (record.getValidTypes([pasteboard.MIMETYPE_TEXT_PLAIN]).length === 0) {
         return { status: 'no_text' };
       }
-      return { status: 'text', value: record.plainText };
+      const value = await record.getData(pasteboard.MIMETYPE_TEXT_PLAIN);
+      return typeof value === 'string' ? { status: 'text', value } : { status: 'no_text' };
     } catch (error) {
       return { status: (error as BusinessError).code === 201 ? 'denied' : 'failed' };
     }
