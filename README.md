@@ -2,6 +2,8 @@
 
 Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费验证边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。
 
+统一版本候选为 `1.1.2`：Maven 与 Swift/Git Pod 待验证、发布及远程消费；HAR／私有 OHPM 沿用既有 `1.1.2`。本次只调整版本和消费配置，生产 API 与平台实现不变。[候选变更](CHANGELOG.md#112)不代表新渠道已经可用。
+
 > 当前已发布：Maven `1.1.1`、HAR 与私有 OHPM `1.1.2`，包含宿主商店策略接线；Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。旧 Tag、归档与摘要不变；精确渠道验收及设备边界统一见[商店策略验证](docs/功能与平台差异.md#商店策略验证)。
 
 已发布：[HAR／私有 OHPM `1.1.2`](https://github.com/gycrosskit/system-actions/releases/tag/har-1.1.2) 修复富文本记录附带纯文本时的读取，Maven 和 Swift 沿用已发布版本。合同与验证边界见[原生剪贴板读取](docs/功能与平台差异.md#原生剪贴板读取当前源码候选)。
@@ -10,7 +12,7 @@ Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费�
 
 ## 当前功能与平台边界
 
-当前 Maven 正式版本为 `1.1.1`，HAR／私有 OHPM 为 `1.1.2`，Swift/Git Pod 保留 `native-1.0.2`。Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
+Android/iOS Native Module 接线见[接入指南](docs/接入指南.md#androidios-native-module)。发布及远程消费状态以对应 Release 证据为准。
 
 core 提供系统动作与独立窗口/观察服务；不提供页面 UI。`system-actions-kuikly` 提供 Android/iOS/OHOS 页面 Module，Android 真实 receiver 与可选 iOS Pod receiver 复用 core；全屏仍需宿主显式 native 接线。
 
@@ -204,7 +206,7 @@ HarmonyOS 原生宿主：
 
 ```sh
 # 当前配套 HAR；按精确版本安装
-ohpm install @gycrosskit/system-actions-native@1.1.1
+ohpm install @gycrosskit/system-actions-native@1.1.2
 ```
 
 Kotlin 插件仓库及 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。此版 Maven rc.6 配套 HAR rc.5，Swift Package/Git Pod 使用 rc.6；HAR rc.4 的精确 Registry 查询与专属空缓存安装记录见 [rc.5 验收](docs/0.2.0-rc.5候选验收.md)，固定 Release HAR 校验/消费结果见 [rc.4 发布验收](docs/0.2.0-rc.4发布验收.md)。上一版 rc.3 的 SHA 安装步骤保留在接入指南历史段落。历史 Registry `0.1.1` 不含 Window 策略，不能替代当前 HAR；此版 Maven/Swift 包含 Android/iOS 观察/全屏 API，仍需宿主显式接线。
