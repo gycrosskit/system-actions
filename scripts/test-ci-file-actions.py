@@ -7,7 +7,7 @@ from pathlib import Path
 script = Path(__file__).with_name('ci-file-actions.sh')
 for version in ('0.1.3', '0.2.0-rc.1', '0.2.0-rc.2', '0.2.0-rc.3', '0.2.0-rc.4'):
     assert subprocess.check_output(['bash', str(script), version], text=True).strip() == 'false'
-for version in ('0.2.0-rc.5', '0.2.0-rc.6', '0.2.0-rc.7', '1.0.0', '1.0.1', '1.1.0', '1.1.1'):
+for version in ('0.2.0-rc.5', '0.2.0-rc.6', '0.2.0-rc.7', '1.0.0', '1.0.1', '1.1.0', '1.1.1', '1.1.2'):
     assert subprocess.check_output(['bash', str(script), version], text=True).strip() == 'true'
 for version in ('1.0.2', 'native-0.2.0', 'bad/version'):
     result = subprocess.run(['bash', str(script), version], capture_output=True, text=True)
@@ -19,6 +19,11 @@ source_version = versions[0]
 assert subprocess.check_output(['bash', str(script), source_version], text=True).strip() == 'true', source_version
 root = build.parent
 har_version = json.loads((root / 'ohos/system-actions-native/oh-package.json5').read_text())['version']
+pod_versions = re.findall(r"^\s*spec\.version = '([^']+)'$", (root / 'GYCWindowPolicy.podspec').read_text(), re.MULTILINE)
+consumer_versions = re.findall(r'val systemActionsVersion = .*\.orElse\("([^"\n]+)"\)\.get\(\)',
+                               (root / 'verification-consumer/build.gradle.kts').read_text())
+assert pod_versions == consumer_versions == [source_version] and har_version == source_version, \
+    'Maven, Native, HAR and the default consumer must use the same current version'
 for path, current in ((root / 'CHANGELOG.md', source_version),
                       (root / 'ohos/system-actions-native/CHANGELOG.md', har_version)):
     sections = re.findall(r'^##[ \t]+(.*?)\n(.*?)(?=^#{1,2}[ \t]|\Z)', path.read_text(), re.MULTILINE | re.DOTALL)

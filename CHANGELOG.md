@@ -1,5 +1,12 @@
 # 更新日志
 
+## 1.1.2
+
+状态：Maven 与 Swift/Git Pod 统一版本候选，尚未发布；既有 HAR／私有 OHPM `1.1.2` 沿用已发布制品。
+
+- Maven、Swift Package 和 Git Pod 的配套版本统一到 `1.1.2`，不修改生产 API 或平台实现。
+- 同步文件操作消费探针、默认消费版本及发布说明；已发布 Tag、归档和摘要保持不变。
+
 ## HAR／私有 OHPM 1.1.2
 
 状态：已发布；[HAR 1.1.2](https://github.com/gycrosskit/system-actions/releases/tag/har-1.1.2) 与私有 OHPM 精确版本均完成独立远程消费。Maven 保留 `1.1.1`，Swift/Git Pod 保留 `native-1.0.2`。
