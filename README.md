@@ -2,7 +2,7 @@
 
 Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费验证边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。
 
-统一版本候选为 `1.1.3`：Maven、Swift/Git Pod、HAR 与私有 OHPM 待本地验证和新版 Jenkins release 发布。生产 API 与平台实现不变，Renderer 固定为原有 `2.29.1`；旧 `1.1.2` Tag、制品和摘要不覆盖。[候选变更](CHANGELOG.md#113渠道统一候选未发布)不代表新渠道已经可用。
+统一版本候选为 `1.1.3`：Maven、Swift/Git Pod、HAR 与私有 OHPM 待本地验证和新版 Jenkins release 发布。生产 API 与平台实现不变，Renderer 固定为原有 `2.29.1`；旧 `1.1.2` Tag、制品和摘要不覆盖。[候选变更](CHANGELOG.md#113)不代表新渠道已经可用。
 
 > 当前已发布：Maven `1.1.1`、HAR 与私有 OHPM `1.1.2`，包含宿主商店策略接线；Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。旧 Tag、归档与摘要不变；精确渠道验收及设备边界统一见[商店策略验证](docs/功能与平台差异.md#商店策略验证)。
 
