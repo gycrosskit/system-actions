@@ -14,13 +14,13 @@ ohpm install @gycrosskit/system-actions-native@1.1.2
 
 HAR **0.2.0-rc.4** 已提供剪贴板、普通私有文件分享和复用 WindowPolicy lease 的常亮；既有发布/Registry验收见根README及rc.5验收记录。此版 Maven/Swift 补充 Android/iOS 原生观察和全屏，不能由本 HAR 安装推导 Android/iOS 已接线。下列历史版本渠道记录保留其记录时点：
 
-OHPM `0.2.0-rc.5` 已提交审核，2026-10-08 精确 Registry 查询仍为 NOTFOUND；目前使用固定 Release HAR。下列 Registry 命令仅在精确版本上架后使用：
+下列命令仅通过私有 OHPM 安装精确版本：
 
 ```sh
 ohpm install @gycrosskit/system-actions-native@1.1.2
 ```
 
-该精确版本的 Registry 目的地为组织私库 `private-ohpm-v1`，安装前需配置组织提供的只读 scope；这不是官方 Registry 上架声明。也可从固定 [HAR Release](https://github.com/gycrosskit/system-actions/releases/tag/har-1.1.2) 下载并校验归档。
+该精确版本的 Registry 目的地为组织私库 `private-ohpm-v1`，安装前需配置组织提供的只读 scope；这不是官方 Registry 上架声明。包字节以对应 Jenkins 发布回执核验。
 
 HAR `1.1.1` 新增可选第三参数 `(applicationId?: string) => NativeStoreRequest`，当前 App 的选择和网页兜底由宿主提供，未注入时仍沿用组件默认行为。取消与销毁继续只结束所属请求，不交付迟到结果。
 
@@ -55,7 +55,7 @@ modules.set(GycSystemActionsModule.MODULE_NAME, () => new GycSystemActionsModule
 
 ## Window 策略（0.2.0-rc.1 预发布）
 
-`0.2.0-rc.1` 的 GitHub Release HAR 已发布并完成下载校验和独立消费；OHPM `next` 提交已接受但仍审核中，精确版本安装返回 `NOTFOUND`。上架后坐标为 `ohpm install @gycrosskit/system-actions-native@0.2.0-rc.1`；当前按[接入指南](https://github.com/gycrosskit/system-actions/blob/main/docs/接入指南.md)从固定 Release 下载、校验并以 `--no-save` 安装。
+`0.2.0-rc.1` 的 GitHub Release HAR 已发布并完成下载校验和独立消费；OHPM `next` 提交已接受但仍审核中，精确版本安装返回 `NOTFOUND`。上架后坐标为 `ohpm install @gycrosskit/system-actions-native@0.2.0-rc.1`；当时也曾按原版本 Tag 的接入说明从固定 Release 下载。
 
 ```typescript
 import { WindowPolicyController, window } from '@gycrosskit/system-actions-native';

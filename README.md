@@ -1,12 +1,14 @@
 # GY CrossKit System Actions
 
+新版 Maven 发布由 Jenkins 生成同版本归档、`source-receipt.json` 和 `SHA256SUMS`。JitPack 核对标签来源、归档尺寸和摘要后安装同一份制品。历史发布按原版本 Tag 复验。
+
 Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费验证边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。
 
-统一版本候选为 `1.1.3`：Maven、Swift/Git Pod、HAR 与私有 OHPM 待本地验证和新版 Jenkins release 发布。生产 API 与平台实现不变，Renderer 固定为原有 `2.29.1`；旧 `1.1.2` Tag、制品和摘要不覆盖。[候选变更](CHANGELOG.md#113)不代表新渠道已经可用。
+统一版本候选为 `1.1.3`：Maven、Swift/Git Pod、私有 OHPM 待本地验证和新版 Jenkins release 发布。生产 API 与平台实现不变，Renderer 固定为原有 `2.29.1`；旧 `1.1.2` Tag、制品和摘要不覆盖。[候选变更](CHANGELOG.md#113)不代表新渠道已经可用。
 
 > 当前已发布：Maven `1.1.1`、HAR 与私有 OHPM `1.1.2`，包含宿主商店策略接线；Swift/Git Pod 保留 `1.0.2`（`native-1.0.2`）。旧 Tag、归档与摘要不变；精确渠道验收及设备边界统一见[商店策略验证](docs/功能与平台差异.md#商店策略验证)。
 
-已发布：[HAR／私有 OHPM `1.1.2`](https://github.com/gycrosskit/system-actions/releases/tag/har-1.1.2) 修复富文本记录附带纯文本时的读取，Maven 和 Swift 沿用已发布版本。合同与验证边界见[原生剪贴板读取](docs/功能与平台差异.md#原生剪贴板读取当前源码候选)。
+已发布：私有 OHPM `1.1.2` 修复富文本记录附带纯文本时的读取，Maven 和 Swift 沿用已发布版本。合同与验证边界见[原生剪贴板读取](docs/功能与平台差异.md#原生剪贴板读取当前源码候选)。
 
 组件构建最低基线为 Kuikly 2.29.1；允许范围、宿主选择及 2.30 消费边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。带日期的历史结果不代替当前渠道验收。
 
@@ -246,7 +248,7 @@ Android 拨号使用 `ACTION_DIAL`，不申请直接呼叫权限。定位服务�
 - [开发与验证](docs/开发与验证.md)、[历史验收记录](verification/验收记录.md)：源码验证与独立消费。
 - [Window 预发布验收](verification/Window策略候选验收.md)：`0.2.0-rc.1` PR、标签、归档校验、三平台远程消费与 OHPM 审核边界。
 - [历史远程发布验收](verification/远程发布验收.md)：Maven `0.1.3` / HAR `0.1.2` 历史记录。
-- [GitHub Releases](https://github.com/gycrosskit/system-actions/releases)：Maven / HAR 版本和归档。
+- [GitHub Releases](https://github.com/gycrosskit/system-actions/releases)：Maven 版本和归档。
 - [GitHub Issues](https://github.com/gycrosskit/system-actions/issues)：提供平台、版本、输入和最小复现。
 
 既有版本的远程产物消费、Simulator Framework、OHPM 与 HAR 记录保留原范围；新增商店回调的宿主联调与当前发布验证边界见[商店策略验证](docs/功能与平台差异.md#商店策略验证)，不由一个渠道或设备推定其他能力通过。
