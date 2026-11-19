@@ -1,0 +1,258 @@
+#AOCI-CODE-VOLUME: 1
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/===
+.gitattributes[FV5T]: F:约束文本检出为LF以保持AOCI字节指纹跨平台一致 | R:- | A:- | S:二进制由Git自动识别，不转换内容
+.gitignore[FV4T]: F:排除工具链缓存、原生产物及本机MCP配置 | R:- | A:- | S:-
+AGENTS.md[SG7S]: F:规定系统动作组件的开发、评审和AOCI认知维护流程 | R:code:docs/开发与验证.md | A:- | S:本库负责通用原生能力，品牌商店与业务策略由宿主装配
+CHANGELOG.md[SV4T]: F:记录候选与已发布渠道的版本演进和验证证据 | R:code:README.md | A:- | S:1.1.3为候选，不能据日志宣称渠道已发布
+GYCWindowPolicy.podspec[FV7T]: F:定义iOS窗口工具与可选Kuikly receiver的Git Pod产品 | R:code:ios/Sources/GYCWindowPolicy/WindowPolicy.swift,code:ios/Sources/GYCSystemActionsKuikly/GycSystemActionsModule.swift | A:GYCWindowPolicy/Core,GYCWindowPolicy/Kuikly | S:默认仅Core，Kuikly子产品依赖Renderer且不携带KMP framework
+LICENSE[SG3M]: F:声明Apache 2.0许可的使用、分发、专利与免责条件 | R:- | A:- | S:-
+Package.swift[FV6T]: F:将GYCWindowPolicy原生Swift目录声明为iOS14起的SPM库 | R:code:ios/Sources/GYCWindowPolicy/WindowPolicy.swift | A:GYCWindowPolicy | S:SPM产品不包含Kuikly receiver
+README.md[SG7M]: F:说明包含系统动作和窗口 lease 的三端产品、装配与使用入口 | R:code:docs/功能与平台差异.md,code:docs/接入指南.md | A:SystemActions,WindowPolicy | S:OHOS 等待串行更新和释放；系统受理回执不保证业务操作完成
+build.gradle.kts[FV6T]: F:固定Kotlin及AGP插件并配置所有模块的组、候选版本和Maven许可 | R:code:settings.gradle.kts | A:- | S:VERSION环境变量可覆盖默认1.1.3
+gradle.properties[FV4T]: F:配置Gradle堆、AndroidX和不可用Native目标处理 | R:- | A:- | S:-
+gradlew[EV4S]: F:解析Java环境和平台路径后启动Gradle Wrapper | R:code:gradle/wrapper/gradle-wrapper.properties | A:GradleWrapperMain | S:-
+gradlew.bat[EV4T]: F:在Windows选择Java并启动Gradle Wrapper | R:code:gradle/wrapper/gradle-wrapper.properties | A:GradleWrapperMain | S:-
+jitpack-install.sh[OV8T]: F:下载冻结Maven归档并核验源码身份、来源回执、摘要与解包边界后安装 | R:code:jitpack.yml | A:- | S:VERSION须不可变语义版本且回执sha/tree匹配当前Tag；拒绝重复字段、归档链接/穿越/重复及超限，不重新编译
+jitpack.yml[FV5T]: F:指定JDK21并通过冻结归档安装器接入JitPack | R:code:jitpack-install.sh | A:- | S:-
+release-pack.py[OV6T]: F:将当前版本Maven目录打包并回读检查module JSON及macOS扩展属性边界 | R:code:scripts/package-maven.sh | A:- | S:仅打包指定版本，不带旧staging和AppleDouble文件
+settings.gradle.kts[FV7T]: F:声明组件模块及插件、依赖仓库并将Kuikly独占路由到完整module仓库 | R:code:system-actions-core/build.gradle.kts,code:system-actions-kuikly/build.gradle.kts | A:- | S:Kuikly不可从仅POM镜像回落不存在的根JAR；拒绝项目级自定义仓库
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/docs/===
+0.2.0-rc.4发布验收.md[SV4T]: F:保留rc.4发布、构建、消费及未验证边界的历史记录 | R:code:README.md | A:- | S:历史验收不证明当前版本或Registry现状
+0.2.0-rc.5候选验收.md[SV4T]: F:记录rc.5共同文件入口及配套原生产物的候选验收 | R:code:docs/接入指南.md | A:- | S:-
+功能与平台差异.md[SG7S]: F:维护系统动作、窗口、观察与剪贴板的三端合同及验证边界 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt,code:docs/接入指南.md | A:- | S:Requested仅表示系统受理，iOS隐私遮罩不能承诺防止静态截图
+完整源码审查.md[SQ4S]: F:保存历史生产文件审查范围、修复点、实际验证与未验收事项 | R:code:docs/开发与验证.md | A:- | S:-
+开发与验证.md[SV7S]: F:给出项目编译、行为测试、原生接线和各渠道消费的验证入口 | R:code:scripts/build.sh,code:docs/功能与平台差异.md | A:- | S:生产编译不串联独立消费者，历史Actions记录不代替当前精确源码回执
+接入指南.md[SG7L]: F:说明KMP、Swift和HAR安装及系统动作、商店、窗口和观察的宿主接线 | R:code:README.md,code:docs/功能与平台差异.md | A:- | S:宿主负责品牌商店策略、URL白名单和owner生命周期，iOS handler必须从已有Shared导出
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/gradle/===
+native-toolchain.properties[FV5T]: F:声明Kotlin Native工具链版本、目标集合及修订 | R:- | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/gradle/wrapper/===
+gradle-wrapper.properties[FV5T]: F:固定Gradle8.11.1下载地址、校验和及缓存位置 | R:code:gradlew,code:gradlew.bat | A:- | S:分发包须匹配SHA256校验和
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ios/Sources/GYCSystemActionsKuikly/===
+GycSystemActionsModule.swift[IE8T]: F:提供真实iOS Kuikly receiver并为每个Renderer懒建独占Kotlin handler和native服务 | R:code:ios/Sources/GYCSystemActionsKuikly/GycSystemActionsNativeServices.swift | A:GycSystemActionsModule,GycSystemActionsHandler,register | S:Main执行handler，Context交付前再次校验存活；invalidate幂等，异步Main清理避免SDK线程互等，析构不重新retain自身
+GycSystemActionsNativeServices.swift[IU7T]: F:为当前Renderer提供常亮lease及键盘高度和主题观察的Swift服务 | R:code:ios/Sources/GYCWindowPolicy/SystemObservations.swift,code:ios/Sources/GYCWindowPolicy/WindowPolicy.swift | A:setKeepScreenOn,observeKeyboardHeight,observeDarkMode,dispose | S:键盘零高度等待frame完成并刷新布局，避免will阶段提前放行依赖UI
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ios/Sources/GYCWindowPolicy/===
+FullscreenWindowPolicy.swift[LU8S]: F:通过宿主显式控制器及独占lease请求全屏方向、系统栏和扩展布局并恢复基线 | R:code:ios/Sources/GYCWindowPolicy/UIKitContext.swift | A:FullscreenPolicyViewController,FullscreenWindowLease | S:替换继承首次基线，旧owner退出无权恢复后继；UIKit只有错误回调，Requested非旋转完成；恢复失败保留基线供重试且按revision屏蔽旧回调
+SystemObservations.swift[LU7S]: F:观察当前宿主View的键盘相交高度和实际主题并提供refresh及永久dispose | R:code:ios/Sources/GYCSystemActionsKuikly/GycSystemActionsNativeServices.swift | A:SystemObservations,observeKeyboardHeight,observeDarkMode | S:单参数键盘保持will时序且初值0，完成回调无初值；token隔离旧stop，外屏通知不能清零当前窗口，初值回调销毁也不能重注册
+UIKitContext.swift[CU7T]: F:提供Main执行和基于当前Scene或指定根的顶层控制器解析 | R:- | A:UIKitExecutionContext,UIKitPresentationContext | S:syncOnMainActor后台会阻塞，不能持有Main等待的锁；每次查当前Scene，不缓存根，容器循环按对象身份终止
+WindowPolicy.swift[LU8S]: F:用进程共享owner集合合并常亮与捕获遮罩并在最后释放时恢复首次idle基线 | R:code:ios/Sources/GYCSystemActionsKuikly/GycSystemActionsNativeServices.swift | A:WindowPolicyController,WindowPolicyLease | S:所有controller共用状态；初始idle禁用不能被放宽，遮罩随Window刷新且仅针对录屏镜像，不能防静态截图；宿主显式end
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ios/Tests/===
+UIKit.swift[TU5S]: F:提供Swift策略行为测试使用的UIKit状态替身 | R:code:ios/Tests/main.swift | A:UIApplication,UIWindow,UIViewController,UIWindowScene | S:替身不证明真实UIKit或设备表现
+main.swift[TU7M]: F:断言iOS窗口多owner、键盘时序、主题、全屏替换和恢复失败重试合同 | R:code:ios/Sources/GYCWindowPolicy/WindowPolicy.swift,code:ios/Sources/GYCWindowPolicy/SystemObservations.swift,code:ios/Sources/GYCWindowPolicy/FullscreenWindowPolicy.swift,code:ios/Tests/UIKit.swift | A:WindowPolicyChecks.main | S:以UIKit替身运行，不代替真机旋转或系统事件验收
+run.sh[TV5T]: F:编译UIKit替身、真实策略Swift库和断言程序并执行 | R:code:ios/Tests/UIKit.swift,code:ios/Tests/main.swift | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ohos/AppScope/===
+app.json5[FV3T]: F:声明鸿蒙构建工程的bundle及展示资源引用 | R:code:ohos/build-profile.json5 | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ohos/===
+build-profile.json5[FV6T]: F:配置API22 HarmonyOS产品并注册SystemActionsNative模块 | R:code:ohos/system-actions-native/build-profile.json5 | A:SystemActionsNative@default | S:target与compatible均为6.0.2(22)
+hvigorfile.ts[FV4T]: F:将鸿蒙工程接入Hvigor appTasks | R:code:ohos/build-profile.json5 | A:- | S:-
+oh-package.json5[FV3T]: F:声明鸿蒙工程包模型与空依赖集合 | R:- | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ohos/hvigor/===
+hvigor-config.json5[FV3T]: F:声明Hvigor模型版本及空执行和依赖配置 | R:- | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ohos/system-actions-native/===
+CHANGELOG.md[SV4T]: F:记录HAR渠道系统动作能力与候选发布版本的变更 | R:code:ohos/system-actions-native/README.md | A:- | S:-
+Index.ets[LE7T]: F:导出HAR系统动作、Renderer Module、窗口策略及窗口类型的公共入口 | R:code:ohos/system-actions-native/src/main/ets/SystemActions.ets,code:ohos/system-actions-native/src/main/ets/GycSystemActionsModule.ets,code:ohos/system-actions-native/src/main/ets/WindowPolicy.ets | A:SystemActions,GycSystemActionsModule,WindowPolicyController | S:SystemObservations仅Module内部使用，不从包根导出
+LICENSE[SG3M]: F:声明HAR源代码的Apache2.0许可与免责条件 | R:- | A:- | S:-
+README.md[SG6T]: F:说明HAR能力、私有OHPM安装、宿主owner装配及历史渠道验证 | R:code:docs/接入指南.md | A:- | S:私仓可安装与官方Registry上架分别判断
+build-profile.json5[FV4T]: F:声明HAR的stageMode与HarmonyOS默认构建目标 | R:code:ohos/build-profile.json5 | A:- | S:-
+hvigorfile.ts[FV4T]: F:将原生模块接入Hvigor harTasks | R:code:ohos/system-actions-native/build-profile.json5 | A:- | S:-
+oh-package.json5[FV6T]: F:声明原生HAR包入口、候选版本、许可与Renderer构建依赖 | R:code:ohos/system-actions-native/Index.ets | A:@gycrosskit/system-actions-native | S:Renderer构建固定2.29.1，候选包版本1.1.3
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ohos/system-actions-native/src/main/ets/===
+GycSystemActionsModule.ets[IE8S]: F:调度鸿蒙Renderer动作、请求取消、观察订阅与常亮lease并在销毁时撤销资源 | R:code:ohos/system-actions-native/src/main/ets/SystemActions.ets,code:ohos/system-actions-native/src/main/ets/SystemObservations.ets,code:ohos/system-actions-native/src/main/ets/WindowPolicy.ets | A:GycSystemActionsModule,call,onDestroy | S:requestId拒绝重复且终态按对象身份隔离；取消只撤等待/迟回执，share展示前检查许可；同Ability共享controller，恢复失败保留lease重试
+SystemActions.ets[IH8S]: F:实现鸿蒙系统动作、纯文本剪贴板读取、受限文件分享和可取消AppGallery请求 | R:code:ohos/system-actions-native/src/main/ets/GycSystemActionsModule.ets,code:ohos/system-actions-native/src/main/resources/rawfile/native/gyc_clipboard_bridge.h | A:SystemActions,ActionResult,ClipboardReadResult,NativeStoreRequest | S:剪贴板仅首记录已有plain文本，201映射denied；分享限定私有普通文件且逐段拒绝符号链接；AppGallery仅onAppear为requested，20秒超时且不能撤回系统页；原文不进Renderer
+SystemObservations.ets[IU7S]: F:为Module观察当前窗口键盘vp高度和Ability实际深色配置 | R:code:ohos/system-actions-native/src/main/ets/GycSystemActionsModule.ets | A:SystemObservations,observeKeyboardHeight,observeDarkMode,dispose | S:异步Window及已排队事件按generation隔离；初始主题回调可同步stop，旧token不能停止新观察
+WindowPolicy.ets[LU8M]: F:在Ability共享串行队列中管理隐私、常亮和独占全屏lease并恢复窗口基线 | R:code:ohos/system-actions-native/src/main/ets/GycSystemActionsModule.ets | A:WindowPolicyController,WindowPolicyLease,FullscreenWindowLease,FullscreenWindowPolicy | S:入队和await后都校验owner代次，旧exit不恢复后继；恢复各项独立尝试且失败保留基线重试；常亮不调用无变化的privacy API，策略数组在构造时复制
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ohos/system-actions-native/src/main/===
+module.json5[FV4T]: F:声明SystemActionsNative为支持默认设备和平板的HAR | R:- | A:SystemActionsNative | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ohos/system-actions-native/src/main/resources/rawfile/native/===
+gyc_clipboard_bridge.h[IS8S]: F:以TSFN将Kotlin剪贴板请求转发原生ArkTS Promise并回传UTF8字节及状态 | R:code:ohos/system-actions-native/src/main/ets/SystemActions.ets | A:GycClipboardInstall,GycClipboardCompletion,GycClipboardRead,GycClipboardCancel | S:只安装一个原生actions；mutex及请求对象身份隔离取消和重复ID，字节仅回调期间有效且长度保留NUL；env清理以unavailable结算，JS异常不泄露原文
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/ohos/tests/===
+clipboard-bridge.test.cpp[TS6T]: F:用真实桥状态断言UTF8含NUL、一次完成、取消及重复ID旧回调隔离 | R:code:ohos/system-actions-native/src/main/resources/rawfile/native/gyc_clipboard_bridge.h | A:main | S:-
+clipboard-bridge.test.py[TV6T]: F:以OHOS SDK校验桥头文件并复制NAPI声明运行宿主生命周期断言 | R:code:ohos/tests/clipboard-bridge.test.cpp | A:- | S:仅复制NAPI声明，避免OHOS libc覆盖宿主标准库
+file-actions.test.cjs[TS7T]: F:对真实ArkTS动作验证复制完成、私有文件边界、符号链接拒绝和取消后不展示分享 | R:code:ohos/system-actions-native/src/main/ets/SystemActions.ets,code:ohos/system-actions-native/src/main/ets/GycSystemActionsModule.ets | A:- | S:SDK使用受控替身，不证明实际系统分享完成
+fullscreen-window.test.cjs[TU7S]: F:验证真实鸿蒙全屏策略的基线继承、替换、迟任务隔离及独立恢复失败重试 | R:code:ohos/system-actions-native/src/main/ets/WindowPolicy.ets | A:- | S:-
+keep-screen-module.test.cjs[TU7T]: F:验证Module常亮、取消销毁、恢复重试及跨Ability独立owner | R:code:ohos/system-actions-native/src/main/ets/GycSystemActionsModule.ets,code:ohos/system-actions-native/src/main/ets/WindowPolicy.ets | A:- | S:仅常亮路径必须避免无变化的PRIVACY_WINDOW调用
+native-store.test.cjs[TH7S]: F:验证AppGallery出现、错误、超时、取消及宿主策略回调的请求级生命周期 | R:code:ohos/system-actions-native/src/main/ets/SystemActions.ets,code:ohos/system-actions-native/src/main/ets/GycSystemActionsModule.ets | A:- | S:共享SystemActions不能因某Module销毁被整体关闭
+system-actions-module.test.cjs[TE7T]: F:验证真实Module参数准入、动作映射、重复ID、迟结果和销毁隔离 | R:code:ohos/system-actions-native/src/main/ets/GycSystemActionsModule.ets | A:- | S:-
+system-actions.test.cjs[TH7T]: F:验证真实ArkTS拨号、URL、设置、系统错误和首记录纯文本剪贴板读取 | R:code:ohos/system-actions-native/src/main/ets/SystemActions.ets | A:- | S:富文本主MIME已有plain表示可读；无plain时不扫描第二条，不转换富文本
+system-observations.test.cjs[TU6T]: F:验证键盘Window迟到、vp换算、旧token和主题初值回调中的停止销毁 | R:code:ohos/system-actions-native/src/main/ets/SystemObservations.ets | A:- | S:-
+window-policy.test.cjs[TU7T]: F:验证鸿蒙隐私和常亮多owner聚合、原始保护、异步释放及恢复失败重试 | R:code:ohos/system-actions-native/src/main/ets/WindowPolicy.ets | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/scripts/===
+build.sh[OV7T]: F:提供Android、iOS、Harmony生产编译和Maven/HAR打包的项目统一入口 | R:code:scripts/package-maven.sh,code:scripts/ci-build-kuikly-render.sh,code:gradlew | A:compile,package | S:单次选择一个平台，iOS编译真实Pod，Harmony编译后打HAR；不运行测试或消费者、不创建Tag
+check-maven.py[TV8S]: F:校验实际Maven仓库的坐标、POM许可、变体引用、文件摘要及可选字节码上限 | R:code:scripts/test-check-maven.py | A:- | S:校验全部变体含可选项及四种sidecar；SNAPSHOT解析当前时间戳文件，publication集合须精确匹配，坏引用不能靠消费者编译掩盖
+check-public-maven.py[TV8M]: F:从公开端点核验不可变JitPack状态、准确源码及全部publication字节和sidecar并存证 | R:code:scripts/ci-release.sh,code:scripts/check-maven.py | A:ready_state,verify,main | S:只读公开端点不取本机凭据；持久化原始失败响应，有界网络重试且证书失败不放宽校验，不能把元数据ready当作消费编译
+ci-build-kuikly-render.sh[OV7T]: F:安装固定Renderer与本地或精确远端Module Pod并编译Simulator framework | R:code:GYCWindowPolicy.podspec | A:- | S:构建目录须绝对路径，校验架构和SDK线程符号；只编译生产Pod，不生成业务App
+ci-file-actions.sh[FV6T]: F:按显式不可变版本映射是否启用文件动作消费者探针 | R:code:scripts/test-ci-file-actions.py | A:- | S:未知版本立即拒绝，不能静默关闭新增API探针
+ci-java.security[FV3T]: F:设置Java正向DNS缓存一小时且不缓存负向结果 | R:code:scripts/ci-repositories.gradle | A:- | S:-
+ci-release.sh[OV7T]: F:检出不可变Tag并复用冻结安装校验及公开Maven全部publication检查 | R:code:jitpack-install.sh,code:scripts/check-maven.py,code:scripts/check-public-maven.py | A:- | S:发布身份取Tag提交及tree，不把当前候选SHA冒充已发布源码
+ci-repositories.gradle[FV6T]: F:配置可选编译缓存、强制行为测试实际执行、DNS预热和定制Kotlin仓库过滤 | R:code:scripts/ci-java.security | A:- | S:测试禁用缓存及up-to-date跳过，DNS预热失败仍由真实依赖解析裁决
+ci-verify-swift-pod.py[TV7T]: F:从准确native Tag安装Git Pod并逐文件验源码后编译Swift公开API消费者与回执 | R:code:verification/KeyboardObservation.swift,code:verification/ci/test_swift_pod.py | A:verify_sources,main | S:要求全新绝对目录且当前HEAD匹配Tag；拒绝缺失/新增/修改源码，不复用本地Pod
+jitpack-metadata.py[OV7T]: F:移除JitPack不支持的源码和空资源变体并更新module摘要及重定向 | R:code:scripts/package-maven.sh,code:scripts/test-jitpack-metadata.py | A:normalize | S:先全量验证再改写，非空资源或无效归档必须失败，不产生部分元数据更新
+package-maven.sh[OV7T]: F:发布当前候选到本地staging、规范化元数据并生成同版本归档及摘要 | R:code:scripts/jitpack-metadata.py,code:release-pack.py | A:- | S:拒绝已有候选输出避免复用旧字节；仅打包不上传不创建Tag
+test-check-maven.py[TV6S]: F:用临时真实发布文件验证Maven门禁拒绝坏变体、摘要、许可及依赖 | R:code:scripts/check-maven.py | A:PublicationGate | S:-
+test-ci-file-actions.py[TV6T]: F:验证探针版本映射、未知版本拒绝及Maven/Pod/HAR/消费者候选版本一致 | R:code:scripts/ci-file-actions.sh,code:build.gradle.kts,code:GYCWindowPolicy.podspec,code:ohos/system-actions-native/oh-package.json5 | A:- | S:当前CHANGELOG须仅一节准确版本标题且正文有变更项
+test-ios-module.sh[TV7S]: F:构建并运行真实SDK Module生命周期Simulator App并采集本轮完成回执 | R:code:verification/KuiklyLifecycle.swift,code:verification/ci/test_ios_module_simulator.py | A:--prepare-simulator,--cleanup-simulator | S:使用本轮随机run_id原子回执，PID或console不能通过；90秒边界后采集有界日志，独占设备在退出时清理
+test-jitpack-metadata.py[TV6T]: F:使用真实ZIP和metadata验证空资源裁剪、重定向、sidecar及失败前零改写 | R:code:scripts/jitpack-metadata.py | A:PublicationContracts | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/===
+build.gradle.kts[FV7T]: F:配置core的Android/iOS/JVM/OHOS目标、公共平台源集及本地staging发布 | R:code:build.gradle.kts | A:system-actions-core | S:平台URL校验只共享至Android/iOS/JVM，OHOS交HAR；minSdk24、compileSdk36
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/src/androidMain/===
+AndroidManifest.xml[FI4T]: F:提供空组件Manifest并将权限及Provider声明留给宿主 | R:- | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/===
+AndroidFileActions.kt[IS7T]: F:在Android主线程复制原文或经宿主FileProvider分享普通文件 | R:code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidSystemActions.kt | A:AndroidFileActions.copyText,shareFile | S:只授予所选URI临时读权限，非Activity补NEW_TASK；文件仍归宿主，chooser受理不表示分享完成
+AndroidSystemActions.kt[IH8S]: F:实现Android剪贴板、文件、拨号、URL、设置与厂商商店动作并切Main执行 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt,code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidFileActions.kt | A:AndroidSystemActions,openMarketDetails | S:读取仅聚焦有效Activity的首条真实text，原样保留且取消向上传播；商店固定接收包直接startActivity不以resolveActivity门禁，危险URI先拒绝；品牌选择可由宿主接管
+AndroidSystemObservations.kt[IU7T]: F:用独立零尺寸View及配置回调观察键盘dp高度与实际主题 | R:code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidWindowPolicy.kt | A:AndroidSystemObservations,observeKeyboardHeight,observeDarkMode,dispose | S:不替换宿主Insets listener；初值回调可销毁，旧stop按observer身份隔离，永久dispose不重新注册
+AndroidWindowPolicy.kt[LU8S]: F:按Window聚合常亮与安全flag并以独占全屏lease管理方向、系统栏和布局恢复 | R:- | A:AndroidWindowPolicy,AndroidWindowPolicyLease,AndroidFullscreenWindowLease | S:所有操作要求Main，任一owner保护或既有flag均不能放宽；新全屏继承首次基线，旧close无权恢复后继，恢复失败保留可重试owner
+WebUrl.kt[KS6T]: F:用java.net.URI验证Android外链host、凭据和端口边界 | R:code:system-actions-core/src/platformMain/kotlin/io/github/gycrosskit/systemactions/Input.kt | A:hasValidWebAuthority | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/src/androidUnitTest/kotlin/io/github/gycrosskit/systemactions/===
+AndroidFileActionsTest.kt[TS6T]: F:以Robolectric验证剪贴板、Provider文件分享、授权及错误边界 | R:code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidFileActions.kt | A:AndroidFileActionsTest | S:-
+AndroidNativeStoreTest.kt[TH7S]: F:验证厂商商店固定包顺序、实际拒绝后回退及恶意商店URI准入 | R:code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidSystemActions.kt | A:AndroidNativeStoreTest | S:测试实际startActivity受理，不用包可见性查询代替
+AndroidSystemActionsTest.kt[TH7S]: F:验证Android首条真实剪贴板、文件动作、输入校验、Main及系统受理回执 | R:code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidSystemActions.kt | A:AndroidSystemActionsTest | S:聚焦Activity之外读取不可用，富文本只取已有text而不coerce URI
+AndroidSystemObservationsTest.kt[TU6T]: F:验证观察者替换、dp换算、销毁后迟事件及初始回调dispose | R:code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidSystemObservations.kt | A:AndroidSystemObservationsTest | S:-
+AndroidWindowPolicyTest.kt[TU7S]: F:验证窗口多owner保护聚合、全屏替换基线、无关flag保留和恢复失败重试 | R:code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidWindowPolicy.kt | A:AndroidWindowPolicyTest | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/===
+ClipboardReadResult.kt[LS8T]: F:声明原生私有剪贴板读取的文本、空、拒绝、不可用及失败结果 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt | A:ClipboardReadResult,ClipboardTextReader | S:Text保留空串空白和控制字符，仅系统明确拒绝映射Denied；原文不经过Renderer，协程取消向上传播
+FileShareOutcome.kt[LG7T]: F:定义系统分享终态及与面板受理分开的组合结果 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt | A:FileShareOutcome,FileShareResult | S:未受理时outcome为null，无可靠完成回执或超时用Unknown；Completed也不证明远端接收成功
+SystemActions.kt[LG8T]: F:定义三端系统动作共同入口、受理结果、文件分享兼容默认值与路径形状校验 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/ClipboardReadResult.kt,code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/FileShareOutcome.kt | A:SystemActions,ActionResult,isValidSharePath | S:Requested只代表受理，取消不能撤回系统动作；默认读取Unavailable且默认分享终态Unknown，品牌URL与文件所有权归宿主
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/src/commonTest/kotlin/io/github/gycrosskit/systemactions/===
+SharePathTest.kt[TS6T]: F:验证共享分享路径拒绝URI、相对路径、NUL、点段及空路径分段 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt | A:SharePathTest | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/src/iosMain/kotlin/io/github/gycrosskit/systemactions/===
+IosFileActions.kt[IU8T]: F:在iOS Main复制原文、解析当前presenter展示单个系统分享面板并交付真实终态 | R:code:system-actions-core/src/iosMain/kotlin/io/github/gycrosskit/systemactions/IosSystemActions.kt | A:IosFileActions.copyText,shareFile,close | S:忙或presenter无窗口/正在切换时不可用；先清active与completion再回调以允许重入，close仅结束自身面板且至多一次Cancelled，文件始终归宿主
+IosSystemActions.kt[IH8T]: F:实现iOS系统动作、剪贴板读取与分享终态等待并用NSURLComponents验证URL | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt,code:system-actions-core/src/iosMain/kotlin/io/github/gycrosskit/systemactions/IosFileActions.kt | A:IosSystemActions,hasValidWebAuthority | S:UIPasteboard nil为NoText不推断Denied；默认文件服务无presenter，native商店Unavailable；分享115秒超时Unknown且取消只close自身已受理未完成面板
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/src/jvmMain/kotlin/io/github/gycrosskit/systemactions/===
+WebUrl.kt[KS6T]: F:用java.net.URI提供JVM外链authority验证 | R:code:system-actions-core/src/platformMain/kotlin/io/github/gycrosskit/systemactions/Input.kt | A:hasValidWebAuthority | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/src/jvmTest/kotlin/io/github/gycrosskit/systemactions/===
+InputTest.kt[TS6T]: F:验证拨号及URL的合法边界、非法输入拒绝和旧实现默认不可用API | R:code:system-actions-core/src/platformMain/kotlin/io/github/gycrosskit/systemactions/Input.kt | A:InputTest | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/src/ohosArm64Main/kotlin/io/github/gycrosskit/systemactions/===
+OhosClipboardTextReader.kt[IS8T]: F:通过宿主安装的C函数指针异步读取剪贴板并将字节和状态还原为共同结果 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/ClipboardReadResult.kt,code:ohos/system-actions-native/src/main/resources/rawfile/native/gyc_clipboard_bridge.h | A:OhosClipboardTextReader.install,readClipboardText | S:读取前在NativeManager初始化安装进程有效指针；CAS请求表支持跨线程取消，移除后才resume；字节长度保留NUL，原文不经Kuikly
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-core/src/platformMain/kotlin/io/github/gycrosskit/systemactions/===
+Input.kt[KS7T]: F:共享拨号规范化及HTTP(S)输入过滤并委托各平台验证authority | R:code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/WebUrl.kt,code:system-actions-core/src/iosMain/kotlin/io/github/gycrosskit/systemactions/IosSystemActions.kt | A:normalizedPhone,normalizedWebUrl,hasValidWebAuthority | S:号码只允许ASCII数字和有限分隔符，URL先拒绝空白控制符反斜线及错误百分号编码再解析
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-kuikly/===
+build.gradle.kts[FV7T]: F:配置Module的Android/iOS/OHOS目标、core导出、Kuikly和测试依赖及staging发布 | R:code:system-actions-core/build.gradle.kts,code:settings.gradle.kts | A:system-actions-kuikly | S:Android编译JVM11且发布release变体，Renderer构建固定2.29.1适配坐标
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-kuikly/src/androidMain/kotlin/io/github/gycrosskit/systemactions/kuikly/===
+AndroidSystemActionsModule.kt[IE8T]: F:将Android真实Renderer调用投递Main并装配独占handler、观察服务及常亮lease | R:code:system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/SystemActionsHandler.kt,code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidSystemActions.kt | A:AndroidSystemActionsModule,registerGycSystemActionsModule | S:工厂每Renderer独立owner，destroy先标记再Main清理使排队调用失效；窗口从原始Context解包Activity，宿主商店回调沿现有取消边界
+NativeDispose.kt[FE4T]: F:声明Android receiver支持显式native dispose协议 | R:code:system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/SystemActionsModule.kt | A:nativeDisposeSupported | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-kuikly/src/androidUnitTest/kotlin/io/github/gycrosskit/systemactions/kuikly/===
+AndroidSystemActionsModuleTest.kt[TE7T]: F:通过真实SDK注册工厂验证宿主商店策略及独占owner销毁恢复 | R:code:system-actions-kuikly/src/androidMain/kotlin/io/github/gycrosskit/systemactions/kuikly/AndroidSystemActionsModule.kt | A:AndroidSystemActionsModuleTest | S:旧构造器保留默认行为，销毁一个Renderer不能释放另一个lease
+SystemActionsHandlerTest.kt[TE7S]: F:验证共同handler准入、空串、重复ID、取消销毁、分享终态及观察替换隔离 | R:code:system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/SystemActionsHandler.kt | A:SystemActionsHandlerTest | S:不可取消的旧结果不得删除同ID后继请求，未知分享结果不能伪造完成
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/===
+SystemActionsHandler.kt[IE8S]: F:为Android/iOS receiver共享JSON协议、Main协程调度、观察所有权及动作终态编码 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt,code:system-actions-kuikly/src/androidMain/kotlin/io/github/gycrosskit/systemactions/kuikly/AndroidSystemActionsModule.kt,code:system-actions-kuikly/src/iosMain/kotlin/io/github/gycrosskit/systemactions/kuikly/IosSystemActionsModuleHandler.kt | A:SystemActionsHandler.call,dispose | S:先把lazy Job登记再start；取消向上传播且结果交付按Job身份校验，旧completion不移除后继；初值回调同步销毁时补stop，closeNative仅一次
+SystemActionsModule.kt[LE8M]: F:提供页面共同Module动作、挂起请求、键盘及共享主题订阅并维护native回调生命周期 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt,code:system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/SystemActionsHandler.kt | A:SystemActionsModule,subscribeDarkMode,setKeepScreenOn,dispose | S:普通请求20秒、分享120秒，dispose后已排队成功仍取消；主题多订阅共享一个native监听，最后释放才stop，legacy stop仅撤自身；不实现剪贴板原文读取
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-kuikly/src/iosMain/kotlin/io/github/gycrosskit/systemactions/kuikly/===
+IosSystemActionsModuleHandler.kt[IE8T]: F:将宿主已有Shared导出的Kotlin handler连接NSNumber原生服务和iOS系统动作 | R:code:system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/SystemActionsHandler.kt,code:system-actions-core/src/iosMain/kotlin/io/github/gycrosskit/systemactions/IosFileActions.kt | A:IosSystemActionsModuleHandler.call,dispose | S:保留五参数Swift构造入口，可选第六参数注入宿主商店；嵌套回执用NSNumber避免KotlinUnit转换，Pod不嵌第二份runtime
+NativeDispose.kt[FE4T]: F:声明iOS receiver支持显式native dispose协议 | R:code:system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/SystemActionsModule.kt | A:nativeDisposeSupported | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/system-actions-kuikly/src/ohosArm64Main/kotlin/io/github/gycrosskit/systemactions/kuikly/===
+NativeDispose.kt[FE4T]: F:声明OHOS receiver支持显式native dispose协议 | R:code:system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/SystemActionsModule.kt | A:nativeDisposeSupported | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/tests/===
+test_jitpack_install.py[TV7T]: F:离线运行真实安装器校验逻辑验证冻结来源、摘要及安全解包边界 | R:code:jitpack-install.sh | A:JitPackInstallTest | S:错误身份/大小/摘要、重复字段和危险归档必须在提取前拒绝
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/===
+build.gradle.kts[TV6T]: F:构建独立KMP远程消费者并按版本选择文件动作和native Module探针 | R:code:verification-consumer/settings.gradle.kts,code:verification-consumer/src/commonMain/kotlin/Probe.kt | A:- | S:组件默认1.1.3，可显式覆盖；Simulator framework导出组件并按需链接同一Renderer
+gradle.properties[FV3T]: F:设置独立消费者Gradle堆及AndroidX | R:- | A:- | S:-
+settings.gradle.kts[TV5T]: F:定义独立消费者的插件和Maven来源并限定组件坐标仓库 | R:code:verification-consumer/build.gradle.kts | A:- | S:systemActionsRepository可指定实际消费仓库，默认JitPack
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/src/androidMain/kotlin/===
+AndroidProbe.kt[TH5T]: F:编译消费Android系统动作、文件服务和窗口lease公开入口 | R:code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidSystemActions.kt,code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidWindowPolicy.kt | A:create,windowPolicy,fileActions | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/src/commonMain/kotlin/===
+Probe.kt[TH5T]: F:消费共享拨号、外链、设置与商店方法签名 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt | A:probe | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/src/fileActionsAndroidMain/kotlin/===
+FileActionsAndroidProbe.kt[TH4T]: F:消费含宿主Provider authority的Android构造器 | R:code:system-actions-core/src/androidMain/kotlin/io/github/gycrosskit/systemactions/AndroidSystemActions.kt | A:createWithFiles | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/src/fileActionsIosMain/kotlin/===
+FileActionsIosProbe.kt[TH4T]: F:消费注入宿主文件服务的iOS系统动作构造器 | R:code:system-actions-core/src/iosMain/kotlin/io/github/gycrosskit/systemactions/IosSystemActions.kt | A:createWithFiles | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/src/fileActionsMain/kotlin/===
+FileActionsProbe.kt[TH4T]: F:消费共享复制文本与文件分享公开方法 | R:code:system-actions-core/src/commonMain/kotlin/io/github/gycrosskit/systemactions/SystemActions.kt | A:probeFileActions | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/src/iosMain/kotlin/===
+IosProbe.kt[TH5T]: F:消费iOS默认系统动作和当前presenter解析文件服务入口 | R:code:system-actions-core/src/iosMain/kotlin/io/github/gycrosskit/systemactions/IosFileActions.kt | A:create,fileActions | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/src/kuiklyNativeAndroidMain/kotlin/===
+AndroidNativeModuleProbe.kt[TE5T]: F:消费真实Android Renderer导出接口的组件Module注册扩展 | R:code:system-actions-kuikly/src/androidMain/kotlin/io/github/gycrosskit/systemactions/kuikly/AndroidSystemActionsModule.kt | A:registerSystemActionsNative | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/src/kuiklyNativeIosMain/kotlin/===
+IosNativeModuleProbe.kt[TE5T]: F:消费Shared可导出的NSNumber原生服务与iOS Kotlin handler构造签名 | R:code:system-actions-kuikly/src/iosMain/kotlin/io/github/gycrosskit/systemactions/kuikly/IosSystemActionsModuleHandler.kt | A:systemActionsNativeHandler | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/src/kuiklyNativeMain/kotlin/===
+NativeModuleProbe.kt[TE4T]: F:消费共享页面SystemActionsModule构造入口 | R:code:system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/SystemActionsModule.kt | A:systemActionsPageModule | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-consumer/src/ohosArm64Main/kotlin/===
+OhosProbe.kt[TE5T]: F:消费OHOS Kotlin Module动作、文件、常亮及dispose入口 | R:code:system-actions-kuikly/src/commonMain/kotlin/io/github/gycrosskit/systemactions/kuikly/SystemActionsModule.kt | A:create,dispose,fileActions | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-ios/===
+Package.resolved[FV3T]: F:保留Swift消费者的空依赖锁定容器 | R:code:verification-ios/Package.swift | A:- | S:-
+Package.swift[TV5T]: F:声明iOS14 Swift独立消费者并精确引用远程SPM版本1.0.1 | R:code:verification-ios/Sources/WindowPolicyConsumer/Probe.swift | A:WindowPolicyConsumer | S:历史固定版本探针不代表候选版本已消费
+create-pod-consumer.rb[TV5T]: F:生成无签名iOS framework消费工程及历史准确Tag的Podfile | R:code:verification-ios/Sources/WindowPolicyConsumer/Probe.swift | A:- | S:Pod引用0.2.0-rc.2，只证明该历史探针来源
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-ios/Sources/WindowPolicyConsumer/===
+Probe.swift[TU5T]: F:消费Swift窗口lease、顶层控制器解析与Main执行公开API | R:code:ios/Sources/GYCWindowPolicy/WindowPolicy.swift,code:ios/Sources/GYCWindowPolicy/UIKitContext.swift | A:probe,presentationProbe,executionProbe | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-ohos/AppScope/===
+app.json5[TV3T]: F:声明独立鸿蒙消费构建工程的bundle身份和展示资源 | R:code:verification-ohos/build-profile.json5 | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-ohos/===
+build-profile.json5[TV5T]: F:配置API22 HarmonyOS产品及SystemActionsConsumer模块 | R:code:verification-ohos/consumer/build-profile.json5 | A:SystemActionsConsumer@default | S:-
+hvigorfile.ts[TV4T]: F:将独立鸿蒙消费工程接入appTasks | R:code:verification-ohos/build-profile.json5 | A:- | S:-
+oh-package.json5[TV3T]: F:声明独立鸿蒙消费根工程模型及空依赖 | R:- | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-ohos/consumer/===
+Index.ets[TH6T]: F:编译消费HAR系统动作、Module、取消句柄和窗口/全屏lease公开API | R:code:ohos/system-actions-native/Index.ets | A:actions,module,probe,cancelledStore,windowPolicy,fullscreenPolicy | S:探针调用和编译不证明设备系统动作或业务验收
+build-profile.json5[TV4T]: F:声明鸿蒙消费HAR的stageMode默认构建目标 | R:code:verification-ohos/build-profile.json5 | A:- | S:-
+hvigorfile.ts[TV4T]: F:以harTasks编译独立鸿蒙消费者 | R:code:verification-ohos/consumer/build-profile.json5 | A:- | S:-
+oh-package.json5[TV5T]: F:声明消费HAR入口及固定远程原生包依赖1.1.0 | R:code:verification-ohos/consumer/Index.ets | A:system-actions-consumer | S:历史固定依赖不代表当前候选版本消费完成
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-ohos/consumer/src/main/===
+module.json5[TV3T]: F:声明默认设备和平板的SystemActionsConsumer HAR | R:- | A:SystemActionsConsumer | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification-ohos/hvigor/===
+hvigor-config.json5[FV3T]: F:声明消费工程Hvigor模型版本及空执行配置 | R:- | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification/===
+KeyboardObservation.swift[TU6T]: F:消费Swift键盘观察的旧函数引用与完成回调重载 | R:code:ios/Sources/GYCWindowPolicy/SystemObservations.swift,code:scripts/ci-verify-swift-pod.py | A:consumeKeyboardObservation | S:编译探针不证明设备键盘动画时序
+KuiklyAssembly.swift[TE7T]: F:用真实Maven导出的Shared API与Pod原生服务装配iOS Module工厂 | R:code:ios/Sources/GYCSystemActionsKuikly/GycSystemActionsModule.swift,code:system-actions-kuikly/src/iosMain/kotlin/io/github/gycrosskit/systemactions/kuikly/IosSystemActionsModuleHandler.kt | A:registerSystemActionsModuleFromShared | S:复用生成framework，不引入第二份runtime；品牌商店URL仍由宿主提供
+KuiklyLifecycle.swift[TE8S]: F:运行真实iOS Renderer Module的Context回执、invalidate、dealloc及后台销毁断言 | R:code:ios/Sources/GYCSystemActionsKuikly/GycSystemActionsModule.swift,code:scripts/test-ios-module.sh | A:CheckApp,CheckScene | S:必须连接Scene再测试；验证无效化永久且幂等、排队结果不泄露、off-Main析构不retain自身；全部断言完成后写本轮随机run_id原子回执
+Window策略候选验收.md[SV4T]: F:保留rc.1窗口策略本地测试、产物消费和远程发布的历史证据 | R:code:docs/功能与平台差异.md | A:- | S:历史替身与消费编译不证明当前真机系统交互
+rc3远程发布验收.md[SV4T]: F:保存rc.3准确Tag、公开Maven/HAR及OHPM审核状态的历史验收 | R:code:README.md | A:- | S:当时NOTFOUND和sidecar缺口保留原义，不推断今日Registry状态
+test-native-services.py[TU6T]: F:用受控UIKit事件执行真实Swift native services验证零键盘完成与布局排序 | R:code:ios/Sources/GYCSystemActionsKuikly/GycSystemActionsNativeServices.swift | A:- | S:will阶段零高度不放行，did完成布局后仅交付一次；停止后旧完成无效
+原生商店候选验收.md[SV4T]: F:保留原生商店系统受理、SDK回调及取消边界的候选验证记录 | R:code:docs/功能与平台差异.md | A:- | S:-
+系统边界闭合候选验收.md[SV4T]: F:记录三端系统动作、窗口和桥接边界闭合的历史候选审查与验证 | R:code:docs/接入指南.md | A:- | S:-
+远程发布验收.md[SV4T]: F:保存历史准确版本远程发布与Maven、Swift和HAR消费者证据 | R:code:README.md | A:- | S:-
+验收记录.md[SV4T]: F:保存早期系统动作、Native Module、打包及独立消费的验收命令与结果 | R:code:docs/开发与验证.md | A:- | S:实际设备与当前版本状态须另行验收
+
+===/Users/guoyang/.codex/worktrees/aoci-system-actions/system-actions/verification/ci/===
+test_cache_contract.py[TV5T]: F:检查源码编译缓存开关与行为测试强制实际执行的配置合同 | R:code:scripts/ci-repositories.gradle | A:- | S:-
+test_ios_module_simulator.py[TV7S]: F:离线替身验证Simulator准备、签名编译失败、随机完成回执及自有设备清理 | R:code:scripts/test-ios-module.sh,code:verification/KuiklyLifecycle.swift | A:- | S:缺失/陈旧/畸形回执或仅console PASS均拒绝，传入设备只能卸载本次App，不能删宿主设备
+test_swift_pod.py[TV6T]: F:离线验证准确Git Pod版本、Tag来源和完整递归Swift源码集合身份 | R:code:scripts/ci-verify-swift-pod.py | A:SwiftPodIdentityTest | S:缺失、新增和修改源码均拒绝
